@@ -1,0 +1,114 @@
+{
+  "theme": "dark",
+  "archetype": "5 (Luxury)",
+  "design_philosophy": "Dark luxury editorial, Awwwards-style, heavy emphasis on cinematic motion and restrained high-end visuals. No generic SaaS aesthetics, no large 3D interactive objects. Relies on negative space, asymmetric layouts, and contrast between elegant serif typography and deep backgrounds.",
+  "typography": {
+    "heading_font": "Cormorant Garamond, serif",
+    "body_font": "Manrope, sans-serif",
+    "hierarchy": {
+      "h1": "text-5xl md:text-6xl lg:text-7xl tracking-tighter leading-none font-light",
+      "h2": "text-4xl md:text-5xl tracking-tight leading-tight font-light",
+      "h3": "text-2xl md:text-3xl tracking-tight leading-snug",
+      "h4": "text-xl md:text-2xl font-medium",
+      "body": "text-base md:text-lg leading-relaxed text-[#A1A1AA]",
+      "overline": "text-xs md:text-sm uppercase tracking-[0.2em] text-[#A1A1AA]"
+    }
+  },
+  "colors": {
+    "background": "#050505",
+    "surface": "#0D0D0D",
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A1A1AA"
+    },
+    "accents": {
+      "soft_blue": "#60A5FA",
+      "soft_purple": "#A78BFA"
+    },
+    "borders": "rgba(255, 255, 255, 0.05)"
+  },
+  "motion": {
+    "library": "framer-motion",
+    "transitions": {
+      "default": "spring, stiffness 100, damping 20",
+      "slow_reveal": "duration 1.2, ease [0.16, 1, 0.3, 1]"
+    },
+    "effects": {
+      "scroll_reveal": "opacity: 0, y: 40 -> opacity: 1, y: 0",
+      "blur_reveal": "filter: blur(10px), opacity: 0 -> filter: blur(0px), opacity: 1",
+      "image_reveal": "scale: 1.05, opacity: 0 -> scale: 1, opacity: 1"
+    }
+  },
+  "spacing": {
+    "section_y": "py-24 md:py-32 lg:py-40",
+    "container": "max-w-7xl mx-auto px-6 md:px-12",
+    "grid_gap": "gap-8 md:gap-16"
+  },
+  "media": {
+    "profile_photo": {
+      "url": "https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/uiidkdb9_ChatGPT%20Image%20Jun%207%2C%202026%2C%2006_04_26%20PM%20%281%29%20%281%29.png",
+      "description": "Indian young man in dark suit, glasses, curly hair. Must be cut/masked with soft glow on dark bg. Used prominently in hero."
+    },
+    "project_placeholders": [
+      {
+        "url": "https://images.pexels.com/photos/37730211/pexels-photo-37730211.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Modern server rack with blue lighting in a secure data center environment. Used for Secure Cloud Storage System project."
+      },
+      {
+        "url": "https://images.pexels.com/photos/36571389/pexels-photo-36571389.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Code lines on a computer screen. Used for coding related project placeholders."
+      }
+    ],
+    "icons": {
+      "library": "lucide-react",
+      "usage": "Use simple stroke icons. Do not use filled colorful logos."
+    }
+  },
+  "layout_philosophy": {
+    "alignment": "Predominantly left-aligned for text. High reliance on asymmetrical bento/editorial grids.",
+    "surfaces": "Minimal cards. Rely on generous padding, borders, and typography to separate content. Avoid solid background cards where possible.",
+    "glassmorphism": "Used selectively (e.g., sticky navbar). High opacity base with heavy blur and 1px delicate inner stroke: backdrop-blur-xl bg-[#0D0D0D]/70 border border-white/5.",
+    "three_js": "Very subtle, almost invisible ambient background. E.g., tsParticles with slow drift, or a soft glowing sphere using react-three-fiber far in the background. No interactive floating geometry."
+  },
+  "sections": {
+    "navbar": {
+      "style": "Floating glassmorphism, rounded-full or pill shape. Items: Home, About, Skills, Projects, Articles, Coding Profiles, Contact.",
+      "classes": "fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full backdrop-blur-xl bg-[#0D0D0D]/70 border border-white/10"
+    },
+    "hero": {
+      "structure": "Split or asymmetrical. Left: Editorial large typography. Right: Huge profile photo with premium frame and soft purple/blue glow.",
+      "content": "Headline: 'Building Secure Cloud Infrastructure with Python, AWS & Modern Security Practices.' 3 CTAs (View Projects, Download Resume, Contact Me)."
+    },
+    "about": {
+      "style": "Editorial storytelling style. IT student -> Python journey -> AWS -> Cybersecurity -> Storage admin.",
+      "visuals": "Scroll reveal text, heavy use of the heading font for key phrases. Parallax effects on background elements."
+    },
+    "skills": {
+      "style": "Premium typography cards. NO progress bars or charts. Categories: Cloud Computing, Cybersecurity, Programming, Infrastructure & Storage, Tools.",
+      "layout": "Bento grid or masonry layout."
+    },
+    "projects": {
+      "style": "Editorial case-study layout. Large edge-to-edge images, alternating sides for text and imagery.",
+      "featured": "Secure Cloud Storage System Using Homomorphic Encryption (Hero Image, Problem, Solution, Architecture, Technologies, Outcome)."
+    },
+    "articles": {
+      "style": "List layout or refined cards. 4 placeholders: AWS EC2, Linux Security Hardening, Python for Cloud Automation, Homomorphic Encryption."
+    },
+    "coding_profiles": {
+      "style": "Premium minimalist cards for GitHub and LeetCode. Show stats textually using large typography.",
+      "links": "GitHub: https://github.com/Saranmani-M, LeetCode: https://leetcode.com/u/AV17koPArh/"
+    },
+    "contact": {
+      "style": "Clean EmailJS form integrated seamlessly into the background surface. Name/Email/Subject/Message. Simple bordered inputs."
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette. Background must be #050505.",
+    "Do not build standard SaaS cards for skills; use elegant typography lists or minimal outlines.",
+    "The Hero profile photo MUST be prominent and use the exact URL provided.",
+    "Implement tsParticles for a subtle ambient background (very slow moving, low opacity, soft blue/purple stars or connections).",
+    "Use Framer Motion for scroll-linked reveals and soft entry animations. It should feel luxurious and slow.",
+    "Ensure all interactive elements have data-testid attributes for testing.",
+    "Use Cormorant Garamond for all headings and Manrope for body text. Apply them via Google Fonts."
+  ]
+}
