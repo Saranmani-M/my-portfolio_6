@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend-only smoke test of SARANMANI portfolio. Page loads, hero renders with portrait image (1024x1536, real src loaded), all 7 floating-navbar items visible and scroll targets exist, CTAs work (cta-projects scrolls to projects, cta-resume is anchor with target=_blank and valid .docx href, cta-contact is button), all 5 skill groups (Cloud/Cybersecurity/Programming/Infra/Tools) render, featured-project shows correct title 'Secure Cloud Storage System / Using Homomorphic Encryption' with Problem/Solution/Architecture/Technologies/Outcome subsections, all 4 articles render with expected titles, profile-github and profile-leetcode have exact expected hrefs, footer socials have correct hrefs, contact form empty-submit shows the required validation toast, filled submit shows 'Message captured. Add EmailJS credentials to enable real delivery.' and clears name/message fields. Mobile menu opens via JS and shows all 7 mobile-nav-* items, BUT the mobile-menu-toggle button is positioned outside the viewport on a 390px-wide mobile screen (button rect.x=489), making it untappable for real users.",
+  "tested_scope": ["frontend", "integration"],
+  "passed": [
+    "Site loads without runtime/JS errors; hero name 'SARANMANI · M' renders",
+    "Floating navbar nav-home/about/skills/projects/articles/profiles/contact all visible",
+    "hero-portrait wraps a real <img> (naturalWidth=1024, naturalHeight=1536, src loaded)",
+    "cta-projects scrolls into featured-project; cta-resume has target=_blank with valid .docx href; cta-contact present",
+    "skill-group-01..05 all present with Cloud Computing / Cybersecurity / Programming / Infrastructure & Storage / Tools",
+    "featured-project contains all required headings (Secure Cloud Storage System, Homomorphic Encryption, Problem, Solution, Architecture, Technologies, Outcome)",
+    "article-0..3 render with exact expected titles",
+    "profile-github href = https://github.com/Saranmani-M (exact match), profile-leetcode href = https://leetcode.com/u/AV17koPArh/ (exact match)",
+    "Footer social-linkedin/github/instagram/x hrefs all contain the expected handles",
+    "contact-form empty submit shows toast 'Please fill in your name, email and message.'",
+    "contact-form filled submit shows 'Message captured. Add EmailJS credentials to enable real delivery.' and clears inputs",
+    "Mobile menu (after force/JS click on toggle) shows mobile-nav-home/about/skills/projects/articles/profiles/contact"
+  ],
+  "failed": [
+    {
+      "area": "Responsive / Navbar",
+      "issue": "mobile-menu-toggle button is rendered outside the mobile viewport. On a 390px-wide screen the button's bounding rect is x=489, y=31 (99px to the right of the visible area). Playwright reports 'element is outside of the viewport'. JS-dispatched click opens the menu correctly, but a real user tap will never land on the button — mobile users cannot open the menu.",
+      "evidence": "page.evaluate getBoundingClientRect on [data-testid=mobile-menu-toggle] returned {x:489.19, y:31, w:32, h:32} with window.innerWidth=390. Native Playwright .click() consistently failed with 'Element is outside of the viewport'; el.click() via JS worked and the mobile-menu became visible.",
+      "priority": "HIGH"
+    }
+  ],
+  "action_items": [
+    "Fix Navbar.jsx so the mobile header row (including data-testid='mobile-menu-toggle') stays within the viewport on small screens — likely the floating navbar's container has a fixed/min width or left offset that pushes the right-aligned toggle past 390px. Constrain container width to 100vw (minus padding) on the mobile breakpoint and verify the toggle's bounding rect.x + width <= window.innerWidth."
+  ],
+  "success_rate": {"backend": "skipped", "frontend": "~92% (11/12 scenarios pass; mobile toggle tap broken)"},
+  "retest_needed": true,
+  "full_testing_deferred": true
+}
