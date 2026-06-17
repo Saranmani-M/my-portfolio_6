@@ -12,7 +12,7 @@ export const PROFILE = {
     "Building reliable and secure digital infrastructure, calm and precise.",
   description:
     "Final-year Information Technology student passionate about cloud computing, cybersecurity, storage technologies, and Python development.",
-  bio: "I'm a final-year Information Technology student at Vel Tech, Chennai. I specialize in Linux systems, SAN/NAS storage, cloud security, and cryptography. I've published a peer-reviewed IEEE paper on Homomorphic Encryption and won 2nd prize at CYBERNIX'25.",
+  bio: "I am an Information Technology graduate from Vel Tech, Chennai. I specialize in Storage administrator, SAN/NAS, cloud security, and cryptography. I've published a peer-reviewed IEEE paper on Homomorphic Encryption and won 2nd prize at CYBERNIX'25.",
 };
 
 export const SOCIALS = {
