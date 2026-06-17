@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Mail, Github, Linkedin, Send } from "lucide-react";
+import { ArrowUpRight, Mail, Github, Linkedin, Phone } from "lucide-react";
 import emailjs from "@emailjs/browser";
 import { Toaster, toast } from "sonner";
 import { PROFILE, SOCIALS } from "../lib/data";
@@ -61,7 +61,7 @@ export const Contact = () => {
     <section
       id="contact"
       data-testid="contact-section"
-      className="relative py-32 md:py-44 px-6 md:px-12"
+      className="relative py-20 md:py-28 px-6 md:px-12"
     >
       <Toaster
         position="bottom-right"
@@ -135,6 +135,18 @@ export const Contact = () => {
                 </span>
                 <span className="link-underline text-[15px]">
                   github.com/Saranmani-M
+                </span>
+              </a>
+              <a
+                href={`tel:${PROFILE.phone.replace(/\s+/g, "")}`}
+                className="flex items-center gap-4 text-white/85 hover:text-white transition-colors"
+                data-testid="contact-phone"
+              >
+                <span className="w-9 h-9 rounded-full border border-white/15 grid place-items-center">
+                  <Phone size={14} />
+                </span>
+                <span className="link-underline text-[15px]">
+                  {PROFILE.phone}
                 </span>
               </a>
             </div>

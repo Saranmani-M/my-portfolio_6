@@ -6,6 +6,8 @@ import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Skills } from "@/components/Skills";
 import { Projects } from "@/components/Projects";
+import { Research } from "@/components/Research";
+import { Achievements } from "@/components/Achievements";
 import { Articles } from "@/components/Articles";
 import { CodingProfiles } from "@/components/CodingProfiles";
 import { Contact } from "@/components/Contact";
@@ -28,6 +30,8 @@ function App() {
           <About />
           <Skills />
           <Projects />
+          <Research />
+          <Achievements />
           <Articles />
           <CodingProfiles />
           <Contact />

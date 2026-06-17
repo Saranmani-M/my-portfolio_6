@@ -15,20 +15,32 @@ export const Hero = () => {
     <section
       id="home"
       data-testid="hero-section"
-      className="relative min-h-[100svh] pt-32 md:pt-40 pb-16 md:pb-24 px-6 md:px-12"
+      className="relative min-h-[100svh] pt-28 md:pt-36 pb-12 md:pb-16 px-6 md:px-12"
     >
-      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
         {/* Left — editorial typography */}
         <div className="lg:col-span-7 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: easeOut, delay: 0.1 }}
-            className="flex items-center gap-3 mb-8 text-[11px] tracking-[0.28em] uppercase text-white/55"
+            className="flex items-center gap-3 mb-6 text-[11px] tracking-[0.28em] uppercase text-white/55"
             data-testid="hero-eyebrow"
           >
             <span className="w-8 h-px bg-white/30" />
             Portfolio · 2025
+          </motion.div>
+
+          {/* Open to work badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease: easeOut }}
+            data-testid="badge-open-to-work"
+            className="inline-flex items-center gap-2.5 mb-6 px-3.5 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[11px] tracking-[0.18em] uppercase"
+          >
+            <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />
+            Open to Work · 2026
           </motion.div>
 
           <h1
@@ -43,10 +55,10 @@ export const Hero = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{
                   duration: 0.9,
-                  delay: 0.25 + i * 0.04,
+                  delay: 0.3 + i * 0.04,
                   ease: easeOut,
                 }}
-                className="inline-block text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-light"
+                className="inline-block text-7xl sm:text-8xl md:text-[7.5rem] lg:text-[11rem] font-light"
               >
                 {c}
               </motion.span>
@@ -60,10 +72,10 @@ export const Hero = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{
                     duration: 0.9,
-                    delay: 0.6 + i * 0.05,
+                    delay: 0.65 + i * 0.05,
                     ease: easeOut,
                   }}
-                  className="inline-block text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-light italic text-white/85"
+                  className="inline-block text-7xl sm:text-8xl md:text-[7.5rem] lg:text-[11rem] font-light italic text-white/85"
                 >
                   {c}
                 </motion.span>
@@ -75,18 +87,19 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 16, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 1.1, ease: easeOut, delay: 1.05 }}
-            className="mt-10 max-w-xl font-serif text-2xl md:text-3xl text-white/90 leading-snug text-balance"
+            className="mt-8 max-w-xl font-serif text-2xl md:text-3xl lg:text-4xl text-white/90 leading-snug text-balance"
             data-testid="hero-headline"
           >
-            Building <em className="italic text-white">secure cloud</em>{" "}
-            infrastructure with Python, AWS &amp; modern security practices.
+            Building <em className="italic text-white">reliable</em> and{" "}
+            <em className="italic text-white">secure</em> digital
+            infrastructure, calm and precise.
           </motion.p>
 
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: easeOut, delay: 1.2 }}
-            className="mt-6 max-w-md text-[15px] leading-relaxed text-[#A1A1AA]"
+            className="mt-6 max-w-md text-base md:text-[17px] leading-relaxed text-[#A1A1AA]"
             data-testid="hero-description"
           >
             {PROFILE.description}
@@ -96,7 +109,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: easeOut, delay: 1.35 }}
-            className="mt-10 flex flex-wrap items-center gap-3"
+            className="mt-8 flex flex-wrap items-center gap-3"
           >
             <button
               data-testid="cta-projects"
@@ -128,23 +141,23 @@ export const Hero = () => {
           </motion.div>
         </div>
 
-        {/* Right — premium framed portrait */}
+        {/* Right — premium framed portrait (larger + yellow glow) */}
         <div className="lg:col-span-5 relative">
           <motion.div
             initial={{ opacity: 0, scale: 1.06, filter: "blur(14px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             transition={{ duration: 1.4, ease: easeOut, delay: 0.3 }}
-            className="relative mx-auto w-[78%] sm:w-[60%] md:w-[55%] lg:w-full max-w-[480px]"
+            className="relative mx-auto w-[88%] sm:w-[72%] md:w-[66%] lg:w-full max-w-[560px]"
             data-testid="hero-portrait"
           >
-            {/* Halo */}
+            {/* Yellow halo */}
             <div
               aria-hidden
-              className="absolute -inset-10 rounded-[40px] -z-10"
+              className="absolute -inset-12 rounded-[44px] -z-10"
               style={{
                 background:
-                  "radial-gradient(closest-side, rgba(167,139,250,0.35), rgba(96,165,250,0.2) 60%, transparent 80%)",
-                filter: "blur(40px)",
+                  "radial-gradient(closest-side, rgba(232,255,71,0.32), rgba(167,139,250,0.18) 55%, transparent 80%)",
+                filter: "blur(48px)",
               }}
             />
 
@@ -152,15 +165,15 @@ export const Hero = () => {
             <motion.div
               whileHover={{ scale: 1.015, rotate: -0.4 }}
               transition={{ type: "spring", stiffness: 120, damping: 14 }}
-              className="relative rounded-[28px] overflow-hidden border border-white/10 portrait-glow bg-[#0D0D0D]"
+              className="relative rounded-[32px] overflow-hidden border border-[#e8ff47]/30 portrait-glow-yellow bg-[#0D0D0D]"
             >
-              <div className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-30 bg-[radial-gradient(ellipse_at_top_right,rgba(167,139,250,0.6),transparent_50%)]" />
+              <div className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-30 bg-[radial-gradient(ellipse_at_top_right,rgba(232,255,71,0.4),transparent_55%)]" />
               <img
                 src={PROFILE.photoUrl}
                 alt="Saranmani M"
                 loading="eager"
                 className="w-full h-auto aspect-[4/5] object-cover grayscale-[0.18] contrast-105"
-                style={{ filter: "saturate(0.9) brightness(0.97)" }}
+                style={{ filter: "saturate(0.92) brightness(0.98)" }}
               />
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
 
@@ -189,7 +202,7 @@ export const Hero = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.8, duration: 1 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[10px] tracking-[0.32em] uppercase text-white/40"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[10px] tracking-[0.32em] uppercase text-white/40"
       >
         <span>Scroll</span>
         <motion.span

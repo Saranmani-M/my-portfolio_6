@@ -7,10 +7,10 @@ export const Skills = () => {
     <section
       id="skills"
       data-testid="skills-section"
-      className="relative py-32 md:py-44 px-6 md:px-12"
+      className="relative py-20 md:py-28 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-16 md:mb-24">
+        <div className="flex items-end justify-between flex-wrap gap-6 mb-12 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ export const Skills = () => {
         </div>
 
         {/* Marquee strip */}
-        <div className="mt-28 md:mt-36 relative overflow-hidden border-y border-white/10 py-8">
+        <div className="mt-20 md:mt-24 relative overflow-hidden border-y border-white/10 py-7">
           <div className="marquee-track flex gap-16 whitespace-nowrap">
             {[
               "Python",

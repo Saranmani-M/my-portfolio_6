@@ -50,20 +50,20 @@ export const Navbar = () => {
           }`}
         >
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-1 px-3 py-2 rounded-full bg-[#0D0D0D]/70 backdrop-blur-xl border border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.8)]">
+        <div className="hidden md:flex items-center gap-0.5 px-2.5 py-1.5 rounded-full bg-[#0D0D0D]/80 backdrop-blur-xl border border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.8)]">
           <div
-            className="px-3 py-1.5 text-[11px] tracking-[0.22em] uppercase text-white/60"
+            className="px-2.5 py-1.5 text-[10px] tracking-[0.22em] uppercase text-white/60"
             data-testid="navbar-brand"
           >
             SM
           </div>
-          <div className="h-4 w-px bg-white/10 mx-1" />
+          <div className="h-4 w-px bg-white/10 mx-0.5" />
           {NAV.map((n) => (
             <button
               key={n.id}
               data-testid={`nav-${n.id}`}
               onClick={() => go(n.id)}
-              className={`relative px-3.5 py-1.5 text-[12px] tracking-wide rounded-full transition-colors ${
+              className={`relative px-2.5 py-1.5 text-[11px] tracking-wide rounded-full transition-colors ${
                 active === n.id
                   ? "text-white"
                   : "text-white/55 hover:text-white"

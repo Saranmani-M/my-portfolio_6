@@ -55,8 +55,25 @@ export const Footer = () => {
             <a
               href={`mailto:${PROFILE.email}`}
               className="block text-white/80 hover:text-white text-[14px] link-underline w-fit"
+              data-testid="footer-email"
             >
               {PROFILE.email}
+            </a>
+            <a
+              href={`tel:${PROFILE.phone.replace(/\s+/g, "")}`}
+              className="mt-2 block text-white/80 hover:text-white text-[14px] link-underline w-fit"
+              data-testid="footer-phone"
+            >
+              {PROFILE.phone}
+            </a>
+            <a
+              href={SOCIALS.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="footer-linkedin-badge"
+              className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#e8ff47]/30 bg-[#e8ff47]/[0.04] text-[#e8ff47] text-[11px] tracking-[0.18em] uppercase hover:bg-[#e8ff47]/[0.08] transition-colors"
+            >
+              <Linkedin size={12} /> LinkedIn
             </a>
             <p className="mt-3 text-white/45 text-[13px]">{PROFILE.location}</p>
           </div>

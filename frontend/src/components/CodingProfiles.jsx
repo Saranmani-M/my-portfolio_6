@@ -13,7 +13,7 @@ export const CodingProfiles = () => {
     <section
       id="profiles"
       data-testid="profiles-section"
-      className="relative py-32 md:py-44 px-6 md:px-12"
+      className="relative py-20 md:py-28 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto">
         <motion.div
@@ -21,7 +21,7 @@ export const CodingProfiles = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 md:mb-20"
+          className="mb-12 md:mb-16"
         >
           <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-6">
             (Coding Profiles)

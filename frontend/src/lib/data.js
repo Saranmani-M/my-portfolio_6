@@ -10,9 +10,10 @@ export const PROFILE = {
   resumeUrl:
     "https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/le5z4x2i_Saranmani_Resume.pdf",
   headline:
-    "Building Secure Cloud Infrastructure with Python, AWS & Modern Security Practices.",
+    "Building reliable and secure digital infrastructure, calm and precise.",
   description:
-    "Information Technology student passionate about cloud computing, cybersecurity, storage technologies, and Python development.",
+    "Final-year Information Technology student passionate about cloud computing, cybersecurity, storage technologies, and Python development.",
+  bio: "I'm a final-year Information Technology student at Vel Tech, Chennai. I specialize in Linux systems, SAN/NAS storage, cloud security, and cryptography. I've published a peer-reviewed IEEE paper on Homomorphic Encryption and won 2nd prize at CYBERNIX'25.",
 };
 
 export const SOCIALS = {
@@ -28,6 +29,8 @@ export const NAV = [
   { id: "about", label: "About" },
   { id: "skills", label: "Skills" },
   { id: "projects", label: "Projects" },
+  { id: "research", label: "Research" },
+  { id: "achievements", label: "Achievements" },
   { id: "articles", label: "Articles" },
   { id: "profiles", label: "Coding Profiles" },
   { id: "contact", label: "Contact" },
@@ -35,24 +38,31 @@ export const NAV = [
 
 export const SKILL_GROUPS = [
   {
-    title: "Cloud Computing",
+    title: "Systems",
     index: "01",
+    items: ["Linux (Ubuntu)", "Windows", "SAN", "NAS", "RAID", "Backup & Recovery"],
+  },
+  {
+    title: "Cloud",
+    index: "02",
     items: ["AWS", "EC2", "S3", "IAM"],
   },
   {
-    title: "Cybersecurity",
-    index: "02",
-    items: ["Linux", "Networking", "Security Fundamentals"],
+    title: "Security / Crypto",
+    index: "03",
+    items: [
+      "Homomorphic Encryption",
+      "Paillier",
+      "ElGamal",
+      "Web Security",
+      "Networking",
+      "Security Fundamentals",
+    ],
   },
   {
     title: "Programming",
-    index: "03",
-    items: ["Python"],
-  },
-  {
-    title: "Infrastructure & Storage",
     index: "04",
-    items: ["SAN", "NAS", "RAID", "Backup & Recovery"],
+    items: ["Python", "Django", "Java (Spring Boot)", "Angular"],
   },
   {
     title: "Tools",
@@ -71,16 +81,39 @@ export const FEATURED_PROJECT = {
   problem:
     "Organisations storing sensitive data in the cloud face a constant tension between accessibility and confidentiality. Conventional encryption protects data at rest, but the moment processing is required the information must be decrypted — exposing it to the cloud provider and any compromise in transit.",
   solution:
-    "A privacy-preserving multi-tenant storage layer where computation happens directly on encrypted data. Files are encrypted client-side using homomorphic schemes, allowing arithmetic and search operations on ciphertext without ever revealing the underlying plaintext to the server.",
+    "A privacy-preserving multi-tenant storage layer where computation happens directly on encrypted data. Files are encrypted client-side using a hybrid Paillier + ElGamal scheme, allowing arithmetic and search operations on ciphertext without ever revealing the underlying plaintext to the server.",
   architecture: [
     "Client SDK in Python — key generation, encryption, lattice-based operations",
     "Object storage layer — encrypted blobs with metadata isolation per tenant",
     "Compute proxy — performs additions and multiplications on ciphertexts",
     "Audit trail — append-only log of access and operations",
   ],
-  technologies: ["Python", "Homomorphic Encryption", "Cloud Storage", "Linux"],
+  technologies: [
+    "Python",
+    "Homomorphic Encryption",
+    "Paillier",
+    "ElGamal",
+    "Cloud Storage",
+    "Linux",
+  ],
   outcome:
-    "Awarded 2nd Prize at CYBERNIX '25 Project Expo at Vel Tech. Demonstrated end-to-end encrypted analytics on a 50MB simulated dataset with no plaintext exposure on the server.",
+    "Published as a peer-reviewed IEEE paper at ICIRCA 2026 and awarded 2nd Prize at CYBERNIX '25 (Vel Tech). Demonstrated end-to-end encrypted analytics on 385 samples with 99%+ data integrity and sub-second encryption (Paillier 0.085s · ElGamal 0.112s).",
+};
+
+export const SECOND_PROJECT = {
+  title: "Face Recognition System",
+  subtitle: "Python · OpenCV",
+  year: "2025",
+  role: "Engineer",
+  cover:
+    "https://images.pexels.com/photos/36571389/pexels-photo-36571389.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+  problem:
+    "Build a lightweight, privacy-conscious face recognition pipeline that works on commodity hardware — no cloud calls, no biometric leakage.",
+  solution:
+    "An OpenCV-based pipeline using Haar cascades for detection and a custom recogniser trained on a small in-house dataset. Encrypted feature vectors are stored locally; nothing leaves the device.",
+  technologies: ["Python", "OpenCV", "NumPy", "Linux"],
+  outcome:
+    "Presented at ASSET-2025 (March 2025). Stable real-time recognition on a CPU-only laptop with sub-100ms inference per frame.",
 };
 
 export const COMING_PROJECTS = [
@@ -98,6 +131,61 @@ export const COMING_PROJECTS = [
     title: "Python SAN Volume Visualiser",
     discipline: "Infrastructure",
     year: "Soon",
+  },
+];
+
+export const RESEARCH = {
+  title:
+    "Optimizing Cloud Data Security Using Homomorphic Encryption: A Hybrid Paillier and ElGamal Approach",
+  venue: "ICIRCA 2026 · IEEE",
+  date: "June 2026",
+  status: "Peer-reviewed · Presented",
+  abstract:
+    "We propose a hybrid homomorphic encryption scheme combining the additive properties of Paillier with the multiplicative structure of ElGamal to enable arithmetic operations directly on ciphertext stored in untrusted cloud environments. The work focuses on reducing the practical overhead of fully homomorphic systems by selectively applying the right primitive per operation, while preserving end-to-end confidentiality.",
+  metrics: [
+    { k: "Paillier", v: "0.085s", note: "Per-encryption" },
+    { k: "ElGamal", v: "0.112s", note: "Per-encryption" },
+    { k: "Integrity", v: "99%+", note: "Across operations" },
+    { k: "Samples", v: "385", note: "Evaluation set" },
+  ],
+};
+
+export const ACHIEVEMENTS = [
+  {
+    title: "2nd Prize · CYBERNIX '25",
+    org: "Vel Tech · Project Expo",
+    date: "Feb 2025",
+    line: "Awarded for the Secure Cloud Storage System using Homomorphic Encryption.",
+  },
+  {
+    title: "IEEE Paper · ICIRCA 2026",
+    org: "Hybrid Paillier + ElGamal scheme",
+    date: "Jun 2026",
+    line: "Peer-reviewed publication and conference presentation.",
+  },
+  {
+    title: "Face Recognition Paper · ASSET-2025",
+    org: "Conference presentation",
+    date: "Mar 2025",
+    line: "Lightweight OpenCV-based recognition pipeline on commodity hardware.",
+  },
+];
+
+export const CERTIFICATIONS = [
+  {
+    title: "AWS Security — Encryption Fundamentals",
+    org: "Amazon Web Services",
+    line: "Cryptographic primitives, KMS, and securing data at rest and in transit.",
+  },
+  {
+    title: "Full Stack Development — Angular + Spring Boot",
+    org: "Digital India Corporation",
+    line: "End-to-end web application development across the JVM and TypeScript ecosystems.",
+  },
+  {
+    title: "Web Security",
+    org: "Vel Tech · Value Added Course",
+    line: "OWASP fundamentals, authentication, and common attack surfaces.",
   },
 ];
 

@@ -6,3 +6,33 @@
   min-height: 100vh;
   overflow-x: hidden;
 }
+
+/* Yellow accent */
+:root {
+  --accent-yellow: #e8ff47;
+}
+
+.text-accent {
+  color: var(--accent-yellow);
+}
+
+/* Open to work pulse */
+@keyframes pulseDot {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+  }
+}
+.pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+/* Yellow portrait glow */
+.portrait-glow-yellow {
+  box-shadow:
+    0 0 0 1px rgba(232, 255, 71, 0.18),
+    0 40px 120px -10px rgba(232, 255, 71, 0.22),
+    0 20px 60px -10px rgba(167, 139, 250, 0.18);
+}

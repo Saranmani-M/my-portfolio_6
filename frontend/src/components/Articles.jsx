@@ -8,10 +8,10 @@ export const Articles = () => {
     <section
       id="articles"
       data-testid="articles-section"
-      className="relative py-32 md:py-44 px-6 md:px-12"
+      className="relative py-20 md:py-28 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-16 md:mb-20">
+        <div className="flex items-end justify-between flex-wrap gap-6 mb-12 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
