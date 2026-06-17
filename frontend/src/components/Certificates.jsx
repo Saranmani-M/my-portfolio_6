@@ -7,7 +7,7 @@ const CERTS = [
     id: "published",
     title: "IEEE Publication - Homomorphic Encryption",
     org: "ICIRCA 2026 - IEEE",
-    pdf: "/publised certificate.pdf",   // ← changed
+    pdf: "/my-portfolio_6/publised certificate.pdf",   // ← changed
     accent: "#e8ff47",
     gradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)",
     icon: "BookOpen",
@@ -17,7 +17,7 @@ const CERTS = [
     id: "appreciation",
     title: "Certificate of Appreciation",
     org: "Vel Tech - CYBERNIX '25",
-    pdf: "/Certificate of Appreciation.pdf",   // ← changed
+    pdf: "/my-portfolio_6/Certificate of Appreciation.pdf",  // ← changed
     accent: "#A78BFA",
     gradient: "linear-gradient(135deg, #1a0533 0%, #2d1b69 50%, #11998e 100%)",
     icon: "Star",
@@ -27,7 +27,7 @@ const CERTS = [
     id: "participation1",
     title: "Certificate of Participation",
     org: "Workshop - 2025",
-    pdf: "/Certificate of Participation 1.pdf",   // ← changed
+    pdf: "/my-portfolio_6/Certificate of Participation 1.pdf",   // ← changed
     accent: "#60A5FA",
     gradient: "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
     icon: "Award",
@@ -37,7 +37,7 @@ const CERTS = [
     id: "participation2",
     title: "Certificate of Participation",
     org: "Conference - 2025",
-    pdf: "/Certificate of Participation 2.pdf",   // ← changed
+    pdf: "/my-portfolio_6/Certificate of Participation 2.pdf",   // ← changed
     accent: "#f0abfc",
     gradient: "linear-gradient(135deg, #1a0533 0%, #3d0068 50%, #c31432 100%)",
     icon: "FileText",
