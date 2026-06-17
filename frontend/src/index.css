@@ -150,10 +150,18 @@ body {
     display: contents !important;
   }
 }
-div[class*="badge"], span[class*="badge"], [data-testid*="badge"], [className*="badge"] {
+/* Removes floating branding frames, labels, and widgets */
+iframe, 
+[id*="emergent"],
+[class*="emergent"],
+[class*="fixed bottom-"],
+[class*="fixed right-"],
+div[style*="z-index: 9999"], 
+div[style*="position: fixed"] {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+    height: 0px !important;
+    width: 0px !important;
 }
-
