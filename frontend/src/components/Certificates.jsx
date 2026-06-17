@@ -7,31 +7,36 @@ const CERTS = [
     id: "published",
     title: "IEEE Publication - Homomorphic Encryption",
     org: "ICIRCA 2026 - IEEE",
-    img: "https://emergentagent.com",
+    img: "https://unsplash.com",
+    pdf: "https://emergentagent.com",
     accent: "#e8ff47",
   },
   {
     id: "appreciation",
     title: "Certificate of Appreciation",
     org: "Vel Tech - CYBERNIX '25",
-    img: "https://emergentagent.com",
+    img: "https://unsplash.com",
+    pdf: "https://emergentagent.com",
     accent: "#A78BFA",
   },
   {
     id: "participation1",
     title: "Certificate of Participation",
     org: "Workshop - 2025",
-    img: "https://emergentagent.com",
+    img: "https://unsplash.com",
+    pdf: "https://emergentagent.com",
     accent: "#60A5FA",
   },
   {
     id: "participation2",
     title: "Certificate of Participation",
     org: "Conference - 2025",
-    img: "https://emergentagent.com",
+    img: "https://unsplash.com",
+    pdf: "https://emergentagent.com",
     accent: "#f0abfc",
   },
 ];
+
 
 export const Certificates = () => {
   const [open, setOpen] = useState(null);
@@ -218,10 +223,11 @@ export const Certificates = () => {
                   href={open.pdf}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 text-[12px] tracking-wide hover:bg-white/90"
+                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 text-[12px] font-medium z-50 pointer-events-auto"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Open PDF <ArrowUpRight size={13} />
-                </a>
+                 Open PDF <ArrowUpRight size={13} />
+               </a>
               </div>
             </motion.div>
           </motion.div>
