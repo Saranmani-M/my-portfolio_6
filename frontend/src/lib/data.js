@@ -175,22 +175,20 @@ export const CERTIFICATES = [
   {
     title: "AWS Security - Encryption Fundamentals",
     org: "Amazon Web Services",
-    line: "Cryptographic primitives, KMS, and securing data at rest and in transit.",
-    image: "/my-portfolio_6/certs/aws.png"
+    line: "Cryptographic primitives, KMS, and securing data at rest and in transit."
   },
   {
     title: "Full Stack Development - Angular + Spring Boot",
     org: "Digital India Corporation",
-    line: "End-to-end web application development across the JVM and TypeScript ecosystems.",
-    image: "/my-portfolio_6/certs/fullstack.png"
+    line: "End-to-end web application development across the JVM and TypeScript ecosystems."
   },
   {
     title: "Web Security",
     org: "Vel Tech - Value Added Course",
-    line: "OWASP fundamentals, authentication, and common attack surfaces.",
-    image: "/my-portfolio_6/certs/websecurity.png"
-  },
+    line: "OWASP fundamentals, authentication, and common attack surfaces."
+  }
 ];
+
 
 export const ARTICLES = [
   {
