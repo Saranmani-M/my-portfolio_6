@@ -7,8 +7,7 @@ export const PROFILE = {
   location: "Chennai, India",
   photoUrl:
     "https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/uiidkdb9_ChatGPT%20Image%20Jun%207%2C%202026%2C%2006_04_26%20PM%20%281%29%20%281%29.png",
-  resumeUrl:
-    "https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/le5z4x2i_Saranmani_Resume.pdf",
+  resumeUrl: "/Saranmani_Resume.pdf",
   headline:
     "Building reliable and secure digital infrastructure, calm and precise.",
   description:
@@ -17,7 +16,7 @@ export const PROFILE = {
 };
 
 export const SOCIALS = {
-  linkedin: "https://www.linkedin.com/in/saranmani-m",
+  linkedin: "https://www.linkedin.com/in/saranmani-m/",
   github: "https://github.com/Saranmani-M",
   instagram: "https://www.instagram.com/m.sxrxn/",
   twitter: "https://x.com/Saran0048597646",
