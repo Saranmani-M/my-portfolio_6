@@ -107,7 +107,7 @@ export const SECOND_PROJECT = {
   year: "2025",
   role: "Engineer",
   cover:
-    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1400&q=75",
+    "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=1400&q=75",
   problem:
     "Build a lightweight, privacy-conscious face recognition pipeline that works on commodity hardware — no cloud calls, no biometric leakage.",
   solution:

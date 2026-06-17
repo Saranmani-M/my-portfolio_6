@@ -17,15 +17,10 @@ export const Footer = () => {
       className="relative px-6 md:px-12 pt-24 md:pt-32 pb-12 border-t border-white/10"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Top: big signature + name */}
-        <div className="flex flex-col items-center text-center mb-16 md:mb-24">
-          <div className="mb-2">
-            <Monogram size={140} variant="plain" className="w-[240px] md:w-[320px]" />
-          </div>
-          <h3 className="font-sans font-light text-white text-3xl md:text-5xl tracking-tight leading-none">
-            Saranmani M
-          </h3>
-          <div className="mt-7 flex items-center gap-6 text-white/55">
+        {/* Top: signature only — no name */}
+        <div className="flex flex-col items-center text-center mb-14 md:mb-20">
+          <Monogram size={130} variant="plain" className="h-[110px] md:h-[140px]" />
+          <div className="mt-8 flex items-center gap-6 text-white/55">
             {socials.map((s) => (
               <a
                 key={s.name}
@@ -42,10 +37,13 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Center tagline */}
+        {/* Center tagline — single font family */}
         <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
           <h4 className="font-sans font-bold text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.02em]">
-            From <span className="italic font-serif font-light text-white/85">plaintext</span> <br className="hidden md:block" /> to <span className="italic font-serif font-light text-[#e8ff47]/90">ciphertext</span>,<br className="hidden md:block" /> let&rsquo;s make it secure.
+            From plaintext <br className="hidden md:block" />
+            to ciphertext, <br className="hidden md:block" />
+            let&rsquo;s make it{" "}
+            <span className="text-[#e8ff47]">secure</span>.
           </h4>
           <p className="mt-10 text-[14px] md:text-[15px] text-white/55 leading-relaxed">
             Curious about cloud, storage or cryptography? <br />

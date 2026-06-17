@@ -146,38 +146,37 @@ export const Process = () => {
           ))}
         </div>
 
-        {/* Tool icons grid */}
+        {/* Tool icons — running line */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="mt-14 md:mt-20"
+          className="mt-14 md:mt-20 -mx-6 md:-mx-12"
           data-testid="toolkit-icons"
         >
-          <div className="grid grid-cols-6 gap-x-4 md:gap-x-12 gap-y-8 md:gap-y-10">
-            {TOOLS.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-30px" }}
-                transition={{ duration: 0.6, delay: i * 0.03 }}
-                className="group flex flex-col items-center justify-center"
-                title={t.name}
-              >
-                <img
-                  src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
-                  alt={t.name}
-                  loading="lazy"
-                  className="w-10 h-10 md:w-12 md:h-12 opacity-65 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
-                  style={{ filter: "grayscale(0.85) brightness(1.6)" }}
-                />
-                <span className="mt-2 text-[10px] tracking-[0.18em] uppercase text-white/0 group-hover:text-white/55 transition-colors">
-                  {t.name}
-                </span>
-              </motion.div>
-            ))}
+          <div className="relative overflow-hidden border-y border-white/10 py-8 md:py-10">
+            <div className="marquee-track flex items-center gap-14 md:gap-20 whitespace-nowrap">
+              {[...TOOLS, ...TOOLS, ...TOOLS].map((t, i) => (
+                <div
+                  key={`${t.name}-${i}`}
+                  className="group flex items-center gap-4 shrink-0"
+                  title={t.name}
+                >
+                  <img
+                    src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
+                    alt={t.name}
+                    loading="lazy"
+                    className="w-10 h-10 md:w-12 md:h-12 opacity-65 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ filter: "grayscale(0.85) brightness(1.6)" }}
+                  />
+                  <span className="font-sans text-base md:text-lg text-white/55 group-hover:text-white transition-colors">
+                    {t.name}
+                  </span>
+                  <span className="text-white/15 ml-2">·</span>
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>
