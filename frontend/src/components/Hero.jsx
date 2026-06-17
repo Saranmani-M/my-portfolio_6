@@ -75,13 +75,13 @@ export const Hero = () => {
 
           <h1
             data-testid="hero-name"
-            className="font-sans font-extrabold tracking-[-0.03em] leading-[0.92] text-white text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] lg:text-[7rem]"
+            className="font-sans font-extrabold tracking-[-0.03em] leading-[0.92] text-white text-[3rem] sm:text-[3.75rem] md:text-[4.75rem] lg:text-[6rem]"
           >
-            Building
+            Learning Cloud
             <br />
-            Secure Cloud
+            &amp; Security
             <br />
-            Since 2025
+            Since 2026
           </h1>
         </motion.div>
 
@@ -94,14 +94,13 @@ export const Hero = () => {
             transition={{ duration: 1, delay: 1, ease: easeOut }}
           >
             <p className="text-[18px] md:text-[20px] text-white font-medium leading-relaxed">
-              Hi, I am Saranmani M
+              Hi, I&rsquo;m Saranmani M
             </p>
             <p
               className="mt-1 text-[15px] md:text-[16px] text-white/55 leading-relaxed"
               data-testid="hero-role"
             >
-              Final-year IT Student at Vel Tech · Aspiring Cloud &amp; Storage
-              Engineer
+              IT Student | Learning Linux, Cloud Computing &amp; Python
             </p>
           </motion.div>
 
@@ -112,9 +111,10 @@ export const Hero = () => {
             data-testid="hero-description"
             className="text-[14px] md:text-[15px] leading-[1.7] text-white/45 max-w-[460px]"
           >
-            I spent the last two years living inside Linux terminals,
-            cryptography papers and cloud consoles — only to learn that the
-            most reliable systems come from mastering the quiet fundamentals.
+            Focused on building a strong foundation in cloud technologies,
+            automation, and system administration. Currently developing
+            hands-on skills through projects and continuous learning, with the
+            goal of becoming a Cloud &amp; Storage Engineer.
           </motion.p>
 
           <motion.div
