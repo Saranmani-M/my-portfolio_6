@@ -194,11 +194,12 @@ export const Certificates = () => {
               onClick={(e) => e.stopPropagation()}
               className="relative max-w-5xl w-full rounded-2xl overflow-hidden border border-white/15 bg-[#0D0D0D]"
             >
-              <img
-                src={open.img}
-                alt={open.title}
-                className="w-full h-auto max-h-[80vh] object-contain bg-black"
-              />
+          <iframe
+            src={open.pdf}
+            title={open.title}
+            className="w-full h-[60vh] md:h-[75vh] border-0 rounded-t-2xl bg-black z-0"
+            loading="lazy"
+          />
               <button
                 onClick={() => setOpen(null)}
                 data-testid="cert-close"
