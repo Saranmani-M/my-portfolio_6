@@ -182,26 +182,6 @@ export const Certificates = () => {
               transition={{ duration: 0.4 }} onClick={(e) => e.stopPropagation()}
               className="relative max-w-4xl w-full rounded-2xl overflow-hidden border border-white/15 bg-[#0d0d0d]">
 
-              <div className="w-full h-[55vh] md:h-[65vh] bg-black relative flex items-center justify-center border-b border-white/5">
-                {open.pdf && open.pdf !== "/" && !open.pdf.includes("emergentagent") ? (
-                  <iframe
-                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + open.pdf)}&embedded=true`}
-                  title={open.title}
-                  className="w-full h-full border-0"
-                  />
-                ) : (
-                  /* Placeholder when no PDF yet */
-                  <div className="flex flex-col items-center gap-4 text-white/30">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center border border-white/10"
-                      style={{ background: `${open.accent}22` }}>
-                      {React.createElement(IconMap[open.icon], { size: 28, style: { color: open.accent } })}
-                    </div>
-                    <p className="text-sm">PDF not uploaded yet</p>
-                    <p className="text-xs text-white/20">Upload to frontend/public/ folder</p>
-                  </div>
-                )}
-              </div>
-
               <button onClick={() => setOpen(null)}
                 className="absolute top-3 right-3 w-9 h-9 grid place-items-center rounded-full bg-black/60 border border-white/10 text-white hover:bg-black/80 transition-colors z-50">
                 <XIcon size={16} />
