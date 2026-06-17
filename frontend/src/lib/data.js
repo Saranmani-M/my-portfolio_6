@@ -7,7 +7,7 @@ export const PROFILE = {
   location: "Chennai, India",
   photoUrl:
     "https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/uiidkdb9_ChatGPT%20Image%20Jun%207%2C%202026%2C%2006_04_26%20PM%20%281%29%20%281%29.png",
-  resumeUrl: "/Saranmani_Resume.pdf",
+  resumeUrl: process.env.PUBLIC_URL + "/Saranmani_Resume.pdf"
   headline:
     "Building reliable and secure digital infrastructure, calm and precise.",
   description:
