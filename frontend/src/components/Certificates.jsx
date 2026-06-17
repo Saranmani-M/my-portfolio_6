@@ -114,26 +114,27 @@ export const Certificates = () => {
                       background: `radial-gradient(closest-side, ${c.accent}66, transparent)`,
                     }}
                   />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/95 via-[#050505]/40 to-transparent z-10" />
-          <img
-            src={c.img}
-            alt={c.title}
-            loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover z-0"
-          />
-          <div className="absolute bottom-4 left-4 right-4 text-left z-20">
-            <div>
-              <span 
-                className="text-[10px] tracking-[0.24em] uppercase mb-1 block font-semibold"
-                style={{ color: c.accent }}
-              >
-                {c.org}
-              </span>
-            </div>
-            <div className="font-serif text-lg text-white leading-tight mt-1">
-              {c.title}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `linear-gradient(to top, rgba(5, 5, 5, 0.95) 0%, rgba(5, 5, 5, 0.4) 50%, transparent 100%), url(${c.img})` 
+            }}
+          >
+            <div className="absolute bottom-4 left-4 right-4 text-left">
+              <div>
+                <span 
+                  className="text-[10px] tracking-[0.24em] uppercase mb-1 block font-semibold"
+                  style={{ color: c.accent }}
+                >
+                  {c.org}
+                </span>
+              </div>
+              <div className="font-serif text-lg text-white leading-tight mt-1">
+                {c.title}
+              </div>
             </div>
           </div>
+
                 </motion.button>
               );
             })}
