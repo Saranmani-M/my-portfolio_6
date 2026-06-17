@@ -34,7 +34,7 @@ jobs:
       - name: Fix Validator Module Conflict
         run: npm install --save-dev ajv@^7 --legacy-peer-deps
       - name: Build App
-        run: PUBLIC_URL=/my-portfolio_6 npm run build
+        run: PUBLIC_URL=/ npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
