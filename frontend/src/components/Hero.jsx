@@ -32,15 +32,33 @@ export const Hero = () => {
           src={PROFILE.photoUrl}
           alt="Saranmani M"
           className="w-full h-full object-cover object-[center_15%] md:object-[center_30%] opacity-90"
-          style={{ filter: "grayscale(1) contrast(1.15) brightness(0.78)" }}
+          style={{ filter: "grayscale(1) contrast(1.2) brightness(0.6)" }}
         />
-        {/* Heavy left-edge gradient blends portrait into bg */}
+        {/* Heavy left-edge gradient blends portrait deeper into bg */}
         <div
           aria-hidden
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, #050505 0%, #050505 18%, rgba(5,5,5,0.7) 32%, rgba(5,5,5,0.2) 50%, transparent 70%)",
+              "linear-gradient(90deg, #050505 0%, #050505 32%, rgba(5,5,5,0.92) 48%, rgba(5,5,5,0.55) 62%, rgba(5,5,5,0.25) 78%, rgba(5,5,5,0.1) 100%)",
+          }}
+        />
+        {/* Right edge soft dark vignette to remove bright background */}
+        <div
+          aria-hidden
+          className="absolute inset-y-0 right-0 w-1/3"
+          style={{
+            background:
+              "linear-gradient(270deg, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.25) 50%, transparent 100%)",
+          }}
+        />
+        {/* Bottom + top darkening */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(5,5,5,0.45) 0%, transparent 25%, transparent 70%, rgba(5,5,5,0.55) 100%)",
           }}
         />
         {/* Subtle yellow rim glow */}

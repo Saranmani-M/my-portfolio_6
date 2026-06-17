@@ -53,22 +53,31 @@ export const Navbar = () => {
 
   return (
     <>
-      {/* Top-left brand card */}
+      {/* Top-left brand card — monogram by default, swaps to photo on hover */}
       <motion.button
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
         onClick={() => go("home")}
         data-testid="brand-card"
-        className="fixed top-5 left-5 md:top-6 md:left-6 z-50 flex items-center gap-3 group"
+        className="group fixed top-5 left-5 md:top-6 md:left-6 z-50 flex items-center gap-3"
       >
-        <span className="w-12 h-12 md:w-14 md:h-14 rounded-2xl overflow-hidden border border-white/10 bg-[#0D0D0D] shrink-0">
-          <img
-            src={PROFILE.photoUrl}
-            alt="Saranmani M"
-            className="w-full h-full object-cover"
-            style={{ filter: "grayscale(0.4) contrast(1.05) brightness(0.95)" }}
-          />
+        <span className="relative w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-2xl overflow-hidden">
+          {/* Default: monogram logo */}
+          <span className="absolute inset-0 transition-opacity duration-500 ease-out opacity-100 group-hover:opacity-0">
+            <Monogram size={56} className="w-full h-full" />
+          </span>
+          {/* Hover: profile photo */}
+          <span className="absolute inset-0 transition-opacity duration-500 ease-out opacity-0 group-hover:opacity-100 rounded-2xl border border-white/10 bg-[#0D0D0D] overflow-hidden">
+            <img
+              src={PROFILE.photoUrl}
+              alt="Saranmani M"
+              className="w-full h-full object-cover"
+              style={{
+                filter: "grayscale(0.3) contrast(1.05) brightness(0.95)",
+              }}
+            />
+          </span>
         </span>
         <span className="text-white leading-[1.1] text-left">
           <span className="block text-[13px] md:text-[14px] font-medium">
