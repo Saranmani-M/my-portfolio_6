@@ -31,6 +31,8 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Fix Validator Module Conflict
+        run: npm install --save-dev ajv@^7 --legacy-peer-deps
       - name: Build App
         run: npm run build
       - name: Upload artifact
