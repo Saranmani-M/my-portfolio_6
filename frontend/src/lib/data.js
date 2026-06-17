@@ -189,7 +189,6 @@ export const CERTIFICATES = [
   }
 ];
 
-
 export const ARTICLES = [
   {
     title: "Getting Started with AWS EC2",
