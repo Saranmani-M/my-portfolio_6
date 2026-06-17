@@ -37,7 +37,6 @@ const CERTS = [
   },
 ];
 
-
 export const Certificates = () => {
   const [open, setOpen] = useState(null);
 
