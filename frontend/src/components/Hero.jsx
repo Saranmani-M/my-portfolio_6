@@ -24,14 +24,14 @@ export const Hero = () => {
         initial={{ opacity: 0, scale: 1.05 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.6, ease: easeOut }}
-        className="absolute inset-y-0 right-0 w-full md:w-[60%] lg:w-[58%] z-0"
+        className="absolute inset-y-0 right-0 w-full md:w-[50%] lg:w-[48%] z-0"
         data-testid="hero-portrait"
       >
         <div className="absolute inset-0 bg-[#050505]" />
         <img
           src={PROFILE.photoUrl}
           alt="Saranmani M"
-          className="w-full h-full object-cover object-[center_15%] md:object-[center_30%] opacity-95"
+          className="w-full h-full object-cover object-[center_20%] md:object-[center_40%] opacity-95"
           style={{ filter: "grayscale(1) contrast(1.18) brightness(0.72)" }}
         />
         {/* Left edge gradient blends portrait into dark bg */}
@@ -100,7 +100,7 @@ export const Hero = () => {
               className="mt-1 text-[15px] md:text-[16px] text-white/55 leading-relaxed"
               data-testid="hero-role"
             >
-              IT Student | Learning Linux, Cloud Computing &amp; Python
+              IT Graduate | Cloud Security &amp; Linux Engineer
             </p>
           </motion.div>
 
