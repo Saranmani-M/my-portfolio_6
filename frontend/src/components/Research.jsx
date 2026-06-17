@@ -107,9 +107,24 @@ export const Research = () => {
             </div>
 
             <Reveal delay={0.1}>
-              <div className="mt-10 inline-flex items-center gap-2 text-[12px] tracking-[0.18em] uppercase text-[#e8ff47]/90">
-                <ArrowUpRight size={14} />
-                Hybrid Paillier × ElGamal
+              <div className="mt-10 flex flex-wrap items-center gap-3">
+                <a
+                  href="https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/4loeugtd_publised%20certificate.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="research-view-paper"
+                  className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-3 text-[13px] tracking-wide hover:bg-white/90 transition-all"
+                >
+                  View Paper
+                  <ArrowUpRight
+                    size={14}
+                    className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  />
+                </a>
+                <span className="inline-flex items-center gap-2 text-[12px] tracking-[0.18em] uppercase text-[#e8ff47]/90">
+                  <ArrowUpRight size={14} />
+                  Hybrid Paillier × ElGamal
+                </span>
               </div>
             </Reveal>
           </div>

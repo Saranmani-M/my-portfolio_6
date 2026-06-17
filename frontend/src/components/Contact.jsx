@@ -5,9 +5,7 @@ import {
   Mail,
   Github,
   Linkedin,
-  Phone,
   Instagram,
-  Twitter,
 } from "lucide-react";
 import { Toaster } from "sonner";
 import { PROFILE, SOCIALS } from "../lib/data";
@@ -44,29 +42,12 @@ const LINKS = [
     external: true,
   },
   {
-    k: "phone",
-    label: "Phone",
-    value: PROFILE.phone,
-    href: `tel:${PROFILE.phone.replace(/\s+/g, "")}`,
-    Icon: Phone,
-    testId: "contact-phone",
-  },
-  {
     k: "instagram",
     label: "Instagram",
     value: "@m.sxrxn",
     href: SOCIALS.instagram,
     Icon: Instagram,
     testId: "contact-instagram",
-    external: true,
-  },
-  {
-    k: "x",
-    label: "X · Twitter",
-    value: "@Saran0048597646",
-    href: SOCIALS.twitter,
-    Icon: Twitter,
-    testId: "contact-x",
     external: true,
   },
 ];

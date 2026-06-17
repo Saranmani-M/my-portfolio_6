@@ -60,13 +60,6 @@ export const Footer = () => {
               {PROFILE.email}
             </a>
             <a
-              href={`tel:${PROFILE.phone.replace(/\s+/g, "")}`}
-              className="mt-2 block text-white/80 hover:text-white text-[14px] link-underline w-fit"
-              data-testid="footer-phone"
-            >
-              {PROFILE.phone}
-            </a>
-            <a
               href={SOCIALS.linkedin}
               target="_blank"
               rel="noopener noreferrer"

@@ -31,6 +31,7 @@ export const NAV = [
   { id: "projects", label: "Projects" },
   { id: "research", label: "Research" },
   { id: "achievements", label: "Achievements" },
+  { id: "certificates", label: "Certificates" },
   { id: "articles", label: "Articles" },
   { id: "profiles", label: "Coding Profiles" },
   { id: "contact", label: "Contact" },
@@ -106,7 +107,7 @@ export const SECOND_PROJECT = {
   year: "2025",
   role: "Engineer",
   cover:
-    "https://images.pexels.com/photos/36571389/pexels-photo-36571389.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1400&q=75",
   problem:
     "Build a lightweight, privacy-conscious face recognition pipeline that works on commodity hardware — no cloud calls, no biometric leakage.",
   solution:
@@ -197,6 +198,8 @@ export const ARTICLES = [
     excerpt:
       "A grounded walk-through of launching, configuring and securing your first EC2 instance — without the marketing fog.",
     date: "2025",
+    cover:
+      "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&w=900&q=70",
   },
   {
     title: "Linux Security Hardening Basics",
@@ -205,6 +208,8 @@ export const ARTICLES = [
     excerpt:
       "The unglamorous habits — users, SSH, firewalls, journaling — that quietly keep a Linux box out of trouble.",
     date: "2025",
+    cover:
+      "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=900&q=70",
   },
   {
     title: "Python for Cloud Automation",
@@ -213,6 +218,8 @@ export const ARTICLES = [
     excerpt:
       "From boto3 to small, deliberate scripts: how Python becomes the connective tissue of a calm cloud setup.",
     date: "2025",
+    cover:
+      "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=70",
   },
   {
     title: "Understanding Homomorphic Encryption",
@@ -221,6 +228,8 @@ export const ARTICLES = [
     excerpt:
       "What it really means to compute on encrypted data — explained without the equations, with the intuition kept intact.",
     date: "2025",
+    cover:
+      "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=900&q=70",
   },
 ];
 

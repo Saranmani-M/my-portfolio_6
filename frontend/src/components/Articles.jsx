@@ -18,7 +18,7 @@ export const Articles = () => {
             viewport={{ once: true }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-6">
+            <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-4">
               (Field Notes)
             </div>
             <h2 className="font-serif text-4xl md:text-6xl font-light text-white text-balance leading-[1]">
@@ -32,43 +32,58 @@ export const Articles = () => {
             transition={{ duration: 1, delay: 0.12 }}
             className="max-w-sm text-sm leading-relaxed text-white/55"
           >
-            Short writing on cloud, security and the small Python rituals
-            that hold an infra together.
+            Short writing on cloud, security and the small Python rituals that
+            hold an infra together.
           </motion.p>
         </div>
 
-        <div className="divide-y divide-white/10 border-t border-b border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
           {ARTICLES.map((a, i) => (
             <motion.a
               key={a.title}
               href="#"
               onClick={(e) => e.preventDefault()}
               data-testid={`article-${i}`}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.9, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-              className="group grid grid-cols-12 gap-6 py-10 md:py-14 items-start hover:bg-white/[0.015] transition-colors px-2 -mx-2"
+              transition={{
+                duration: 0.9,
+                delay: i * 0.08,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              whileHover={{ y: -4 }}
+              className="group relative rounded-3xl border border-white/10 bg-[#0D0D0D]/70 backdrop-blur-sm overflow-hidden hover:border-[#e8ff47]/30 transition-colors"
             >
-              <div className="col-span-2 md:col-span-1 font-mono text-[11px] text-white/35 pt-2">
-                {String(i + 1).padStart(2, "0")}
+              {/* Cover */}
+              <div className="relative aspect-[16/9] overflow-hidden">
+                <img
+                  src={a.cover}
+                  alt={a.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover grayscale-[0.35] group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-transparent to-transparent" />
+                <div className="absolute top-4 left-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#050505]/80 backdrop-blur-sm border border-white/10 text-[10px] tracking-[0.2em] uppercase text-white/75">
+                  {a.category}
+                </div>
+                <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[#050505]/80 backdrop-blur-sm border border-white/10 grid place-items-center text-white/80 group-hover:rotate-45 group-hover:text-[#e8ff47] transition-all">
+                  <ArrowUpRight size={14} />
+                </div>
               </div>
-              <div className="col-span-10 md:col-span-7">
-                <h3 className="font-serif text-3xl md:text-5xl font-light text-white leading-[1.05] text-balance">
+
+              {/* Body */}
+              <div className="p-6 md:p-7">
+                <h3 className="font-serif text-2xl md:text-3xl font-light text-white leading-[1.15] text-balance">
                   {a.title}
                 </h3>
-                <p className="mt-4 text-[15px] leading-relaxed text-white/55 max-w-xl">
+                <p className="mt-3 text-[14px] leading-relaxed text-white/55">
                   {a.excerpt}
                 </p>
-              </div>
-              <div className="col-span-6 md:col-span-2 pt-2 text-[11px] tracking-[0.2em] uppercase text-white/45">
-                {a.category}
-              </div>
-              <div className="col-span-6 md:col-span-2 pt-2 flex items-center justify-end gap-3 text-[11px] tracking-[0.2em] uppercase text-white/50">
-                <span>{a.read}</span>
-                <span className="w-9 h-9 rounded-full border border-white/15 grid place-items-center transition-transform group-hover:rotate-45">
-                  <ArrowUpRight size={13} />
-                </span>
+                <div className="mt-5 pt-5 border-t border-white/10 flex items-center justify-between text-[11px] tracking-[0.22em] uppercase text-white/45">
+                  <span>{a.read}</span>
+                  <span className="font-mono">{a.date}</span>
+                </div>
               </div>
             </motion.a>
           ))}
