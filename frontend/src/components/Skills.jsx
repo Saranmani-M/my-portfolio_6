@@ -136,36 +136,42 @@ export const Skills = () => {
           </motion.p>
         </div>
 
-        {/* Tech logos — running line */}
+        {/* Tech logo grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="mb-12 md:mb-16 -mx-6 md:-mx-12"
+          className="mb-12 md:mb-16"
           data-testid="tech-grid"
         >
-          <div className="relative overflow-hidden border-y border-white/10 py-6 md:py-8">
-            <div className="marquee-track flex items-center gap-12 md:gap-16 whitespace-nowrap">
-              {[...TECH, ...TECH].map((t, i) => (
-                <div
-                  key={`${t.name}-${i}`}
-                  className="group flex items-center gap-3 shrink-0"
-                  title={t.name}
-                >
-                  <img
-                    src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
-                    alt={t.name}
-                    loading="lazy"
-                    className="w-8 h-8 md:w-9 md:h-9 opacity-65 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ filter: "grayscale(0.6) brightness(1.6)" }}
-                  />
-                  <span className="font-sans text-sm md:text-base text-white/55 group-hover:text-white transition-colors">
-                    {t.name}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="text-[10px] tracking-[0.28em] uppercase text-white/40 mb-5">
+            (Stack · Tools)
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5 md:gap-3">
+            {TECH.map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.03 }}
+                whileHover={{ y: -3 }}
+                className="group relative aspect-square rounded-2xl border border-white/10 bg-[#0D0D0D]/60 backdrop-blur-sm grid place-items-center hover:border-[#e8ff47]/30 transition-colors"
+                title={t.name}
+              >
+                <img
+                  src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
+                  alt={t.name}
+                  loading="lazy"
+                  className="w-7 h-7 md:w-9 md:h-9 opacity-65 group-hover:opacity-100 transition-all duration-500"
+                  style={{ filter: "grayscale(0.6) brightness(1.6)" }}
+                />
+                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] tracking-[0.18em] uppercase text-white/0 group-hover:text-white/60 transition-colors whitespace-nowrap">
+                  {t.name}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
@@ -207,10 +213,9 @@ export const Skills = () => {
           ))}
         </div>
 
-        {/* Running tickers */}
-        <div className="mt-12 md:mt-16 space-y-3">
+        {/* Running ticker — single line */}
+        <div className="mt-12 md:mt-16">
           <Ticker items={TICKER_TOP} direction="left" italic />
-          <Ticker items={TICKER_BOTTOM} direction="right" accent />
         </div>
       </div>
     </section>

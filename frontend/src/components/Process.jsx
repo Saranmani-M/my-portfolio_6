@@ -49,24 +49,28 @@ const STEPS = [
     body:
       "I break down the system, not just the spec — aligning user trust, threat models and constraints to set a clear direction before any code is written.",
     angle: 60,
+    img: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=70",
   },
   {
     title: "Research & Architecture",
     body:
       "I read the papers, the man-pages and the IAM docs — surfacing patterns that influence real decisions, not just validate easy ones.",
     angle: 130,
+    img: "https://images.unsplash.com/photo-1532153975070-2e9ab71f1b14?auto=format&fit=crop&w=900&q=70",
   },
   {
     title: "Build & Iterate",
     body:
       "I write small, deliberate Python, ship to a Linux box, and refine on feedback — keeping clarity, reliability and measurable impact in view.",
     angle: 220,
+    img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=70",
   },
   {
     title: "Test, Harden & Document",
     body:
       "I work closely with the people who'll run the thing — hardening, monitoring and writing down the why, so the system survives me.",
     angle: 310,
+    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=70",
   },
 ];
 
@@ -121,20 +125,33 @@ export const Process = () => {
                 ease: [0.16, 1, 0.3, 1],
               }}
               whileHover={{ y: -4 }}
-              className="group relative rounded-3xl border border-white/10 bg-[#0D0D0D]/70 backdrop-blur-sm p-7 md:p-10 min-h-[320px] md:min-h-[420px] flex flex-col justify-between overflow-hidden hover:border-white/20 transition-colors"
+              className="group relative rounded-3xl border border-white/10 bg-[#0D0D0D]/70 backdrop-blur-sm min-h-[420px] md:min-h-[480px] flex flex-col overflow-hidden hover:border-white/20 transition-colors"
             >
               <div
                 aria-hidden
-                className="absolute -top-20 -right-20 w-56 h-56 rounded-full opacity-0 group-hover:opacity-30 blur-3xl transition-opacity duration-700"
+                className="absolute -top-20 -right-20 w-56 h-56 rounded-full opacity-0 group-hover:opacity-30 blur-3xl transition-opacity duration-700 z-10"
                 style={{
                   background:
                     "radial-gradient(closest-side,#e8ff47,transparent)",
                 }}
               />
-              <div className="relative">
-                <PieIcon angle={s.angle} />
+              {/* Cover image */}
+              <div className="relative h-44 md:h-52 overflow-hidden border-b border-white/10">
+                <img
+                  src={s.img}
+                  alt={s.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover grayscale-[0.6] group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-[900ms]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/30 to-transparent" />
+                <div className="absolute top-4 left-4">
+                  <PieIcon angle={s.angle} />
+                </div>
+                <div className="absolute top-4 right-4 text-[10px] tracking-[0.28em] uppercase text-white/55 font-mono">
+                  0{i + 1}
+                </div>
               </div>
-              <div className="relative">
+              <div className="relative flex-1 p-7 md:p-9 flex flex-col justify-end">
                 <h3 className="font-sans font-semibold text-white text-xl md:text-2xl mb-4 tracking-tight">
                   {s.title}
                 </h3>
