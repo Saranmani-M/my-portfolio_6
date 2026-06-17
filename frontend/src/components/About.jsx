@@ -87,21 +87,9 @@ export const About = () => {
           </div>
 
           <Reveal delay={0.1}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-6 border-t border-white/5">
-              {[
-                { k: "Focus", v: "Cloud · Storage" },
-                { k: "Stack", v: "Python · AWS · Linux" },
-                { k: "Status", v: "Open to roles" },
-              ].map((m) => (
-                <div key={m.k}>
-                  <div className="text-[10px] tracking-[0.28em] uppercase text-white/40">
-                    {m.k}
-                  </div>
-                  <div className="mt-2 font-serif text-xl text-white">
-                    {m.v}
-                  </div>
-                </div>
-              ))}
+            <div className="pt-6 border-t border-white/5 text-[13px] tracking-[0.18em] uppercase text-white/45">
+              Focus · Cloud &amp; Storage Engineering — Open to roles ·
+              Chennai, India
             </div>
           </Reveal>
         </div>

@@ -47,7 +47,7 @@ export const Hero = () => {
                   delay: 0.3 + i * 0.04,
                   ease: easeOut,
                 }}
-                className="inline-block text-7xl sm:text-8xl md:text-[7.5rem] lg:text-[11rem] font-light"
+                className="inline-block text-6xl sm:text-7xl md:text-[6.5rem] lg:text-[9rem] font-light"
               >
                 {c}
               </motion.span>
@@ -64,7 +64,7 @@ export const Hero = () => {
                     delay: 0.65 + i * 0.05,
                     ease: easeOut,
                   }}
-                  className="inline-block text-7xl sm:text-8xl md:text-[7.5rem] lg:text-[11rem] font-light italic text-white/85"
+                  className="inline-block text-6xl sm:text-7xl md:text-[6.5rem] lg:text-[9rem] font-light italic text-white/85"
                 >
                   {c}
                 </motion.span>

@@ -36,23 +36,43 @@ const TICKER_BOTTOM = [
   "Cloud Engineer",
 ];
 
-const IMAGE_STRIP = [
-  // Server / data center vibe
-  "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=900&q=70",
-  // Code on screen
-  "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=70",
-  // Linux terminal
-  "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=900&q=70",
-  // Network cables / racks
-  "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?auto=format&fit=crop&w=900&q=70",
-  // Encryption / abstract
-  "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=900&q=70",
-  // Cloud servers
-  "https://images.unsplash.com/photo-1597852074816-d933c7d2b988?auto=format&fit=crop&w=900&q=70",
+const HEADLINE_TICKER = [
+  "Cloud Engineer",
+  "Storage Administrator",
+  "Cybersecurity",
+  "Python Developer",
+  "IEEE Researcher",
 ];
 
-const Ticker = ({ items, direction = "left", italic = false, accent = false }) => (
-  <div className="relative overflow-hidden border-y border-white/10 py-5">
+const TECH = [
+  { name: "Python", icon: "python/python-original.svg" },
+  { name: "Linux", icon: "linux/linux-original.svg" },
+  { name: "AWS", icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg" },
+  { name: "Ubuntu", icon: "ubuntu/ubuntu-plain.svg" },
+  { name: "Django", icon: "django/django-plain.svg" },
+  { name: "OpenCV", icon: "opencv/opencv-original.svg" },
+  { name: "Git", icon: "git/git-original.svg" },
+  { name: "GitHub", icon: "github/github-original.svg" },
+  { name: "Java", icon: "java/java-original.svg" },
+  { name: "Spring", icon: "spring/spring-original.svg" },
+  { name: "Angular", icon: "angularjs/angularjs-original.svg" },
+  { name: "VS Code", icon: "vscode/vscode-original.svg" },
+  { name: "PyCharm", icon: "pycharm/pycharm-original.svg" },
+  { name: "NumPy", icon: "numpy/numpy-original.svg" },
+  { name: "Bash", icon: "bash/bash-original.svg" },
+  { name: "MongoDB", icon: "mongodb/mongodb-original.svg" },
+  { name: "Pandas", icon: "pandas/pandas-original.svg" },
+  { name: "FastAPI", icon: "fastapi/fastapi-original.svg" },
+  { name: "Docker", icon: "docker/docker-original.svg" },
+  { name: "Kubernetes", icon: "kubernetes/kubernetes-plain.svg" },
+  { name: "Nginx", icon: "nginx/nginx-original.svg" },
+  { name: "Postgres", icon: "postgresql/postgresql-original.svg" },
+  { name: "Redis", icon: "redis/redis-original.svg" },
+  { name: "Bitbucket", icon: "bitbucket/bitbucket-original.svg" },
+];
+
+const Ticker = ({ items, direction = "left", italic = false, accent = false, size = "lg" }) => (
+  <div className="relative overflow-hidden border-y border-white/10 py-4 md:py-5">
     <div
       className={`flex gap-10 whitespace-nowrap ${
         direction === "right" ? "marquee-track-rev" : "marquee-track"
@@ -61,14 +81,16 @@ const Ticker = ({ items, direction = "left", italic = false, accent = false }) =
       {[...items, ...items].map((t, i) => (
         <span
           key={`${t}-${i}`}
-          className={`font-serif text-3xl md:text-5xl ${
-            italic ? "italic" : ""
-          } ${accent ? "text-[#e8ff47]/85" : "text-white/75"}`}
+          className={`font-serif ${
+            size === "xl"
+              ? "text-4xl md:text-6xl"
+              : "text-2xl md:text-5xl"
+          } ${italic ? "italic" : ""} ${
+            accent ? "text-[#e8ff47]/85" : "text-white/75"
+          }`}
         >
           {t}{" "}
-          <span className="text-white/15 mx-2">
-            {accent ? "✦" : "·"}
-          </span>
+          <span className="text-white/15 mx-2">{accent ? "✦" : "·"}</span>
         </span>
       ))}
     </div>
@@ -80,8 +102,13 @@ export const Skills = () => {
     <section
       id="skills"
       data-testid="skills-section"
-      className="relative py-14 md:py-20 px-6 md:px-12"
+      className="relative py-10 md:py-16 px-6 md:px-12"
     >
+      {/* Headline running ticker (above section) */}
+      <div className="-mx-6 md:-mx-12 mb-12 md:mb-16">
+        <Ticker items={HEADLINE_TICKER} italic size="xl" accent />
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between flex-wrap gap-6 mb-10 md:mb-14">
           <motion.div
@@ -108,6 +135,45 @@ export const Skills = () => {
             chart, no progress bars — just the things I keep reaching for.
           </motion.p>
         </div>
+
+        {/* Tech logo grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="mb-12 md:mb-16"
+          data-testid="tech-grid"
+        >
+          <div className="text-[10px] tracking-[0.28em] uppercase text-white/40 mb-5">
+            (Stack · Tools)
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5 md:gap-3">
+            {TECH.map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.03 }}
+                whileHover={{ y: -3 }}
+                className="group relative aspect-square rounded-2xl border border-white/10 bg-[#0D0D0D]/60 backdrop-blur-sm grid place-items-center hover:border-[#e8ff47]/30 transition-colors"
+                title={t.name}
+              >
+                <img
+                  src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
+                  alt={t.name}
+                  loading="lazy"
+                  className="w-7 h-7 md:w-9 md:h-9 opacity-65 group-hover:opacity-100 transition-all duration-500"
+                  style={{ filter: "grayscale(0.6) brightness(1.6)" }}
+                />
+                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] tracking-[0.18em] uppercase text-white/0 group-hover:text-white/60 transition-colors whitespace-nowrap">
+                  {t.name}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
         {/* Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 md:gap-y-12 md:gap-x-12">
@@ -152,38 +218,6 @@ export const Skills = () => {
           <Ticker items={TICKER_TOP} direction="left" italic />
           <Ticker items={TICKER_BOTTOM} direction="right" accent />
         </div>
-
-        {/* Image strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-10 md:mt-12"
-          data-testid="skills-image-strip"
-        >
-          <div className="text-[10px] tracking-[0.28em] uppercase text-white/40 mb-4">
-            (Field · Imagery)
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
-            {IMAGE_STRIP.map((src, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ y: -3 }}
-                transition={{ type: "spring", stiffness: 200, damping: 18 }}
-                className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#0D0D0D]"
-              >
-                <img
-                  src={src}
-                  alt=""
-                  loading="lazy"
-                  className="w-full h-full object-cover grayscale-[0.35] contrast-[1.05] opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/60 via-transparent to-transparent pointer-events-none" />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </section>
   );
