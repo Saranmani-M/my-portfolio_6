@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, X as XIcon } from "lucide-react";
 import { PROFILE, NAV } from "../lib/data";
+import { Monogram } from "./Monogram";
 
 // 4-dot icon
 const DotsIcon = ({ size = 18 }) => (
@@ -61,13 +62,8 @@ export const Navbar = () => {
         data-testid="brand-card"
         className="fixed top-5 left-5 md:top-6 md:left-6 z-50 flex items-center gap-3 group"
       >
-        <span className="w-12 h-12 md:w-14 md:h-14 rounded-2xl overflow-hidden border border-white/10 bg-[#0D0D0D] shrink-0">
-          <img
-            src={PROFILE.photoUrl}
-            alt="Saranmani M"
-            className="w-full h-full object-cover"
-            style={{ filter: "grayscale(0.4) contrast(1.05) brightness(0.95)" }}
-          />
+        <span className="w-12 h-12 md:w-14 md:h-14 shrink-0">
+          <Monogram size={56} />
         </span>
         <span className="text-white leading-[1.1] text-left">
           <span className="block text-[13px] md:text-[14px] font-medium">

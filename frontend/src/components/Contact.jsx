@@ -139,54 +139,6 @@ export const Contact = () => {
             Or DM on LinkedIn <Linkedin size={14} />
           </a>
         </motion.div>
-
-        {/* Links grid */}
-        <div className="mt-20 md:mt-24 border-t border-white/10 pt-12">
-          <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-8">
-            (All channels)
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {LINKS.map((l, i) => (
-              <motion.a
-                key={l.k}
-                href={l.href}
-                {...(l.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-                data-testid={l.testId}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{
-                  duration: 0.8,
-                  delay: i * 0.05,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                whileHover={{ y: -2 }}
-                className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#0D0D0D]/60 backdrop-blur-sm p-5 md:p-6 hover:border-[#e8ff47]/30 transition-colors"
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <span className="shrink-0 w-10 h-10 rounded-full border border-white/15 grid place-items-center text-white/85 group-hover:text-[#e8ff47] group-hover:border-[#e8ff47]/40 transition-colors">
-                    <l.Icon size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="text-[10px] tracking-[0.24em] uppercase text-white/40">
-                      {l.label}
-                    </div>
-                    <div className="mt-1 text-[14px] text-white/90 truncate">
-                      {l.value}
-                    </div>
-                  </div>
-                </div>
-                <ArrowUpRight
-                  size={14}
-                  className="shrink-0 text-white/40 transition-transform group-hover:rotate-45 group-hover:text-[#e8ff47]"
-                />
-              </motion.a>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
