@@ -35,6 +35,8 @@ jobs:
         run: npm install --save-dev ajv@^7 --legacy-peer-deps
       - name: Build App
         run: npm run build
+        env:
+          PUBLIC_URL: '/my-portfolio_6'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
