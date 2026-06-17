@@ -150,3 +150,10 @@ body {
     display: contents !important;
   }
 }
+div[class*="badge"], span[class*="badge"], [data-testid*="badge"], [className*="badge"] {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
