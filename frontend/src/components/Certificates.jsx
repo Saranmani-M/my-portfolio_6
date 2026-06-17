@@ -115,26 +115,24 @@ export const Certificates = () => {
                     }}
                   />
           <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ 
-              backgroundImage: `linear-gradient(to top, rgba(5, 5, 5, 0.95) 0%, rgba(5, 5, 5, 0.4) 50%, transparent 100%), url(${c.img})` 
-            }}
+            className="absolute inset-0 bg-[#141414] border border-white/5 rounded-3xl flex flex-col justify-between p-5"
           >
-            <div className="absolute bottom-4 left-4 right-4 text-left">
-              <div>
-                <span 
-                  className="text-[10px] tracking-[0.24em] uppercase mb-1 block font-semibold"
-                  style={{ color: c.accent }}
-                >
-                  {c.org}
-                </span>
-              </div>
-              <div className="font-serif text-lg text-white leading-tight mt-1">
-                {c.title}
-              </div>
+            <div className="flex justify-between items-start w-full">
+              <span 
+                className="text-[10px] tracking-[0.24em] uppercase font-semibold text-left"
+                style={{ color: c.accent }}
+              >
+                {c.org}
+              </span>
+              <span className="text-xl" style={{ textShadow: `0 0 10px ${c.accent}` }}>
+                📜
+              </span>
+            </div>
+
+            <div className="font-serif text-lg text-white leading-tight mt-auto text-left w-full">
+              {c.title}
             </div>
           </div>
-
                 </motion.button>
               );
             })}
