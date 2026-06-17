@@ -8,7 +8,7 @@ const CERTS = [
     title: "IEEE Publication - Homomorphic Encryption",
     org: "ICIRCA 2026 - IEEE",
     img: "https://unsplash.com",
-    pdf: "#",
+    pdf: "https://emergentagent.com",
     accent: "#e8ff47",
   },
   {
@@ -16,7 +16,7 @@ const CERTS = [
     title: "Certificate of Appreciation",
     org: "Vel Tech - CYBERNIX '25",
     img: "https://unsplash.com",
-    pdf: "#",
+    pdf: "https://emergentagent.com",
     accent: "#A78BFA",
   },
   {
@@ -24,7 +24,7 @@ const CERTS = [
     title: "Certificate of Participation",
     org: "Workshop - 2025",
     img: "https://unsplash.com",
-    pdf: "#",
+    pdf: "https://emergentagent.com",
     accent: "#60A5FA",
   },
   {
@@ -32,7 +32,7 @@ const CERTS = [
     title: "Certificate of Participation",
     org: "Conference - 2025",
     img: "https://unsplash.com",
-    pdf: "#",
+    pdf: "https://emergentagent.com",
     accent: "#f0abfc",
   },
 ];
