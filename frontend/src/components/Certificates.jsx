@@ -185,9 +185,9 @@ export const Certificates = () => {
               <div className="w-full h-[55vh] md:h-[65vh] bg-black relative flex items-center justify-center border-b border-white/5">
                 {open.pdf && open.pdf !== "/" && !open.pdf.includes("emergentagent") ? (
                   <iframe
-                    src={open.pdf}
-                    title={open.title}
-                    className="w-full h-full border-0"
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + open.pdf)}&embedded=true`}
+                  title={open.title}
+                  className="w-full h-full border-0"
                   />
                 ) : (
                   /* Placeholder when no PDF yet */
