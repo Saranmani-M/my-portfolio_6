@@ -171,7 +171,7 @@ export const ACHIEVEMENTS = [
   },
 ];
 
-export const CERTIFICATES = [
+export const CERTIFICATIONS = [
   {
     title: "AWS Security - Encryption Fundamentals",
     org: "Amazon Web Services",
