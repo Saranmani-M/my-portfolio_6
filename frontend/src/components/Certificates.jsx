@@ -58,7 +58,7 @@ export const Certificates = () => {
               (Certificates)
             </div>
             <h2 className="font-serif text-4xl md:text-6xl font-light text-white text-balance leading-[1]">
-              Paper <em className="italic text-[#e8ff47]/85">trail</em>.
+              Paper <em className="italic text-[#e8ff47]/85">trail</em>
             </h2>
           </motion.div>
           <motion.p
@@ -100,7 +100,7 @@ export const Certificates = () => {
                     delay: i * 0.08,
                     ease: [0.16, 1, 0.3, 1],
                   }}
-                  className="absolute rounded-3xl overflow-hidden border border-white/10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] bg-[#0D0D0D]"
+                  className="absolute rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
                   style={{
                     width: 280,
                     height: 380,
@@ -114,25 +114,26 @@ export const Certificates = () => {
                       background: `radial-gradient(closest-side, ${c.accent}66, transparent)`,
                     }}
                   />
-          <div 
-            className="absolute inset-0 bg-[#141414] border border-white/5 rounded-3xl flex flex-col justify-between p-5"
-          >
-            <div className="flex justify-between items-start w-full">
-              <span 
-                className="text-[10px] tracking-[0.24em] uppercase font-semibold text-left"
-                style={{ color: c.accent }}
-              >
-                {c.org}
-              </span>
-              <span className="text-xl" style={{ textShadow: `0 0 10px ${c.accent}` }}>
-                📜
-              </span>
-            </div>
-
-            <div className="font-serif text-lg text-white leading-tight mt-auto text-left w-full">
-              {c.title}
-            </div>
-          </div>
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ 
+                      backgroundImage: `linear-gradient(to top, rgba(5, 5, 5, 0.95) 0%, rgba(5, 5, 5, 0.4) 50%, transparent 100%), url(${c.img})` 
+                    }}
+                  >
+                    <div className="absolute bottom-5 left-5 right-5 text-left">
+                      <div>
+                        <span 
+                          className="text-[10px] tracking-[0.24em] uppercase mb-1 block font-semibold"
+                          style={{ color: c.accent }}
+                        >
+                          {c.org}
+                        </span>
+                      </div>
+                      <div className="font-serif text-lg text-white leading-tight mt-1">
+                        {c.title}
+                      </div>
+                    </div>
+                  </div>
                 </motion.button>
               );
             })}
@@ -150,24 +151,24 @@ export const Certificates = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: i * 0.05 }}
-              className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#0D0D0D] text-left"
+              className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#0d0d0d] text-left aspect-[4/3]"
             >
-              <img
-                src={c.img}
-                alt={c.title}
-                loading="lazy"
-                className="w-full aspect-[4/3] object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/85 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 right-3">
-                <div
-                  className="text-[9px] tracking-[0.24em] uppercase mb-1"
-                  style={{ color: c.accent }}
-                >
-                  {c.org}
-                </div>
-                <div className="font-serif text-base text-white leading-tight">
-                  {c.title}
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ 
+                  backgroundImage: `linear-gradient(to top, rgba(5, 5, 5, 0.95) 0%, rgba(5, 5, 5, 0.4) 50%, transparent 100%), url(${c.img})` 
+                }}
+              >
+                <div className="absolute bottom-4 left-4 right-4">
+                  <span 
+                    className="text-[9px] tracking-[0.24em] uppercase mb-1 block font-semibold"
+                    style={{ color: c.accent }}
+                  >
+                    {c.org}
+                  </span>
+                  <div className="font-serif text-base text-white leading-tight">
+                    {c.title}
+                  </div>
                 </div>
               </div>
             </motion.button>
@@ -175,7 +176,7 @@ export const Certificates = () => {
         </div>
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox Modal */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -192,30 +193,30 @@ export const Certificates = () => {
               exit={{ scale: 0.92, y: 20 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative max-w-5xl w-full rounded-2xl overflow-hidden border border-white/15 bg-[#0D0D0D]"
+              className="relative max-w-5xl w-full rounded-2xl overflow-hidden border border-white/15 bg-[#0d0d0d]"
             >
-          <iframe
-            src={open.pdf}
-            title={open.title}
-            className="w-full h-[60vh] md:h-[75vh] border-0 rounded-t-2xl bg-black z-0"
-            loading="lazy"
-          />
+              <iframe
+                src={open.pdf}
+                title={open.title}
+                className="w-full h-[60vh] md:h-[75vh] border-0 bg-black z-0"
+                loading="lazy"
+              />
               <button
                 onClick={() => setOpen(null)}
                 data-testid="cert-close"
-                className="absolute top-3 right-3 w-9 h-9 grid place-items-center rounded-full bg-black/60 border border-white/10 text-white hover:bg-black"
+                className="absolute top-3 right-3 w-9 h-9 grid place-items-center rounded-full bg-black/60 border border-white/10 text-white hover:bg-black/80 transition-colors z-50"
               >
                 <XIcon size={16} />
               </button>
               <div className="px-5 py-4 flex items-center justify-between gap-4 border-t border-white/10">
                 <div>
-                  <div
-                    className="text-[10px] tracking-[0.24em] uppercase"
+                  <span 
+                    className="text-[10px] tracking-[0.24em] uppercase font-semibold"
                     style={{ color: open.accent }}
                   >
                     {open.org}
-                  </div>
-                  <div className="font-serif text-xl text-white">
+                  </span>
+                  <div className="font-serif text-xl text-white mt-0.5">
                     {open.title}
                   </div>
                 </div>
@@ -223,11 +224,11 @@ export const Certificates = () => {
                   href={open.pdf}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 text-[12px] font-medium z-50 pointer-events-auto"
+                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 text-[12px] font-medium hover:bg-neutral-200 transition-colors z-50 pointer-events-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
-                 Open PDF <ArrowUpRight size={13} />
-               </a>
+                  Open PDF <ArrowUpRight size={13} />
+                </a>
               </div>
             </motion.div>
           </motion.div>
