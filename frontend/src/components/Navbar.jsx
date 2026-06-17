@@ -52,10 +52,15 @@ export const Navbar = () => {
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-0.5 px-2.5 py-1.5 rounded-full bg-[#0D0D0D]/80 backdrop-blur-xl border border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.8)]">
           <div
-            className="px-2.5 py-1.5 text-[10px] tracking-[0.22em] uppercase text-white/60"
+            className="flex items-center gap-2 pl-1.5 pr-2 py-0.5 text-[10px] tracking-[0.22em] uppercase text-white/70"
             data-testid="navbar-brand"
           >
-            SM
+            <img
+              src="https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/uiidkdb9_ChatGPT%20Image%20Jun%207%2C%202026%2C%2006_04_26%20PM%20%281%29%20%281%29.png"
+              alt="SM"
+              className="w-6 h-6 rounded-full object-cover border border-white/15"
+            />
+            <span>SM</span>
           </div>
           <div className="h-4 w-px bg-white/10 mx-0.5" />
           {NAV.map((n) => (
@@ -82,10 +87,17 @@ export const Navbar = () => {
         </div>
 
         {/* Mobile */}
-        <div className="md:hidden flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0D0D0D]/70 backdrop-blur-xl border border-white/10 w-full max-w-[440px]">
-          <span className="text-[11px] tracking-[0.22em] uppercase text-white/70 truncate">
-            SARANMANI · M
-          </span>
+        <div className="md:hidden flex items-center justify-between gap-3 px-3.5 py-2 rounded-full bg-[#0D0D0D]/80 backdrop-blur-xl border border-white/10 w-full max-w-[440px]">
+          <div className="flex items-center gap-2 min-w-0">
+            <img
+              src="https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/uiidkdb9_ChatGPT%20Image%20Jun%207%2C%202026%2C%2006_04_26%20PM%20%281%29%20%281%29.png"
+              alt="SM"
+              className="w-6 h-6 rounded-full object-cover border border-white/15 shrink-0"
+            />
+            <span className="text-[11px] tracking-[0.22em] uppercase text-white/70 truncate">
+              SARANMANI · M
+            </span>
+          </div>
           <button
             data-testid="mobile-menu-toggle"
             onClick={() => setOpen((s) => !s)}

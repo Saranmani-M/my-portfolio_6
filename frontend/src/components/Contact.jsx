@@ -76,7 +76,7 @@ export const Contact = () => {
     <section
       id="contact"
       data-testid="contact-section"
-      className="relative py-20 md:py-28 px-6 md:px-12"
+      className="relative py-14 md:py-20 px-6 md:px-12"
     >
       <Toaster
         position="bottom-right"

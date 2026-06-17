@@ -170,10 +170,10 @@ export const Projects = () => {
     <section
       id="projects"
       data-testid="projects-section"
-      className="relative py-20 md:py-28 px-6 md:px-12"
+      className="relative py-14 md:py-20 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-14 md:mb-20">
+        <div className="flex items-end justify-between flex-wrap gap-6 mb-10 md:mb-14">
           <Reveal>
             <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5">
               (Selected Work)

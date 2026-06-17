@@ -20,7 +20,7 @@ export const Research = () => {
     <section
       id="research"
       data-testid="research-section"
-      className="relative py-20 md:py-28 px-6 md:px-12"
+      className="relative py-14 md:py-20 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto">
         <Reveal>

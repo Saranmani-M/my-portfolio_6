@@ -83,8 +83,19 @@ body {
     transform: translateX(-50%);
   }
 }
+@keyframes marqueeRev {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
 .marquee-track {
-  animation: marquee 40s linear infinite;
+  animation: marquee 45s linear infinite;
+}
+.marquee-track-rev {
+  animation: marqueeRev 55s linear infinite;
 }
 
 /* Hero portrait soft glow */

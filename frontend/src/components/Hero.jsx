@@ -15,29 +15,18 @@ export const Hero = () => {
     <section
       id="home"
       data-testid="hero-section"
-      className="relative min-h-[100svh] pt-28 md:pt-36 pb-12 md:pb-16 px-6 md:px-12"
+      className="relative min-h-[100svh] pt-24 md:pt-28 pb-8 md:pb-12 px-6 md:px-12"
     >
-      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left — editorial typography */}
         <div className="lg:col-span-7 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: easeOut, delay: 0.1 }}
-            className="flex items-center gap-3 mb-6 text-[11px] tracking-[0.28em] uppercase text-white/55"
-            data-testid="hero-eyebrow"
-          >
-            <span className="w-8 h-px bg-white/30" />
-            Portfolio · 2025
-          </motion.div>
-
           {/* Open to work badge */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: easeOut }}
+            transition={{ duration: 0.9, delay: 0.15, ease: easeOut }}
             data-testid="badge-open-to-work"
-            className="inline-flex items-center gap-2.5 mb-6 px-3.5 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[11px] tracking-[0.18em] uppercase"
+            className="inline-flex items-center gap-2.5 mb-5 px-3.5 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[11px] tracking-[0.18em] uppercase"
           >
             <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />
             Open to Work · 2026

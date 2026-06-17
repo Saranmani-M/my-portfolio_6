@@ -22,7 +22,7 @@ export const About = () => {
     <section
       id="about"
       data-testid="about-section"
-      className="relative py-20 md:py-28 px-6 md:px-12"
+      className="relative py-14 md:py-20 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-14">
         <div className="col-span-12 md:col-span-4">
@@ -47,7 +47,7 @@ export const About = () => {
           </Reveal>
         </div>
 
-        <div className="col-span-12 md:col-span-8 md:col-start-6 lg:col-start-6 space-y-10 md:space-y-12">
+        <div className="col-span-12 md:col-span-8 md:col-start-6 lg:col-start-6 space-y-8 md:space-y-10">
           <Reveal delay={0.1}>
             <h3 className="font-serif text-3xl md:text-5xl leading-[1.1] text-white text-balance">
               Building <span className="italic text-white/80">reliable</span>{" "}
