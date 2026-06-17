@@ -1,4 +1,4 @@
-import React from "react";
+ximport React from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { PROFILE } from "../lib/data";
 
@@ -35,13 +35,13 @@ export const About = () => {
                 style={{ y }}
                 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light leading-[1] text-white"
               >
-                A student of{" "}
+                A graduate of{" "}
                 <em className="italic text-[#e8ff47]/85">infrastructure</em>,
                 calm and secure.
               </motion.h2>
               <p className="mt-7 text-sm tracking-wide text-white/50 max-w-xs">
-                {PROFILE.location} · Bachelor of Information Technology · Final
-                year
+                {PROFILE.location} · Bachelor of Information Technology · Graduated 2026
+                
               </p>
             </div>
           </Reveal>
@@ -78,7 +78,7 @@ export const About = () => {
             </Reveal>
             <Reveal delay={0.15}>
               <p>
-                Beyond coursework, I&rsquo;ve presented research at IEEE and
+                Beyond academics, I&rsquo;ve presented research at IEEE and
                 ASSET conferences, and I&rsquo;m actively exploring practical
                 cryptography — particularly homomorphic schemes that allow
                 computation on encrypted data.
