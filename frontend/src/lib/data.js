@@ -176,19 +176,19 @@ export const CERTIFICATIONS = [
     title: "AWS Security - Encryption Fundamentals",
     org: "Amazon Web Services",
     line: "Cryptographic primitives, KMS, and securing data at rest and in transit.",
-    cover: "https://unsplash.com"
+    image: "https://unsplash.com"
   },
   {
     title: "Full Stack Development - Angular + Spring Boot",
     org: "Digital India Corporation",
     line: "End-to-end web application development across the JVM and TypeScript ecosystems.",
-    cover: "https://unsplash.com"
+    image: "https://unsplash.com"
   },
   {
     title: "Web Security",
     org: "Vel Tech - Value Added Course",
     line: "OWASP fundamentals, authentication, and common attack surfaces.",
-    cover: "https://unsplash.com"
+    image: "https://unsplash.com"
   }
 ];
 
