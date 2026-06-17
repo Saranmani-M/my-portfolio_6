@@ -6,11 +6,13 @@ import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Skills } from "@/components/Skills";
 import { Projects } from "@/components/Projects";
+import { Process } from "@/components/Process";
 import { Research } from "@/components/Research";
 import { Achievements } from "@/components/Achievements";
 import { Certificates } from "@/components/Certificates";
 import { Articles } from "@/components/Articles";
 import { CodingProfiles } from "@/components/CodingProfiles";
+import { Testimonials } from "@/components/Testimonials";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 
@@ -31,11 +33,13 @@ function App() {
           <About />
           <Skills />
           <Projects />
+          <Process />
           <Research />
           <Achievements />
           <Certificates />
           <Articles />
           <CodingProfiles />
+          <Testimonials />
           <Contact />
         </main>
 
