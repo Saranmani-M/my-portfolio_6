@@ -33,6 +33,11 @@ const MARQUEE_SKILLS = [
  * Replaces the old DNABackground point-cloud with a dark, organic
  * cluster-of-spheres render reminiscent of a clay/bubble material,
  * lit from the top-left, slowly drifting.
+ *
+ * NOTE: bubble density/size is computed relative to viewport size
+ * (not browser zoom %), so the cluster looks identical — always
+ * overlapping/joined, always covering the full viewport height —
+ * regardless of how zoomed in or out the page is.
  */
 const BubbleBackground = () => {
   const canvasRef = useRef(null);
@@ -42,22 +47,35 @@ const BubbleBackground = () => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animId;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+
+    // Use devicePixelRatio so the canvas is always crisp and the bubble
+    // math is driven by CSS pixel size (window.innerWidth/innerHeight),
+    // which is what actually changes with browser zoom. This keeps the
+    // *relative* density of the cluster constant across zoom levels.
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
     const resize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
+    resize();
     window.addEventListener("resize", resize);
 
     // Build bubbles wrapped around a twisted, elongated ribbon (torus-knot-like)
     // path so the cluster reads as an organic, overlapping ridge rather than a
     // tight ball — this fills the whole frame edge to edge like a real render.
-    const BUBBLES = 420;
+    const BUBBLES = 620; // more bubbles than before -> denser, always-joined look
     const bubbles = [];
-    const STRANDS = 5; // number of ridge "tubes" wrapped around the knot path
-    const TURNS = 2.6; // how many times the path twists along its length
+    const STRANDS = 7; // more ridge "tubes" wrapped around the knot path
+    const TURNS = 3.2; // how many times the path twists along its length
 
     for (let i = 0; i < BUBBLES; i++) {
       const strand = i % STRANDS;
@@ -66,14 +84,14 @@ const BubbleBackground = () => {
 
       // Base knot path: a stretched figure-eight / helix shape, elongated
       // vertically so it spans top-to-bottom of the viewport like the reference.
-      const pathX = Math.sin(u * 1.5) * 0.75;
-      const pathY = (along - 0.5) * 2.05; // stretch top to bottom
-      const pathZ = Math.cos(u) * 0.6;
+      const pathX = Math.sin(u * 1.5) * 0.8;
+      const pathY = (along - 0.5) * 2.6; // stretch further top to bottom -> fills full viewport height
+      const pathZ = Math.cos(u) * 0.65;
 
       // Wrap a small tube of bubbles (the "strand") around the path,
       // offset by angle per strand for the ridged, overlapping look.
       const strandAngle = (strand / STRANDS) * Math.PI * 2 + along * 3;
-      const tubeR = 0.16;
+      const tubeR = 0.22; // wider tube -> strands overlap each other, no visible gaps
       const offX = Math.cos(strandAngle) * tubeR;
       const offZ = Math.sin(strandAngle) * tubeR;
 
@@ -81,7 +99,7 @@ const BubbleBackground = () => {
         x: pathX + offX,
         y: pathY,
         z: pathZ + offZ,
-        r: Math.random() * 0.55 + 0.6, // relative bubble size
+        r: Math.random() * 0.55 + 0.85, // bigger relative bubble size -> guarantees overlap
         jitter: Math.random() * Math.PI * 2,
       });
     }
@@ -95,8 +113,13 @@ const BubbleBackground = () => {
       t += 0.0016;
 
       const cx = width * 0.5;
-      const cy = height * 0.48;
-      const baseRadius = Math.max(width, height) * 0.46;
+      const cy = height * 0.5;
+
+      // Tie baseRadius to viewport diagonal-ish so the cluster always spans
+      // the full height/width of the screen in CSS-pixel terms, independent
+      // of browser zoom (zoom changes innerWidth/innerHeight together, so
+      // this ratio-based sizing stays visually consistent).
+      const baseRadius = Math.max(width, height) * 0.5;
 
       const cosA = Math.cos(t);
       const sinA = Math.sin(t);
@@ -117,7 +140,10 @@ const BubbleBackground = () => {
           sx: cx + x1 * baseRadius * perspective,
           sy: cy + y2 * baseRadius * perspective,
           z: z2,
-          r: b.r * (baseRadius * 0.1) * perspective * breathe,
+          // Bubble pixel radius scales with baseRadius (viewport-relative),
+          // so on small or large screens (and at any zoom %) the bubbles
+          // stay proportionally large enough to overlap their neighbors.
+          r: b.r * (baseRadius * 0.115) * perspective * breathe,
         };
       });
 
