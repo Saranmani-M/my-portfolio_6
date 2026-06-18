@@ -71,7 +71,8 @@ const DNABackground = () => {
           const dy = projected[i].sy - projected[j].sy;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 80) {
-            const alpha = (1 - dist / 80) * 0.12 * ((projected[i].z + 1.5) / 2.5);
+            const alpha =
+              ((1 - dist / 80) * 0.12 * (projected[i].z + 1.5)) / 2.5;
             ctx.beginPath();
             ctx.moveTo(projected[i].sx, projected[i].sy);
             ctx.lineTo(projected[j].sx, projected[j].sy);
@@ -85,7 +86,9 @@ const DNABackground = () => {
         const brightness = (p.z + 1.5) / 2.5;
         const alpha = brightness * 0.7 + 0.1;
         const r = p.size * brightness;
-        const grad = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3);
+        const grad = ctx.createRadialGradient(
+          p.sx, p.sy, 0, p.sx, p.sy, r * 3
+        );
         grad.addColorStop(0, `rgba(255,255,255,${alpha * 0.4})`);
         grad.addColorStop(1, "rgba(255,255,255,0)");
         ctx.beginPath();
@@ -200,7 +203,7 @@ export const Hero = () => {
             className="flex items-center gap-5 pt-2"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              
+              <a
                 key={k}
                 href={url}
                 target="_blank"
@@ -211,6 +214,7 @@ export const Hero = () => {
                 <Icon size={20} strokeWidth={1.5} />
               </a>
             ))}
+            <a
             
               href={PROFILE.resumeUrl}
               target="_blank"
@@ -220,7 +224,7 @@ export const Hero = () => {
             >
               Résumé →
             </a>
-            
+            <a
               href={`mailto:${PROFILE.email}`}
               className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
             >
