@@ -12,8 +12,31 @@ const SOCIAL_ICONS = [
   { Icon: Twitter, url: SOCIALS.twitter, k: "x" },
 ];
 
-const DNABackground = () => {
+// Skills shown in the running marquee strip. Edit this list to change what scrolls.
+const MARQUEE_SKILLS = [
+  "Python",
+  "AWS",
+  "Linux",
+  "SAN / NAS",
+  "RAID",
+  "IAM",
+  "S3",
+  "EC2",
+  "Bash",
+  "Git",
+  "Docker",
+  "PyCharm",
+];
+
+/**
+ * BubbleBackground
+ * Replaces the old DNABackground point-cloud with a dark, organic
+ * cluster-of-spheres render reminiscent of a clay/bubble material,
+ * lit from the top-left, slowly drifting.
+ */
+const BubbleBackground = () => {
   const canvasRef = useRef(null);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -21,99 +44,171 @@ const DNABackground = () => {
     let animId;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+
     const resize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
     window.addEventListener("resize", resize);
-    const TOTAL = 180;
-    const points = [];
+
+    // Build a cluster of bubbles on a rough spherical shell, like packed spheres.
+    const BUBBLES = 220;
+    const bubbles = [];
     const phi = Math.PI * (3 - Math.sqrt(5));
-    for (let i = 0; i < TOTAL; i++) {
-      const y = 1 - (i / (TOTAL - 1)) * 2;
-      const radius = Math.sqrt(1 - y * y);
+    for (let i = 0; i < BUBBLES; i++) {
+      const y = 1 - (i / (BUBBLES - 1)) * 2;
+      const radiusAtY = Math.sqrt(1 - y * y);
       const theta = phi * i;
-      points.push({
-        x: Math.cos(theta) * radius,
-        y,
-        z: Math.sin(theta) * radius,
-        size: Math.random() * 3 + 1.5,
+      bubbles.push({
+        x: Math.cos(theta) * radiusAtY,
+        y: y * 0.92,
+        z: Math.sin(theta) * radiusAtY,
+        r: Math.random() * 0.65 + 0.55, // relative bubble size
+        jitter: Math.random() * Math.PI * 2,
       });
     }
-    let angle = 0;
+
+    let t = 0;
+
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
-      angle += 0.003;
-      const cx = width * 0.72;
-      const cy = height * 0.5;
-      const scale = Math.min(width, height) * 0.42;
-      const projected = points.map((p) => {
-        const cosA = Math.cos(angle);
-        const sinA = Math.sin(angle);
-        const cosB = Math.cos(angle * 0.4);
-        const sinB = Math.sin(angle * 0.4);
-        const x1 = p.x * cosA - p.z * sinA;
-        const z1 = p.x * sinA + p.z * cosA;
-        const y2 = p.y * cosB - z1 * sinB;
-        const z2 = p.y * sinB + z1 * cosB;
-        const perspective = 2.5 / (2.5 + z2);
+
+      // Background stays transparent here; the page's own bg-black shows through.
+      t += 0.0016;
+
+      const cx = width * 0.5;
+      const cy = height * 0.46;
+      const baseRadius = Math.min(width, height) * 0.34;
+
+      const cosA = Math.cos(t);
+      const sinA = Math.sin(t);
+      const cosB = Math.cos(t * 0.35);
+      const sinB = Math.sin(t * 0.35);
+
+      const projected = bubbles.map((b) => {
+        // slow organic breathing per-bubble
+        const breathe = 1 + Math.sin(t * 1.4 + b.jitter) * 0.04;
+
+        const x1 = b.x * cosA - b.z * sinA;
+        const z1 = b.x * sinA + b.z * cosA;
+        const y2 = b.y * cosB - z1 * sinB;
+        const z2 = b.y * sinB + z1 * cosB;
+
+        const perspective = 2.6 / (2.6 + z2);
         return {
-          sx: cx + x1 * scale * perspective,
-          sy: cy + y2 * scale * perspective,
+          sx: cx + x1 * baseRadius * perspective,
+          sy: cy + y2 * baseRadius * perspective,
           z: z2,
-          size: p.size * perspective,
+          r: b.r * (baseRadius * 0.16) * perspective * breathe,
         };
       });
+
       projected.sort((a, b) => a.z - b.z);
-      for (let i = 0; i < projected.length; i++) {
-        for (let j = i + 1; j < projected.length; j++) {
-          const dx = projected[i].sx - projected[j].sx;
-          const dy = projected[i].sy - projected[j].sy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 80) {
-            const alpha =
-              ((1 - dist / 80) * 0.12 * (projected[i].z + 1.5)) / 2.5;
-            ctx.beginPath();
-            ctx.moveTo(projected[i].sx, projected[i].sy);
-            ctx.lineTo(projected[j].sx, projected[j].sy);
-            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
+
       projected.forEach((p) => {
-        const brightness = (p.z + 1.5) / 2.5;
-        const alpha = brightness * 0.7 + 0.1;
-        const r = p.size * brightness;
-        const grad = ctx.createRadialGradient(
-          p.sx, p.sy, 0, p.sx, p.sy, r * 3
+        const depth = (p.z + 1.3) / 2.6; // 0 (back) -> 1 (front)
+
+        // Soft ambient glow behind each bubble
+        const glow = ctx.createRadialGradient(
+          p.sx, p.sy, 0,
+          p.sx, p.sy, p.r * 2.2
         );
-        grad.addColorStop(0, `rgba(255,255,255,${alpha * 0.4})`);
-        grad.addColorStop(1, "rgba(255,255,255,0)");
+        glow.addColorStop(0, `rgba(20,20,20,${0.35 * depth})`);
+        glow.addColorStop(1, "rgba(0,0,0,0)");
         ctx.beginPath();
-        ctx.arc(p.sx, p.sy, r * 3, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
+        ctx.fillStyle = glow;
+        ctx.arc(p.sx, p.sy, p.r * 2.2, 0, Math.PI * 2);
         ctx.fill();
+
+        // The bubble itself: matte dark sphere lit from top-left
+        const lightX = p.sx - p.r * 0.45;
+        const lightY = p.sy - p.r * 0.55;
+        const body = ctx.createRadialGradient(
+          lightX, lightY, p.r * 0.05,
+          p.sx, p.sy, p.r * 1.15
+        );
+        const base = 8 + depth * 14; // dark gray -> slightly lighter near front
+        body.addColorStop(0, `rgba(${base + 24},${base + 24},${base + 24},${0.9})`);
+        body.addColorStop(0.55, `rgba(${base + 6},${base + 6},${base + 6},${0.85})`);
+        body.addColorStop(1, `rgba(2,2,2,0.95)`);
+
         ctx.beginPath();
-        ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200,200,200,${alpha})`;
+        ctx.fillStyle = body;
+        ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2);
         ctx.fill();
+
+        // subtle rim shadow for separation between overlapping bubbles
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(0,0,0,${0.4 * depth})`;
+        ctx.lineWidth = Math.max(1, p.r * 0.06);
+        ctx.arc(p.sx, p.sy, p.r * 0.98, 0, Math.PI * 2);
+        ctx.stroke();
       });
+
       animId = requestAnimationFrame(draw);
     };
     draw();
+
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
     };
   }, []);
+
   return (
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full z-0"
-      style={{ opacity: 0.85 }}
+      style={{ opacity: 0.9 }}
     />
+  );
+};
+
+/**
+ * SkillsMarquee
+ * Continuous right-to-left scrolling strip of skill keywords,
+ * separated by dots, framed by hairline rules. Pauses on hover.
+ */
+const SkillsMarquee = () => {
+  const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
+
+  return (
+    <div
+      data-testid="skills-marquee"
+      className="relative z-10 w-full border-t border-b border-white/10 py-5 overflow-hidden"
+    >
+      <div className="marquee-track flex items-center whitespace-nowrap will-change-transform">
+        {[0, 1].map((copy) => (
+          <div key={copy} className="flex items-center shrink-0">
+            {items.map((skill, i) => (
+              <React.Fragment key={`${copy}-${skill}-${i}`}>
+                <span className="font-serif italic text-white/80 text-[20px] md:text-[26px] px-6">
+                  {skill}
+                </span>
+                <span className="text-white/30 text-[10px]">•</span>
+              </React.Fragment>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        .marquee-track {
+          width: max-content;
+          animation: marquee-scroll 38s linear infinite;
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
+        }
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marquee-track { animation: none; }
+        }
+      `}</style>
+    </div>
   );
 };
 
@@ -122,31 +217,31 @@ export const Hero = () => {
     <section
       id="home"
       data-testid="hero-section"
-      className="relative min-h-[100svh] overflow-hidden"
+      className="relative min-h-[100svh] overflow-hidden flex flex-col"
     >
-      <DNABackground />
+      <BubbleBackground />
 
       <div
         className="absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(ellipse at 70% 50%, transparent 30%, rgba(5,5,5,0.85) 70%), linear-gradient(90deg, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.6) 45%, transparent 100%)",
+            "radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,0.75) 75%), linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0.75) 100%)",
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-12 pt-28 md:pt-32 pb-16 md:pb-20 min-h-[100svh] flex flex-col">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-10 md:pb-12 flex-1 flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
-          className="max-w-[640px] mt-4 md:mt-8"
+          className="max-w-[760px] mt-4 md:mt-8 flex flex-col items-center"
         >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.7 }}
             data-testid="badge-open-to-work"
-            className="inline-flex items-center gap-2.5 mb-6 md:mb-8 px-3 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[10px] tracking-[0.22em] uppercase"
+            className="inline-flex items-center gap-2.5 mb-6 md:mb-8 px-3 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[11px] tracking-[0.18em] uppercase"
           >
             <span className="relative inline-flex w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot" />
             Open to Work · 2026
@@ -164,9 +259,9 @@ export const Hero = () => {
           </h1>
         </motion.div>
 
-        <div className="flex-1 min-h-[40px]" />
+        <div className="flex-1 min-h-[24px] md:min-h-[32px]" />
 
-        <div className="max-w-[520px] space-y-7 md:space-y-9">
+        <div className="max-w-[560px] space-y-6 md:space-y-7 flex flex-col items-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,7 +295,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1.3, ease: easeOut }}
-            className="flex items-center gap-5 pt-2"
+            className="flex items-center justify-center gap-5 pt-2"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a
@@ -215,7 +310,6 @@ export const Hero = () => {
               </a>
             ))}
             <a
-            
               href={PROFILE.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -226,13 +320,15 @@ export const Hero = () => {
             </a>
             <a
               href={`mailto:${PROFILE.email}`}
-              className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
+              className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
             >
               Say hi ↗
             </a>
           </motion.div>
         </div>
       </div>
+
+      <SkillsMarquee />
     </section>
   );
 };
