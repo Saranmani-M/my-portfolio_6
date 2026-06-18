@@ -51,19 +51,37 @@ const BubbleBackground = () => {
     };
     window.addEventListener("resize", resize);
 
-    // Build a cluster of bubbles on a rough spherical shell, like packed spheres.
-    const BUBBLES = 220;
+    // Build bubbles wrapped around a twisted, elongated ribbon (torus-knot-like)
+    // path so the cluster reads as an organic, overlapping ridge rather than a
+    // tight ball — this fills the whole frame edge to edge like a real render.
+    const BUBBLES = 420;
     const bubbles = [];
-    const phi = Math.PI * (3 - Math.sqrt(5));
+    const STRANDS = 5; // number of ridge "tubes" wrapped around the knot path
+    const TURNS = 2.6; // how many times the path twists along its length
+
     for (let i = 0; i < BUBBLES; i++) {
-      const y = 1 - (i / (BUBBLES - 1)) * 2;
-      const radiusAtY = Math.sqrt(1 - y * y);
-      const theta = phi * i;
+      const strand = i % STRANDS;
+      const along = Math.floor(i / STRANDS) / Math.ceil(BUBBLES / STRANDS); // 0..1 along the path
+      const u = along * Math.PI * 2 * TURNS;
+
+      // Base knot path: a stretched figure-eight / helix shape, elongated
+      // vertically so it spans top-to-bottom of the viewport like the reference.
+      const pathX = Math.sin(u * 1.5) * 0.75;
+      const pathY = (along - 0.5) * 2.05; // stretch top to bottom
+      const pathZ = Math.cos(u) * 0.6;
+
+      // Wrap a small tube of bubbles (the "strand") around the path,
+      // offset by angle per strand for the ridged, overlapping look.
+      const strandAngle = (strand / STRANDS) * Math.PI * 2 + along * 3;
+      const tubeR = 0.16;
+      const offX = Math.cos(strandAngle) * tubeR;
+      const offZ = Math.sin(strandAngle) * tubeR;
+
       bubbles.push({
-        x: Math.cos(theta) * radiusAtY,
-        y: y * 0.92,
-        z: Math.sin(theta) * radiusAtY,
-        r: Math.random() * 0.65 + 0.55, // relative bubble size
+        x: pathX + offX,
+        y: pathY,
+        z: pathZ + offZ,
+        r: Math.random() * 0.55 + 0.6, // relative bubble size
         jitter: Math.random() * Math.PI * 2,
       });
     }
@@ -77,13 +95,13 @@ const BubbleBackground = () => {
       t += 0.0016;
 
       const cx = width * 0.5;
-      const cy = height * 0.46;
-      const baseRadius = Math.min(width, height) * 0.34;
+      const cy = height * 0.48;
+      const baseRadius = Math.max(width, height) * 0.46;
 
       const cosA = Math.cos(t);
       const sinA = Math.sin(t);
-      const cosB = Math.cos(t * 0.35);
-      const sinB = Math.sin(t * 0.35);
+      const cosB = Math.cos(0.15); // slight fixed tilt, not animated, for a stable silhouette
+      const sinB = Math.sin(0.15);
 
       const projected = bubbles.map((b) => {
         // slow organic breathing per-bubble
@@ -99,7 +117,7 @@ const BubbleBackground = () => {
           sx: cx + x1 * baseRadius * perspective,
           sy: cy + y2 * baseRadius * perspective,
           z: z2,
-          r: b.r * (baseRadius * 0.16) * perspective * breathe,
+          r: b.r * (baseRadius * 0.1) * perspective * breathe,
         };
       });
 
@@ -229,12 +247,12 @@ export const Hero = () => {
         }}
       />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-10 md:pb-12 flex-1 flex flex-col items-center text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-10 md:pb-12 flex-1 flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
-          className="max-w-[760px] mt-4 md:mt-8 flex flex-col items-center"
+          className="max-w-[920px] mt-4 md:mt-8 flex flex-col items-center"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -249,7 +267,7 @@ export const Hero = () => {
 
           <h1
             data-testid="hero-name"
-            className="font-sans font-extrabold tracking-[-0.03em] leading-[0.92] text-white text-[3rem] sm:text-[3.75rem] md:text-[4.75rem] lg:text-[6rem]"
+            className="font-sans font-extrabold tracking-[-0.02em] leading-[0.95] text-white text-[2.75rem] sm:text-[3.5rem] md:text-[4.25rem] lg:text-[5.25rem]"
           >
             Learning Cloud
             <br />
