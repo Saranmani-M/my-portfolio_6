@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
 import { PROFILE, SOCIALS } from "../lib/data";
@@ -12,6 +12,134 @@ const SOCIAL_ICONS = [
   { Icon: Twitter, url: SOCIALS.twitter, k: "x" },
 ];
 
+const DNABackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const resize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resize);
+
+    // Generate sphere points
+    const TOTAL = 180;
+    const points = [];
+    const phi = Math.PI * (3 - Math.sqrt(5));
+    for (let i = 0; i < TOTAL; i++) {
+      const y = 1 - (i / (TOTAL - 1)) * 2;
+      const radius = Math.sqrt(1 - y * y);
+      const theta = phi * i;
+      points.push({
+        x: Math.cos(theta) * radius,
+        y,
+        z: Math.sin(theta) * radius,
+        size: Math.random() * 3 + 1.5,
+      });
+    }
+
+    let angle = 0;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      angle += 0.003;
+
+      const cx = width * 0.72;
+      const cy = height * 0.5;
+      const scale = Math.min(width, height) * 0.42;
+
+      // Project and sort by z
+      const projected = points.map((p) => {
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        const cosB = Math.cos(angle * 0.4);
+        const sinB = Math.sin(angle * 0.4);
+
+        // Rotate Y
+        const x1 = p.x * cosA - p.z * sinA;
+        const z1 = p.x * sinA + p.z * cosA;
+        // Rotate X
+        const y2 = p.y * cosB - z1 * sinB;
+        const z2 = p.y * sinB + z1 * cosB;
+
+        const perspective = 2.5 / (2.5 + z2);
+        return {
+          sx: cx + x1 * scale * perspective,
+          sy: cy + y2 * scale * perspective,
+          z: z2,
+          size: p.size * perspective,
+        };
+      });
+
+      projected.sort((a, b) => a.z - b.z);
+
+      // Draw connections
+      for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+          const dx = projected[i].sx - projected[j].sx;
+          const dy = projected[i].sy - projected[j].sy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 80) {
+            const alpha = (1 - dist / 80) * 0.12 * ((projected[i].z + 1.5) / 2.5);
+            ctx.beginPath();
+            ctx.moveTo(projected[i].sx, projected[i].sy);
+            ctx.lineTo(projected[j].sx, projected[j].sy);
+            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw dots
+      projected.forEach((p) => {
+        const brightness = (p.z + 1.5) / 2.5;
+        const alpha = brightness * 0.7 + 0.1;
+        const r = p.size * brightness;
+
+        // Glow
+        const grad = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3);
+        grad.addColorStop(0, `rgba(255,255,255,${alpha * 0.4})`);
+        grad.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, r * 3, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Core dot
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,200,200,${alpha})`;
+        ctx.fill();
+      });
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full z-0"
+      style={{ opacity: 0.85 }}
+    />
+  );
+};
+
 export const Hero = () => {
   return (
     <section
@@ -19,40 +147,17 @@ export const Hero = () => {
       data-testid="hero-section"
       className="relative min-h-[100svh] overflow-hidden"
     >
-      {/* Full-bleed dramatic portrait on the right */}
-      <motion.div
-        initial={{ opacity: 0, scale: 1.05 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.6, ease: easeOut }}
-        className="absolute inset-y-0 right-0 w-full md:w-[50%] lg:w-[48%] z-0"
-        data-testid="hero-portrait"
-      >
-        <div className="absolute inset-0 bg-[#050505]" />
-        <img
-          src={PROFILE.photoUrl}
-          alt="Saranmani M"
-          className="w-full h-full object-cover object-[center_20%] md:object-[center_40%] opacity-95"
-          style={{ filter: "grayscale(1) contrast(1.18) brightness(0.72)" }}
-        />
-        {/* Left edge gradient blends portrait into dark bg */}
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(90deg, #050505 0%, #050505 18%, rgba(5,5,5,0.7) 32%, rgba(5,5,5,0.2) 50%, transparent 70%)",
-          }}
-        />
-        {/* Soft vignette */}
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)",
-          }}
-        />
-      </motion.div>
+      {/* DNA Sphere Background */}
+      <DNABackground />
+
+      {/* Dark overlay so text is readable */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background:
+            "radial-gradient(ellipse at 70% 50%, transparent 30%, rgba(5,5,5,0.85) 70%), linear-gradient(90deg, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.6) 45%, transparent 100%)",
+        }}
+      />
 
       {/* Foreground content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-12 pt-28 md:pt-32 pb-16 md:pb-20 min-h-[100svh] flex flex-col">
@@ -62,6 +167,7 @@ export const Hero = () => {
           transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
           className="max-w-[640px] mt-4 md:mt-8"
         >
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -73,6 +179,7 @@ export const Hero = () => {
             Open to Work · 2026
           </motion.div>
 
+          {/* Headline */}
           <h1
             data-testid="hero-name"
             className="font-sans font-extrabold tracking-[-0.03em] leading-[0.92] text-white text-[3rem] sm:text-[3.75rem] md:text-[4.75rem] lg:text-[6rem]"
@@ -124,7 +231,7 @@ export const Hero = () => {
             className="flex items-center gap-5 pt-2"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              <a
+              
                 key={k}
                 href={url}
                 target="_blank"
@@ -135,7 +242,7 @@ export const Hero = () => {
                 <Icon size={20} strokeWidth={1.5} />
               </a>
             ))}
-            <a
+            
               href={PROFILE.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -143,13 +250,13 @@ export const Hero = () => {
               className="ml-3 text-[11px] tracking-[0.22em] uppercase text-white/65 hover:text-[#e8ff47] link-underline"
             >
               Résumé →
-             </a>
-             <a
-            href={`mailto:${PROFILE.email}`}
-            className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
-          >
-            Say hi ↗
-          </a>
+            </a>
+            
+              href={`mailto:${PROFILE.email}`}
+              className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
+            >
+              Say hi ↗
+            </a>
           </motion.div>
         </div>
       </div>
