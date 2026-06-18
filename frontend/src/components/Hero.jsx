@@ -14,22 +14,18 @@ const SOCIAL_ICONS = [
 
 const DNABackground = () => {
   const canvasRef = useRef(null);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animId;
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
     const resize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
     window.addEventListener("resize", resize);
-
-    // Generate sphere points
     const TOTAL = 180;
     const points = [];
     const phi = Math.PI * (3 - Math.sqrt(5));
@@ -44,31 +40,22 @@ const DNABackground = () => {
         size: Math.random() * 3 + 1.5,
       });
     }
-
     let angle = 0;
-
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
       angle += 0.003;
-
       const cx = width * 0.72;
       const cy = height * 0.5;
       const scale = Math.min(width, height) * 0.42;
-
-      // Project and sort by z
       const projected = points.map((p) => {
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
         const cosB = Math.cos(angle * 0.4);
         const sinB = Math.sin(angle * 0.4);
-
-        // Rotate Y
         const x1 = p.x * cosA - p.z * sinA;
         const z1 = p.x * sinA + p.z * cosA;
-        // Rotate X
         const y2 = p.y * cosB - z1 * sinB;
         const z2 = p.y * sinB + z1 * cosB;
-
         const perspective = 2.5 / (2.5 + z2);
         return {
           sx: cx + x1 * scale * perspective,
@@ -77,10 +64,7 @@ const DNABackground = () => {
           size: p.size * perspective,
         };
       });
-
       projected.sort((a, b) => a.z - b.z);
-
-      // Draw connections
       for (let i = 0; i < projected.length; i++) {
         for (let j = i + 1; j < projected.length; j++) {
           const dx = projected[i].sx - projected[j].sx;
@@ -97,14 +81,10 @@ const DNABackground = () => {
           }
         }
       }
-
-      // Draw dots
       projected.forEach((p) => {
         const brightness = (p.z + 1.5) / 2.5;
         const alpha = brightness * 0.7 + 0.1;
         const r = p.size * brightness;
-
-        // Glow
         const grad = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3);
         grad.addColorStop(0, `rgba(255,255,255,${alpha * 0.4})`);
         grad.addColorStop(1, "rgba(255,255,255,0)");
@@ -112,25 +92,19 @@ const DNABackground = () => {
         ctx.arc(p.sx, p.sy, r * 3, 0, Math.PI * 2);
         ctx.fillStyle = grad;
         ctx.fill();
-
-        // Core dot
         ctx.beginPath();
         ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(200,200,200,${alpha})`;
         ctx.fill();
       });
-
       animId = requestAnimationFrame(draw);
     };
-
     draw();
-
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
     };
   }, []);
-
   return (
     <canvas
       ref={canvasRef}
@@ -147,10 +121,8 @@ export const Hero = () => {
       data-testid="hero-section"
       className="relative min-h-[100svh] overflow-hidden"
     >
-      {/* DNA Sphere Background */}
       <DNABackground />
 
-      {/* Dark overlay so text is readable */}
       <div
         className="absolute inset-0 z-[1]"
         style={{
@@ -159,7 +131,6 @@ export const Hero = () => {
         }}
       />
 
-      {/* Foreground content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-12 pt-28 md:pt-32 pb-16 md:pb-20 min-h-[100svh] flex flex-col">
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
@@ -167,7 +138,6 @@ export const Hero = () => {
           transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
           className="max-w-[640px] mt-4 md:mt-8"
         >
-          {/* Badge */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -179,7 +149,6 @@ export const Hero = () => {
             Open to Work · 2026
           </motion.div>
 
-          {/* Headline */}
           <h1
             data-testid="hero-name"
             className="font-sans font-extrabold tracking-[-0.03em] leading-[0.92] text-white text-[3rem] sm:text-[3.75rem] md:text-[4.75rem] lg:text-[6rem]"
@@ -217,49 +186,3 @@ export const Hero = () => {
             transition={{ duration: 1, delay: 1.15, ease: easeOut }}
             data-testid="hero-description"
             className="text-[14px] md:text-[15px] leading-[1.7] text-white/45 max-w-[460px]"
-          >
-            Focused on building a strong foundation in cloud technologies,
-            automation, and system administration. Currently developing
-            hands-on skills through projects and continuous learning, with the
-            goal of becoming a Cloud &amp; Storage Engineer.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.3, ease: easeOut }}
-            className="flex items-center gap-5 pt-2"
-          >
-            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              <a
-                key={k}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid={`hero-social-${k}`}
-                className="text-white/55 hover:text-[#e8ff47] transition-colors"
-              >
-                <Icon size={20} strokeWidth={1.5} />
-              </a>
-            ))}
-            <a
-              href={PROFILE.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="cta-resume"
-              className="ml-3 text-[11px] tracking-[0.22em] uppercase text-white/65 hover:text-[#e8ff47] link-underline"
-            >
-              Résumé →
-            </a>
-            
-              href={`mailto:${PROFILE.email}`}
-              className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
-            >
-              Say hi ↗
-            </a>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-};
