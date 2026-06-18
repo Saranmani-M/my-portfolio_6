@@ -186,3 +186,49 @@ export const Hero = () => {
             transition={{ duration: 1, delay: 1.15, ease: easeOut }}
             data-testid="hero-description"
             className="text-[14px] md:text-[15px] leading-[1.7] text-white/45 max-w-[460px]"
+          >
+            Focused on building a strong foundation in cloud technologies,
+            automation, and system administration. Currently developing
+            hands-on skills through projects and continuous learning, with the
+            goal of becoming a Cloud &amp; Storage Engineer.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.3, ease: easeOut }}
+            className="flex items-center gap-5 pt-2"
+          >
+            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
+              
+                key={k}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid={`hero-social-${k}`}
+                className="text-white/55 hover:text-[#e8ff47] transition-colors"
+              >
+                <Icon size={20} strokeWidth={1.5} />
+              </a>
+            ))}
+            
+              href={PROFILE.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="cta-resume"
+              className="ml-3 text-[11px] tracking-[0.22em] uppercase text-white/65 hover:text-[#e8ff47] link-underline"
+            >
+              Résumé →
+            </a>
+            
+              href={`mailto:${PROFILE.email}`}
+              className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
+            >
+              Say hi ↗
+            </a>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
