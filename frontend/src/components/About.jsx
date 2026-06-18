@@ -24,30 +24,15 @@ export const About = () => {
       data-testid="about-section"
       className="relative py-14 md:py-20 px-6 md:px-12"
     >
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-14">
-        <div className="col-span-12 md:col-span-4">
-          <Reveal>
-            <div className="md:sticky md:top-28">
-              <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5">
-                (About)
-              </div>
-              <motion.h2
-                style={{ y }}
-                className="font-serif text-4xl md:text-5xl lg:text-6xl font-light leading-[1] text-white"
-              >
-                A graduate of{" "}
-                <em className="italic text-[#e8ff47]/85">infrastructure</em>,
-                calm and secure.
-              </motion.h2>
-              <p className="mt-7 text-sm tracking-wide text-white/50 max-w-xs">
-                {PROFILE.location} · Bachelor of Information Technology · Graduated 2026
-                
-              </p>
-            </div>
-          </Reveal>
-        </div>
+      <div className="max-w-3xl mx-auto flex flex-col gap-8 md:gap-14"
+        <Reveal>
+         <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5 text-center">
+           (About)
+         </div>
+         </Reveal>
 
-        <div className="col-span-12 md:col-span-8 md:col-start-6 lg:col-start-6 space-y-8 md:space-y-10">
+        <div className="w-full space-y-8 md:space-y-10">
+          
           <Reveal delay={0.1}>
             <h3 className="font-serif text-3xl md:text-5xl leading-[1.1] text-white text-balance">
               Building <span className="italic text-white/80">reliable</span>{" "}
