@@ -143,7 +143,13 @@ export const Hero = () => {
               className="ml-3 text-[11px] tracking-[0.22em] uppercase text-white/65 hover:text-[#e8ff47] link-underline"
             >
               Résumé →
-            </a>
+             </a>
+             <a
+            href={`mailto:${PROFILE.email}`}
+            className="ml-3 inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1.5 rounded-full hover:bg-[#d4eb30] transition-colors"
+          >
+            Say hi ↗
+          </a>
           </motion.div>
         </div>
       </div>
