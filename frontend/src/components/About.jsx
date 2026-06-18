@@ -1,5 +1,5 @@
-import React from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { PROFILE } from "../lib/data";
 
 const Reveal = ({ children, delay = 0, className = "" }) => (
@@ -13,6 +13,218 @@ const Reveal = ({ children, delay = 0, className = "" }) => (
     {children}
   </motion.div>
 );
+
+const IDCard = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <div ref={ref} className="hidden md:flex flex-col items-center flex-shrink-0">
+
+      {/* Lanyard rope SVG */}
+      <motion.div
+        initial={{ opacity: 0, y: -40 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <svg width="100" height="130" viewBox="0 0 100 130" fill="none">
+          {/* Left rope */}
+          <path
+            d="M50 0 C50 0, 15 25, 12 65 C11 85, 35 100, 50 112"
+            stroke="url(#ropeL)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Right rope */}
+          <path
+            d="M50 0 C50 0, 85 25, 88 65 C89 85, 65 100, 50 112"
+            stroke="url(#ropeR)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Text on lanyard */}
+          <text
+            x="58" y="45"
+            fontSize="6"
+            fill="white"
+            fillOpacity="0.25"
+            transform="rotate(75, 58, 45)"
+            fontFamily="monospace"
+            letterSpacing="1"
+          >
+            SARANMANI M
+          </text>
+
+          {/* Clasp outer ring */}
+          <circle cx="50" cy="112" r="10" stroke="#555" strokeWidth="2.5" fill="#1a1a1a" />
+          {/* Clasp inner ring */}
+          <circle cx="50" cy="112" r="5" stroke="#777" strokeWidth="1.5" fill="#111" />
+          {/* Clasp hook body */}
+          <rect x="43" y="118" width="14" height="10" rx="3" fill="url(#hookGrad)" />
+          {/* Clasp hook opening */}
+          <rect x="46" y="121" width="8" height="5" rx="1.5" fill="#050505" />
+          {/* Clasp highlight */}
+          <rect x="43" y="118" width="14" height="3" rx="3" fill="white" fillOpacity="0.12" />
+
+          <defs>
+            <linearGradient id="ropeL" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#555555" />
+              <stop offset="100%" stopColor="#333333" />
+            </linearGradient>
+            <linearGradient id="ropeR" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#444444" />
+              <stop offset="100%" stopColor="#222222" />
+            </linearGradient>
+            <linearGradient id="hookGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#888888" />
+              <stop offset="100%" stopColor="#333333" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </motion.div>
+
+      {/* Card drop animation */}
+      <motion.div
+        initial={{ opacity: 0, y: -120 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        whileHover={{ rotate: 3, y: 8 }}
+        style={{ marginTop: -14 }}
+      >
+        {/* Card */}
+        <div
+          className="relative w-[260px] rounded-3xl overflow-hidden cursor-pointer"
+          style={{ height: 360 }}
+        >
+          {/* Card background */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(145deg, #0e0e0e 0%, #161616 50%, #0a0a0a 100%)",
+            }}
+          />
+
+          {/* Glowing monogram pattern — like the reference image */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            {/* Big glowing SM letters tiled */}
+            {[
+              { top: "5%", left: "20%", size: "5rem", opacity: 0.08 },
+              { top: "5%", left: "55%", size: "5rem", opacity: 0.06 },
+              { top: "25%", left: "5%", size: "5rem", opacity: 0.05 },
+              { top: "25%", left: "38%", size: "6rem", opacity: 0.18, glow: true },
+              { top: "25%", left: "68%", size: "5rem", opacity: 0.07 },
+              { top: "50%", left: "20%", size: "5rem", opacity: 0.07 },
+              { top: "50%", left: "55%", size: "5rem", opacity: 0.05 },
+              { top: "70%", left: "5%", size: "5rem", opacity: 0.04 },
+              { top: "70%", left: "38%", size: "5rem", opacity: 0.06 },
+              { top: "70%", left: "68%", size: "5rem", opacity: 0.04 },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="absolute font-serif select-none"
+                style={{
+                  top: item.top,
+                  left: item.left,
+                  fontSize: item.size,
+                  color: "white",
+                  opacity: item.opacity,
+                  fontWeight: 300,
+                  lineHeight: 1,
+                  filter: item.glow ? "blur(0px) drop-shadow(0 0 20px white)" : "none",
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                SM
+              </div>
+            ))}
+          </div>
+
+          {/* Radial glow center */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(ellipse at 60% 35%, rgba(255,255,255,0.08) 0%, transparent 65%)",
+            }}
+          />
+
+          {/* Top gradient fade for text readability */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[55%]"
+            style={{
+              background: "linear-gradient(to top, rgba(5,5,5,0.98) 0%, rgba(5,5,5,0.7) 60%, transparent 100%)",
+            }}
+          />
+
+          {/* Year — top right */}
+          <div className="absolute top-5 right-5 z-10">
+            <span className="text-[10px] tracking-[0.2em] text-white/25 uppercase font-light">
+              2026
+            </span>
+          </div>
+
+          {/* Bottom content */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
+            {/* Name */}
+            <div
+              className="font-sans font-bold text-white leading-[1.05] mb-2"
+              style={{ fontSize: "2rem" }}
+            >
+              Saranmani
+              <br />M
+            </div>
+
+            {/* Role */}
+            <div className="text-[9px] tracking-[0.3em] uppercase text-white/50 mb-3">
+              Cloud Security Engineer
+            </div>
+
+            {/* Divider */}
+            <div className="w-full h-px bg-white/10 mb-3" />
+
+            {/* Company */}
+            <div className="text-[9px] tracking-[0.25em] uppercase text-white/30">
+              Vel Tech
+            </div>
+          </div>
+
+          {/* Border loading animation */}
+          <svg
+            className="absolute inset-0 w-full h-full"
+            style={{ borderRadius: "1.5rem" }}
+          >
+            <rect
+              x="1" y="1"
+              width="258" height="358"
+              rx="23" ry="23"
+              fill="none"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeOpacity="0.15"
+            />
+            {isInView && (
+              <motion.rect
+                x="1" y="1"
+                width="258" height="358"
+                rx="23" ry="23"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeDasharray="1234"
+                strokeDashoffset="1234"
+                animate={{ strokeDashoffset: 0 }}
+                transition={{ duration: 1.8, ease: "easeInOut", delay: 0.8 }}
+                style={{ filter: "drop-shadow(0 0 4px white)" }}
+              />
+            )}
+          </svg>
+
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 export const About = () => {
   const { scrollYProgress } = useScroll();
@@ -84,162 +296,8 @@ export const About = () => {
             </Reveal>
           </div>
 
-          {/* Right — ID Card with Lanyard */}
-          <Reveal delay={0.2}>
-            <div className="hidden md:flex flex-col items-center flex-shrink-0">
-
-              {/* Lanyard SVG */}
-              <svg width="80" height="120" viewBox="0 0 80 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Lanyard rope - left side */}
-                <path
-                  d="M40 0 C40 0, 10 20, 10 60 C10 80, 30 90, 40 100"
-                  stroke="url(#lanyardGrad)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                {/* Lanyard rope - right side */}
-                <path
-                  d="M40 0 C40 0, 70 20, 70 60 C70 80, 50 90, 40 100"
-                  stroke="url(#lanyardGrad)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                {/* Clasp body */}
-                <rect x="28" y="95" width="24" height="18" rx="4" fill="url(#claspGrad)" />
-                {/* Clasp highlight */}
-                <rect x="28" y="95" width="24" height="6" rx="4" fill="white" fillOpacity="0.15" />
-                {/* Clasp hole */}
-                <rect x="35" y="100" width="10" height="8" rx="2" fill="#050505" />
-                {/* Clasp screw left */}
-                <circle cx="32" cy="104" r="2" fill="#333" />
-                {/* Clasp screw right */}
-                <circle cx="48" cy="104" r="2" fill="#333" />
-
-                <defs>
-                  <linearGradient id="lanyardGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#444444" />
-                    <stop offset="50%" stopColor="#666666" />
-                    <stop offset="100%" stopColor="#e8ff47" stopOpacity="0.6" />
-                  </linearGradient>
-                  <linearGradient id="claspGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#888888" />
-                    <stop offset="100%" stopColor="#333333" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Card */}
-              <motion.div
-                whileHover={{ rotate: 4, y: 10, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 100, damping: 8 }}
-                className="w-[240px] rounded-3xl border border-white/10 relative overflow-hidden flex flex-col justify-between p-6 shadow-2xl cursor-pointer mt-[-12px]"
-                style={{
-                  background: "linear-gradient(145deg, #161616 0%, #1e1e1e 50%, #111111 100%)",
-                  height: 340,
-                  boxShadow: "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
-                }}
-              >
-                {/* Glossy top shine */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-[45%] rounded-t-3xl opacity-5"
-                  style={{
-                    background: "linear-gradient(180deg, white 0%, transparent 100%)",
-                  }}
-                />
-
-                {/* Grid pattern */}
-                <div
-                  className="absolute inset-0 opacity-[0.06]"
-                  style={{
-                    backgroundImage: `repeating-linear-gradient(0deg, #e8ff47 0px, #e8ff47 1px, transparent 1px, transparent 35px),
-                                      repeating-linear-gradient(90deg, #e8ff47 0px, #e8ff47 1px, transparent 1px, transparent 35px)`,
-                  }}
-                />
-
-                {/* Glow */}
-                <div
-                  className="absolute -top-16 -right-16 w-48 h-48 rounded-full"
-                  style={{ background: "#e8ff47", opacity: 0.08, filter: "blur(50px)" }}
-                />
-
-                {/* Top row — logo dot + year */}
-                <div className="relative z-10 flex justify-between items-start">
-                  <div
-                    className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center"
-                    style={{ background: "#e8ff4718" }}
-                  >
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ background: "#e8ff47" }}
-                    />
-                  </div>
-                  <span className="text-[10px] tracking-[0.2em] text-white/20 uppercase font-light">
-                    2026
-                  </span>
-                </div>
-
-                {/* Middle — big monogram watermark */}
-                <div className="relative z-10 flex-1 flex items-center justify-center">
-                  <div
-                    className="font-serif select-none"
-                    style={{
-                      fontSize: "7rem",
-                      fontWeight: 300,
-                      color: "#e8ff47",
-                      opacity: 0.07,
-                      lineHeight: 1,
-                      letterSpacing: "-0.05em",
-                    }}
-                  >
-                    SM
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div
-                  className="relative z-10 h-px w-full mb-4 opacity-10"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, #e8ff47, transparent)",
-                  }}
-                />
-
-                {/* Bottom — name & role */}
-                <div className="relative z-10">
-                  <div className="text-[8px] tracking-[0.35em] uppercase mb-2"
-                    style={{ color: "#e8ff4799" }}>
-                    Cloud Security Engineer
-                  </div>
-                  <div
-                    className="font-sans font-bold text-white leading-tight"
-                    style={{ fontSize: "1.6rem" }}
-                  >
-                    Saranmani M
-                  </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div
-                      className="w-1 h-1 rounded-full"
-                      style={{ background: "#e8ff47" }}
-                    />
-                    <span className="text-[9px] tracking-[0.2em] uppercase text-white/30">
-                      Vel Tech · Chennai, India
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bottom shine */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-px opacity-30"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, transparent, #e8ff47, transparent)",
-                  }}
-                />
-              </motion.div>
-
-            </div>
-          </Reveal>
+          {/* Right — ID Card */}
+          <IDCard />
 
         </div>
       </div>
