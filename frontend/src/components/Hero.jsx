@@ -231,7 +231,7 @@ export const Hero = () => {
             className="flex items-center gap-5 pt-2"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              
+              <a
                 key={k}
                 href={url}
                 target="_blank"
@@ -242,7 +242,7 @@ export const Hero = () => {
                 <Icon size={20} strokeWidth={1.5} />
               </a>
             ))}
-            
+            <a
               href={PROFILE.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
