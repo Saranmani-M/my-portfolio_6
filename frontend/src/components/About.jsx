@@ -41,66 +41,59 @@ const IDCard = () => {
 
   return (
     <div ref={ref} className="hidden md:flex flex-col items-center flex-shrink-0">
-      {/* Lanyard rope SVG */}
+      {/* Ribbon strap */}
       <motion.div
         initial={{ opacity: 0, y: -40 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <svg width="100" height="130" viewBox="0 0 100 130" fill="none">
-          {/* Left rope */}
+        <svg width="64" height="150" viewBox="0 0 64 150" fill="none">
+          {/* Flat ribbon body */}
+          <rect x="22" y="0" width="20" height="118" rx="2" fill="url(#ribbonGrad)" />
+          {/* Ribbon center seam */}
+          <line x1="32" y1="0" x2="32" y2="118" stroke="black" strokeOpacity="0.35" strokeWidth="1" />
+          {/* Small logo glyph near the top */}
           <path
-            d="M50 0 C50 0, 15 25, 12 65 C11 85, 35 100, 50 112"
-            stroke="url(#ropeL)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            fill="none"
-          />
-          {/* Right rope */}
-          <path
-            d="M50 0 C50 0, 85 25, 88 65 C89 85, 65 100, 50 112"
-            stroke="url(#ropeR)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            fill="none"
-          />
-          {/* Text on lanyard */}
-          <text
-            x="58"
-            y="45"
-            fontSize="6"
+            d="M28 14 L32 8 L36 14 L33 14 L33 20 L31 20 L31 14 Z"
             fill="white"
-            fillOpacity="0.25"
-            transform="rotate(75, 58, 45)"
-            fontFamily="monospace"
-            letterSpacing="1"
+            fillOpacity="0.85"
+          />
+          {/* Name printed on the ribbon, reading top-to-bottom */}
+          <text
+            x="38"
+            y="0"
+            fontSize="7"
+            fontWeight="700"
+            fill="white"
+            fillOpacity="0.85"
+            fontFamily="sans-serif"
+            letterSpacing="0.5"
+            transform="rotate(90, 38, 0)"
           >
             SARANMANI M
           </text>
 
-          {/* Clasp outer ring */}
-          <circle cx="50" cy="112" r="10" stroke="#555" strokeWidth="2.5" fill="#1a1a1a" />
-          {/* Clasp inner ring */}
-          <circle cx="50" cy="112" r="5" stroke="#777" strokeWidth="1.5" fill="#111" />
-          {/* Clasp hook body */}
-          <rect x="43" y="118" width="14" height="10" rx="3" fill="url(#hookGrad)" />
-          {/* Clasp hook opening */}
-          <rect x="46" y="121" width="8" height="5" rx="1.5" fill="#050505" />
-          {/* Clasp highlight */}
-          <rect x="43" y="118" width="14" height="3" rx="3" fill="white" fillOpacity="0.12" />
+          {/* Plunger clasp body */}
+          <rect x="20" y="116" width="24" height="22" rx="11" fill="url(#claspGrad)" />
+          <circle cx="32" cy="123" r="6" fill="#0a0a0a" stroke="#444" strokeWidth="1" />
+          {/* Short cord loop from clasp to card */}
+          <path
+            d="M32 138 C 32 142, 28 144, 28 148 C 28 152, 36 152, 36 148 C 36 144, 32 142, 32 138"
+            stroke="#222"
+            strokeWidth="3"
+            fill="none"
+            strokeLinecap="round"
+          />
 
           <defs>
-            <linearGradient id="ropeL" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#555555" />
-              <stop offset="100%" stopColor="#333333" />
+            <linearGradient id="ribbonGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#0a0a0a" />
+              <stop offset="50%" stopColor="#1c1c1c" />
+              <stop offset="100%" stopColor="#0a0a0a" />
             </linearGradient>
-            <linearGradient id="ropeR" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#444444" />
-              <stop offset="100%" stopColor="#222222" />
-            </linearGradient>
-            <linearGradient id="hookGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#888888" />
-              <stop offset="100%" stopColor="#333333" />
+            <linearGradient id="claspGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3a3a3a" />
+              <stop offset="100%" stopColor="#0e0e0e" />
             </linearGradient>
           </defs>
         </svg>
@@ -119,8 +112,8 @@ const IDCard = () => {
           ref={cardRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative w-[260px] rounded-3xl overflow-hidden cursor-pointer"
-          style={{ height: 360, perspective: 1000 }}
+          className="relative w-[300px] rounded-2xl overflow-hidden cursor-pointer"
+          style={{ height: 420, perspective: 1000 }}
         >
           <motion.div
             style={{ rotateX: tiltX, rotateY: tiltY, transformStyle: "preserve-3d" }}
@@ -134,46 +127,42 @@ const IDCard = () => {
               }}
             />
 
-            {/* Glowing monogram pattern — like the reference image */}
-            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-              {/* Big glowing SM letters tiled */}
-              {[
-                { top: "5%", left: "20%", size: "5rem", opacity: 0.08 },
-                { top: "5%", left: "55%", size: "5rem", opacity: 0.06 },
-                { top: "25%", left: "5%", size: "5rem", opacity: 0.05 },
-                { top: "25%", left: "38%", size: "6rem", opacity: 0.18, glow: true },
-                { top: "25%", left: "68%", size: "5rem", opacity: 0.07 },
-                { top: "50%", left: "20%", size: "5rem", opacity: 0.07 },
-                { top: "50%", left: "55%", size: "5rem", opacity: 0.05 },
-                { top: "70%", left: "5%", size: "5rem", opacity: 0.04 },
-                { top: "70%", left: "38%", size: "5rem", opacity: 0.06 },
-                { top: "70%", left: "68%", size: "5rem", opacity: 0.04 },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="absolute font-serif select-none"
-                  style={{
-                    top: item.top,
-                    left: item.left,
-                    fontSize: item.size,
-                    color: "white",
-                    opacity: item.opacity,
-                    fontWeight: 300,
-                    lineHeight: 1,
-                    filter: item.glow ? "blur(0px) drop-shadow(0 0 20px white)" : "none",
-                    transform: "translate(-50%, -50%)",
-                  }}
-                >
-                  SM
-                </div>
-              ))}
+            {/* Continuous diagonal zigzag pattern — like the reference image */}
+            <div className="absolute inset-0 overflow-hidden">
+              <svg width="100%" height="100%" viewBox="0 0 300 420" preserveAspectRatio="none">
+                {Array.from({ length: 9 }).map((_, row) =>
+                  Array.from({ length: 4 }).map((_, col) => {
+                    const x = col * 90 - 60;
+                    const y = row * 60 - 40;
+                    return (
+                      <path
+                        key={`${row}-${col}`}
+                        d={`M ${x} ${y} L ${x + 22} ${y + 30} L ${x + 44} ${y} L ${x + 22} ${y - 30} Z`}
+                        fill="none"
+                        stroke="white"
+                        strokeOpacity="0.14"
+                        strokeWidth="2.2"
+                      />
+                    );
+                  })
+                )}
+              </svg>
             </div>
+
+            {/* Diagonal light streak / glare */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.16) 47%, rgba(255,255,255,0.04) 56%, transparent 70%)",
+              }}
+            />
 
             {/* Radial glow center */}
             <div
               className="absolute inset-0"
               style={{
-                background: "radial-gradient(ellipse at 60% 35%, rgba(255,255,255,0.08) 0%, transparent 65%)",
+                background: "radial-gradient(ellipse at 35% 40%, rgba(255,255,255,0.1) 0%, transparent 60%)",
               }}
             />
 
@@ -197,7 +186,7 @@ const IDCard = () => {
               {/* Name */}
               <div
                 className="font-sans font-bold text-white leading-[1.05] mb-2"
-                style={{ fontSize: "2rem" }}
+                style={{ fontSize: "2.25rem" }}
               >
                 Saranmani
                 <br />M
@@ -220,15 +209,15 @@ const IDCard = () => {
             {/* Border loading animation */}
             <svg
               className="absolute inset-0 w-full h-full"
-              style={{ borderRadius: "1.5rem" }}
+              style={{ borderRadius: "1rem" }}
             >
               <rect
                 x="1"
                 y="1"
-                width="258"
-                height="358"
-                rx="23"
-                ry="23"
+                width="298"
+                height="418"
+                rx="15"
+                ry="15"
                 fill="none"
                 stroke="white"
                 strokeWidth="1.5"
@@ -238,15 +227,15 @@ const IDCard = () => {
                 <motion.rect
                   x="1"
                   y="1"
-                  width="258"
-                  height="358"
-                  rx="23"
-                  ry="23"
+                  width="298"
+                  height="418"
+                  rx="15"
+                  ry="15"
                   fill="none"
                   stroke="white"
                   strokeWidth="1.5"
-                  strokeDasharray="1234"
-                  strokeDashoffset="1234"
+                  strokeDasharray="1440"
+                  strokeDashoffset="1440"
                   animate={{ strokeDashoffset: 0 }}
                   transition={{ duration: 1.8, ease: "easeInOut", delay: 0.8 }}
                   style={{ filter: "drop-shadow(0 0 4px white)" }}
