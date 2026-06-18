@@ -1,6 +1,19 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
+import {
+  SiPython,
+  SiAmazonaws,
+  SiLinux,
+  SiNetapp,
+  SiIam,
+  SiAmazons3,
+  SiAmazonec2,
+  SiGnubash,
+  SiGit,
+  SiDocker,
+  SiPycharm,
+} from "react-icons/si";
 import { PROFILE, SOCIALS } from "../lib/data";
 
 const easeOut = [0.16, 1, 0.3, 1];
@@ -12,21 +25,35 @@ const SOCIAL_ICONS = [
   { Icon: Twitter, url: SOCIALS.twitter, k: "x" },
 ];
 
-// Skills shown in the running marquee strip. Edit this list to change what scrolls.
+// Skills shown in the running marquee strip, as logos instead of text.
+// Edit this list to change what scrolls. Some entries (SAN/NAS, RAID, IAM,
+// S3, EC2) don't have a dedicated brand mark in react-icons/si, so they
+// fall back to the closest related/representative icon — swap in your own
+// SVGs in /lib or /assets if you'd rather use exact logos for those.
 const MARQUEE_SKILLS = [
-  "Python",
-  "AWS",
-  "Linux",
-  "SAN / NAS",
-  "RAID",
-  "IAM",
-  "S3",
-  "EC2",
-  "Bash",
-  "Git",
-  "Docker",
-  "PyCharm",
+  { label: "Python", Icon: SiPython },
+  { label: "AWS", Icon: SiAmazonaws },
+  { label: "Linux", Icon: SiLinux },
+  { label: "SAN / NAS", Icon: SiNetapp },
+  { label: "IAM", Icon: SiIam },
+  { label: "S3", Icon: SiAmazons3 },
+  { label: "EC2", Icon: SiAmazonec2 },
+  { label: "Bash", Icon: SiGnubash },
+  { label: "Git", Icon: SiGit },
+  { label: "Docker", Icon: SiDocker },
+  { label: "PyCharm", Icon: SiPycharm },
 ];
+
+// Fixed virtual canvas resolution. All bubble geometry is computed in this
+// constant coordinate space, then the canvas element itself is stretched
+// with CSS to fill its container. This is the key fix for the "shifts on
+// zoom/resize" bug: browser zoom changes window.innerWidth/innerHeight,
+// and the old version recalculated bubble positions/sizes from those live
+// numbers, so the whole cluster visibly reflowed. Now the bubble layout is
+// computed exactly once against fixed numbers and never touches viewport
+// size again — only the CSS box stretches, like scaling a photograph.
+const VIRTUAL_W = 1600;
+const VIRTUAL_H = 1000;
 
 /**
  * BubbleBackground
@@ -34,10 +61,11 @@ const MARQUEE_SKILLS = [
  * cluster-of-spheres render reminiscent of a clay/bubble material,
  * lit from the top-left, slowly drifting.
  *
- * NOTE: bubble density/size is computed relative to viewport size
- * (not browser zoom %), so the cluster looks identical — always
- * overlapping/joined, always covering the full viewport height —
- * regardless of how zoomed in or out the page is.
+ * NOTE: bubble geometry is computed once against a fixed virtual canvas
+ * size (VIRTUAL_W x VIRTUAL_H), not the live viewport. The canvas element
+ * is then scaled with CSS to fill its container. Result: the cluster's
+ * position/scale/density never changes with browser zoom or window
+ * resize — only animation (drift/breathing) moves it, exactly as before.
  */
 const BubbleBackground = () => {
   const canvasRef = useRef(null);
@@ -48,26 +76,15 @@ const BubbleBackground = () => {
     const ctx = canvas.getContext("2d");
     let animId;
 
-    // Use devicePixelRatio so the canvas is always crisp and the bubble
-    // math is driven by CSS pixel size (window.innerWidth/innerHeight),
-    // which is what actually changes with browser zoom. This keeps the
-    // *relative* density of the cluster constant across zoom levels.
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-
-    const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    resize();
-    window.addEventListener("resize", resize);
+    // Render buffer is fixed-resolution and never resized after this.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = VIRTUAL_W;
+    const height = VIRTUAL_H;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // CSS stretches this fixed buffer to fill the section. No JS resize
+    // listener at all — there is nothing to recompute on zoom/resize.
 
     // Build bubbles wrapped around a twisted, elongated ribbon (torus-knot-like)
     // path so the cluster reads as an organic, overlapping ridge rather than a
@@ -115,10 +132,8 @@ const BubbleBackground = () => {
       const cx = width * 0.5;
       const cy = height * 0.5;
 
-      // Tie baseRadius to viewport diagonal-ish so the cluster always spans
-      // the full height/width of the screen in CSS-pixel terms, independent
-      // of browser zoom (zoom changes innerWidth/innerHeight together, so
-      // this ratio-based sizing stays visually consistent).
+      // Tie baseRadius to the fixed virtual canvas size (never the live
+      // viewport), so cluster scale is constant regardless of zoom/resize.
       const baseRadius = Math.max(width, height) * 0.5;
 
       const cosA = Math.cos(t);
@@ -195,7 +210,6 @@ const BubbleBackground = () => {
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
     };
   }, []);
 
@@ -203,15 +217,18 @@ const BubbleBackground = () => {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full z-0"
-      style={{ opacity: 0.9 }}
+      style={{ opacity: 0.9, width: "100%", height: "100%" }}
     />
   );
 };
 
 /**
  * SkillsMarquee
- * Continuous right-to-left scrolling strip of skill keywords,
+ * Continuous right-to-left scrolling strip of skill logos,
  * separated by dots, framed by hairline rules. Pauses on hover.
+ * Contained to the same max-width as the rest of the hero content
+ * (instead of bleeding edge-to-edge) so it reads as a centered row,
+ * matching the rest of the page's content column.
  */
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
@@ -219,21 +236,27 @@ const SkillsMarquee = () => {
   return (
     <div
       data-testid="skills-marquee"
-      className="relative z-10 w-full border-t border-b border-white/10 py-5 overflow-hidden"
+      className="relative z-10 w-full border-t border-b border-white/10 py-5"
     >
-      <div className="marquee-track flex items-center whitespace-nowrap will-change-transform">
-        {[0, 1].map((copy) => (
-          <div key={copy} className="flex items-center shrink-0">
-            {items.map((skill, i) => (
-              <React.Fragment key={`${copy}-${skill}-${i}`}>
-                <span className="font-serif italic text-white/80 text-[20px] md:text-[26px] px-6">
-                  {skill}
-                </span>
-                <span className="text-white/30 text-[10px]">•</span>
-              </React.Fragment>
-            ))}
-          </div>
-        ))}
+      <div className="max-w-6xl mx-auto px-6 md:px-10 overflow-hidden">
+        <div className="marquee-track flex items-center whitespace-nowrap will-change-transform">
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex items-center shrink-0">
+              {items.map(({ label, Icon }, i) => (
+                <React.Fragment key={`${copy}-${label}-${i}`}>
+                  <span
+                    className="inline-flex items-center gap-2 px-6 text-white/80"
+                    title={label}
+                  >
+                    <Icon size={20} aria-hidden="true" />
+                    <span className="sr-only">{label}</span>
+                  </span>
+                  <span className="text-white/30 text-[10px]">•</span>
+                </React.Fragment>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       <style>{`
