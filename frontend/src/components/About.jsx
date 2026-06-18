@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
 import { PROFILE } from "../lib/data";
 
 const Reveal = ({ children, delay = 0, className = "" }) => (
@@ -18,9 +18,29 @@ const IDCard = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  // --- 3D mouse-tilt, added on top of the existing card ---
+  const cardRef = useRef(null);
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const springX = useSpring(mx, { stiffness: 150, damping: 18 });
+  const springY = useSpring(my, { stiffness: 150, damping: 18 });
+  const tiltX = useTransform(springY, [0, 1], [8, -8]);
+  const tiltY = useTransform(springX, [0, 1], [-8, 8]);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mx.set((e.clientX - rect.left) / rect.width);
+    my.set((e.clientY - rect.top) / rect.height);
+  };
+  const handleMouseLeave = () => {
+    mx.set(0.5);
+    my.set(0.5);
+  };
+  // --- end tilt setup ---
+
   return (
     <div ref={ref} className="hidden md:flex flex-col items-center flex-shrink-0">
-
       {/* Lanyard rope SVG */}
       <motion.div
         initial={{ opacity: 0, y: -40 }}
@@ -46,7 +66,8 @@ const IDCard = () => {
           />
           {/* Text on lanyard */}
           <text
-            x="58" y="45"
+            x="58"
+            y="45"
             fontSize="6"
             fill="white"
             fillOpacity="0.25"
@@ -95,131 +116,144 @@ const IDCard = () => {
       >
         {/* Card */}
         <div
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
           className="relative w-[260px] rounded-3xl overflow-hidden cursor-pointer"
-          style={{ height: 360 }}
+          style={{ height: 360, perspective: 1000 }}
         >
-          {/* Card background */}
-          <div
+          <motion.div
+            style={{ rotateX: tiltX, rotateY: tiltY, transformStyle: "preserve-3d" }}
             className="absolute inset-0"
-            style={{
-              background: "linear-gradient(145deg, #0e0e0e 0%, #161616 50%, #0a0a0a 100%)",
-            }}
-          />
-
-          {/* Glowing monogram pattern — like the reference image */}
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            {/* Big glowing SM letters tiled */}
-            {[
-              { top: "5%", left: "20%", size: "5rem", opacity: 0.08 },
-              { top: "5%", left: "55%", size: "5rem", opacity: 0.06 },
-              { top: "25%", left: "5%", size: "5rem", opacity: 0.05 },
-              { top: "25%", left: "38%", size: "6rem", opacity: 0.18, glow: true },
-              { top: "25%", left: "68%", size: "5rem", opacity: 0.07 },
-              { top: "50%", left: "20%", size: "5rem", opacity: 0.07 },
-              { top: "50%", left: "55%", size: "5rem", opacity: 0.05 },
-              { top: "70%", left: "5%", size: "5rem", opacity: 0.04 },
-              { top: "70%", left: "38%", size: "5rem", opacity: 0.06 },
-              { top: "70%", left: "68%", size: "5rem", opacity: 0.04 },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="absolute font-serif select-none"
-                style={{
-                  top: item.top,
-                  left: item.left,
-                  fontSize: item.size,
-                  color: "white",
-                  opacity: item.opacity,
-                  fontWeight: 300,
-                  lineHeight: 1,
-                  filter: item.glow ? "blur(0px) drop-shadow(0 0 20px white)" : "none",
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                SM
-              </div>
-            ))}
-          </div>
-
-          {/* Radial glow center */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse at 60% 35%, rgba(255,255,255,0.08) 0%, transparent 65%)",
-            }}
-          />
-
-          {/* Top gradient fade for text readability */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-[55%]"
-            style={{
-              background: "linear-gradient(to top, rgba(5,5,5,0.98) 0%, rgba(5,5,5,0.7) 60%, transparent 100%)",
-            }}
-          />
-
-          {/* Year — top right */}
-          <div className="absolute top-5 right-5 z-10">
-            <span className="text-[10px] tracking-[0.2em] text-white/25 uppercase font-light">
-              2026
-            </span>
-          </div>
-
-          {/* Bottom content */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
-            {/* Name */}
-            <div
-              className="font-sans font-bold text-white leading-[1.05] mb-2"
-              style={{ fontSize: "2rem" }}
-            >
-              Saranmani
-              <br />M
-            </div>
-
-            {/* Role */}
-            <div className="text-[9px] tracking-[0.3em] uppercase text-white/50 mb-3">
-              Cloud Security Engineer
-            </div>
-
-            {/* Divider */}
-            <div className="w-full h-px bg-white/10 mb-3" />
-
-            {/* Company */}
-            <div className="text-[9px] tracking-[0.25em] uppercase text-white/30">
-              Vel Tech
-            </div>
-          </div>
-
-          {/* Border loading animation */}
-          <svg
-            className="absolute inset-0 w-full h-full"
-            style={{ borderRadius: "1.5rem" }}
           >
-            <rect
-              x="1" y="1"
-              width="258" height="358"
-              rx="23" ry="23"
-              fill="none"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeOpacity="0.15"
+            {/* Card background */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(145deg, #0e0e0e 0%, #161616 50%, #0a0a0a 100%)",
+              }}
             />
-            {isInView && (
-              <motion.rect
-                x="1" y="1"
-                width="258" height="358"
-                rx="23" ry="23"
+
+            {/* Glowing monogram pattern — like the reference image */}
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+              {/* Big glowing SM letters tiled */}
+              {[
+                { top: "5%", left: "20%", size: "5rem", opacity: 0.08 },
+                { top: "5%", left: "55%", size: "5rem", opacity: 0.06 },
+                { top: "25%", left: "5%", size: "5rem", opacity: 0.05 },
+                { top: "25%", left: "38%", size: "6rem", opacity: 0.18, glow: true },
+                { top: "25%", left: "68%", size: "5rem", opacity: 0.07 },
+                { top: "50%", left: "20%", size: "5rem", opacity: 0.07 },
+                { top: "50%", left: "55%", size: "5rem", opacity: 0.05 },
+                { top: "70%", left: "5%", size: "5rem", opacity: 0.04 },
+                { top: "70%", left: "38%", size: "5rem", opacity: 0.06 },
+                { top: "70%", left: "68%", size: "5rem", opacity: 0.04 },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="absolute font-serif select-none"
+                  style={{
+                    top: item.top,
+                    left: item.left,
+                    fontSize: item.size,
+                    color: "white",
+                    opacity: item.opacity,
+                    fontWeight: 300,
+                    lineHeight: 1,
+                    filter: item.glow ? "blur(0px) drop-shadow(0 0 20px white)" : "none",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  SM
+                </div>
+              ))}
+            </div>
+
+            {/* Radial glow center */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "radial-gradient(ellipse at 60% 35%, rgba(255,255,255,0.08) 0%, transparent 65%)",
+              }}
+            />
+
+            {/* Top gradient fade for text readability */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-[55%]"
+              style={{
+                background: "linear-gradient(to top, rgba(5,5,5,0.98) 0%, rgba(5,5,5,0.7) 60%, transparent 100%)",
+              }}
+            />
+
+            {/* Year — top right */}
+            <div className="absolute top-5 right-5 z-10">
+              <span className="text-[10px] tracking-[0.2em] text-white/25 uppercase font-light">
+                2026
+              </span>
+            </div>
+
+            {/* Bottom content */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
+              {/* Name */}
+              <div
+                className="font-sans font-bold text-white leading-[1.05] mb-2"
+                style={{ fontSize: "2rem" }}
+              >
+                Saranmani
+                <br />M
+              </div>
+
+              {/* Role */}
+              <div className="text-[9px] tracking-[0.3em] uppercase text-white/50 mb-3">
+                Cloud Security Engineer
+              </div>
+
+              {/* Divider */}
+              <div className="w-full h-px bg-white/10 mb-3" />
+
+              {/* Company */}
+              <div className="text-[9px] tracking-[0.25em] uppercase text-white/30">
+                Vel Tech
+              </div>
+            </div>
+
+            {/* Border loading animation */}
+            <svg
+              className="absolute inset-0 w-full h-full"
+              style={{ borderRadius: "1.5rem" }}
+            >
+              <rect
+                x="1"
+                y="1"
+                width="258"
+                height="358"
+                rx="23"
+                ry="23"
                 fill="none"
                 stroke="white"
                 strokeWidth="1.5"
-                strokeDasharray="1234"
-                strokeDashoffset="1234"
-                animate={{ strokeDashoffset: 0 }}
-                transition={{ duration: 1.8, ease: "easeInOut", delay: 0.8 }}
-                style={{ filter: "drop-shadow(0 0 4px white)" }}
+                strokeOpacity="0.15"
               />
-            )}
-          </svg>
-
+              {isInView && (
+                <motion.rect
+                  x="1"
+                  y="1"
+                  width="258"
+                  height="358"
+                  rx="23"
+                  ry="23"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeDasharray="1234"
+                  strokeDashoffset="1234"
+                  animate={{ strokeDashoffset: 0 }}
+                  transition={{ duration: 1.8, ease: "easeInOut", delay: 0.8 }}
+                  style={{ filter: "drop-shadow(0 0 4px white)" }}
+                />
+              )}
+            </svg>
+          </motion.div>
         </div>
       </motion.div>
     </div>
@@ -252,7 +286,8 @@ export const About = () => {
           <div className="flex-1 space-y-8">
             <Reveal delay={0.1}>
               <h3 className="font-serif text-3xl md:text-5xl leading-[1.1] text-white text-balance">
-                Building <span className="italic text-white/80">reliable</span>{" "}
+                Building <span className="italic text-white/80">reliable</span>
+                {" "}
                 and <span className="italic text-white/80">secure</span> digital
                 infrastructure.
               </h3>
