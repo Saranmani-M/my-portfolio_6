@@ -24,15 +24,14 @@ export const About = () => {
       data-testid="about-section"
       className="relative py-14 md:py-20 px-6 md:px-12"
     >
-      <div className="max-w-3xl mx-auto flex flex-col gap-8 md:gap-14"
+      <div className="max-w-3xl mx-auto flex flex-col gap-8 md:gap-14">
         <Reveal>
-         <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5 text-center">
-           (About)
-         </div>
-         </Reveal>
+          <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5 text-center">
+            (About)
+          </div>
+        </Reveal>
 
         <div className="w-full space-y-8 md:space-y-10">
-          
           <Reveal delay={0.1}>
             <h3 className="font-serif text-3xl md:text-5xl leading-[1.1] text-white text-balance">
               Building <span className="italic text-white/80">reliable</span>{" "}
