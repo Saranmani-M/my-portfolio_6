@@ -49,7 +49,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── FIXED CENTRALIZED 3D BEAD BACKGROUND ──
+// ── CYLINDER BEAD BACKGROUND — centered X/hourglass, reference match ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
@@ -62,111 +62,113 @@ const CylinderBeadBackground = () => {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
+      canvas.width  = window.innerWidth  * dpr;
       canvas.height = window.innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-
     resize();
     window.addEventListener("resize", resize);
 
-    const drawStructure = (centerX, centerY, rotationDirection, tilt, depthOffset) => {
-      const particles = [];
-      const rings = 32;
-      const strands = 260;
+    const buildArm = (allParticles, W, H, rotDir, tilt) => {
+      const scale    = Math.min(W, H) / 800;
+      const RINGS    = 60;            // rows of spheres around tube
+      const STRANDS  = 380;           // spheres along the helix length
+      const MAIN_R   = 230 * scale;   // helix radius — controls width of X arms
+      const TUBE_R   = 85  * scale;   // tube thickness — controls sphere density
+      const SPHERE_R = 19  * scale;   // individual sphere size
+      const PERSP    = 2000;
 
-      for (let ring = 0; ring < rings; ring++) {
-        for (let i = 0; i < strands; i++) {
-          const p = i / strands;
-          const y = (p - 0.5) * window.innerHeight * 1.4;
+      const cx = W * 0.5;
+      const cy = H * 0.5;
 
-          // Compute spiral wrapping with specific direction rotation
-          const angle = p * Math.PI * 14 + t * rotationDirection + ring * 0.22;
-          const mainRadius = 180 + Math.sin(p * Math.PI * 4) * 30;
+      for (let ring = 0; ring < RINGS; ring++) {
+        for (let i = 0; i < STRANDS; i++) {
+          const p = i / STRANDS;
 
-          const x = Math.cos(angle) * mainRadius;
-          const z = Math.sin(angle) * mainRadius + depthOffset;
+          // Vertical — just enough to bleed slightly past top & bottom
+          const yWorld = (p - 0.5) * H * 1.35;
 
-          const tubeAngle = (ring / rings) * Math.PI * 2;
-          const tubeRadius = 70;
+          // Helix rotation + animation
+          const helixAngle = p * Math.PI * 9 + t * rotDir;
 
-          const tx = Math.cos(tubeAngle) * tubeRadius;
-          const tz = Math.sin(tubeAngle) * tubeRadius;
+          // X pinch — narrow waist at center, wide arms at top & bottom
+          const pinch = 1 - 0.50 * Math.exp(-Math.pow((p - 0.5) * 3.0, 2));
+          const curR  = MAIN_R * pinch;
 
-          const px = x + tx;
-          const pz = z + tz;
+          const hx = Math.cos(helixAngle) * curR;
+          const hz = Math.sin(helixAngle) * curR;
 
-          // Apply directional tilt transformation matrix
-          const rx = px * Math.cos(tilt) - y * Math.sin(tilt);
-          const ry = px * Math.sin(tilt) + y * Math.cos(tilt);
+          // Tube cross-section
+          const tubeAngle = (ring / RINGS) * Math.PI * 2;
+          const tx = Math.cos(tubeAngle) * TUBE_R;
+          const tz = Math.sin(tubeAngle) * TUBE_R;
 
-          const perspective = 1600 / (1600 + pz);
+          const px = hx + tx;
+          const pz = hz + tz;
 
-          particles.push({
-            x: centerX + rx * perspective,
-            y: centerY + ry * perspective,
-            z: pz,
-            r: 10 * perspective,
+          // Tilt to form X — arm1 tilts one way, arm2 the other
+          const rx = px * Math.cos(tilt) - yWorld * Math.sin(tilt);
+          const ry = px * Math.sin(tilt) + yWorld * Math.cos(tilt);
+
+          const persp = PERSP / (PERSP + pz);
+
+          allParticles.push({
+            sx: cx + rx * persp,
+            sy: cy + ry * persp,
+            sz: pz,
+            r:  SPHERE_R * persp,
+            PERSP,
           });
         }
       }
-      return particles;
+    };
+
+    const drawSphere = ({ sx, sy, sz, r, PERSP }) => {
+      const depth   = Math.max(0, Math.min(1, (sz + PERSP * 0.5) / PERSP));
+      const hi      = 0.10 + depth * 0.22;
+
+      // Dark matte — exact reference look
+      const g = ctx.createRadialGradient(
+        sx - r * 0.36, sy - r * 0.40, r * 0.01,
+        sx,            sy,            r
+      );
+      g.addColorStop(0,    `rgba(85, 82, 78, ${hi})`);
+      g.addColorStop(0.18, `rgba(34, 32, 30, 0.97)`);
+      g.addColorStop(0.58, `rgba(12, 11, 10, 1)`);
+      g.addColorStop(1,    `rgba(2,  2,  2,  1)`);
+
+      ctx.beginPath();
+      ctx.fillStyle = g;
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Specular dot upper-left
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(155, 150, 143, ${hi * 0.65})`;
+      ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.115, 0, Math.PI * 2);
+      ctx.fill();
     };
 
     const animate = () => {
       frame = requestAnimationFrame(animate);
-      t += 0.0012; // Balanced cinematic speed
+      t += 0.003;
 
       const W = window.innerWidth;
       const H = window.innerHeight;
       ctx.clearRect(0, 0, W, H);
 
-      // Centered anchor positions so they cross over perfectly like the screenshot
-      const midX = W * 0.5;
-      const midY = H * 0.52;
+      const all = [];
+      // Arm 1: tilts /, rotates clockwise (+1)
+      buildArm(all, W, H, +1,  0.52);
+      // Arm 2: tilts \, rotates counter-clockwise (-1)
+      buildArm(all, W, H, -1, -0.52);
 
-      // Generate both columns
-      const frontColumn = drawStructure(midX, midY, 1, 0.45, 0);       // Rotates Right (1), Tilts Right
-      const backColumn = drawStructure(midX, midY, -1, -0.45, 250);   // Rotates Left (-1), Tilts Left, Pushed into deep Z-space
-
-      // Combine arrays and sort by global depth layer (Painter's algorithm)
-      const combinedParticles = [...frontColumn, ...backColumn];
-      combinedParticles.sort((a, b) => b.z - a.z);
-
-      // Render the matte black spheres with soft illumination highlights
-      combinedParticles.forEach((p) => {
-        const normDepth = (p.z + 300) / 600;
-
-        const g = ctx.createRadialGradient(
-          p.x - p.r * 0.35,
-          p.y - p.r * 0.35,
-          0,
-          p.x,
-          p.y,
-          p.r
-        );
-
-        // Core colors matching the image palette profile
-        g.addColorStop(0, "rgba(255, 255, 255, 0.22)");
-        g.addColorStop(0.18, "rgba(90, 90, 100, 0.12)");
-        g.addColorStop(0.6, "rgba(14, 14, 16, 1)");
-        g.addColorStop(1, "rgba(3, 3, 4, 1)");
-
-        ctx.beginPath();
-        ctx.fillStyle = g;
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // High-precision specular micro-dot
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.18 * (1 - normDepth)})`;
-        ctx.arc(p.x - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.1, 0, Math.PI * 2);
-        ctx.fill();
-      });
+      // Global depth sort — arms correctly occlude at the cross
+      all.sort((a, b) => a.sz - b.sz);
+      all.forEach(drawSphere);
     };
 
     animate();
-
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
@@ -210,7 +212,8 @@ export const Hero = () => {
     let animFrameId;
     const update = () => {
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
+        cursorRef.current.style.transform =
+          `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
       }
       animFrameId = requestAnimationFrame(update);
     };
@@ -257,16 +260,17 @@ export const Hero = () => {
         id="home"
         data-testid="hero-section"
         className="relative min-h-screen overflow-hidden flex flex-col"
-        style={{ background: "#040405" }}
+        style={{ background: "#050507" }}
       >
-        {/* Central Interlocking Abstract Structures */}
+        {/* Abstract Bead Background Mesh */}
         <CylinderBeadBackground />
 
-        {/* Framing Contrast Overlay for maximum visual clarity */}
+        {/* ── UPDATED OVERLAY ── */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
-            background: "radial-gradient(circle at center, rgba(0,0,0,0.02) 0%, rgba(4,4,5,0.65) 100%)"
+            background:
+              "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 0%, rgba(5,5,7,0.55) 100%)"
           }}
         />
 
