@@ -7,8 +7,6 @@ import { About } from "@/components/About";
 import { Skills } from "@/components/Skills";
 import { Projects } from "@/components/Projects";
 import { Research } from "@/components/Research";
-import { Achievements } from "@/components/Achievements";
-import { Certificates } from "@/components/Certificates";
 import { Articles } from "@/components/Articles";
 import { CodingProfiles } from "@/components/CodingProfiles";
 import { Testimonials } from "@/components/Testimonials";
@@ -33,8 +31,6 @@ function App() {
           <Skills />
           <Projects />
           <Research />
-          <Achievements />
-          <Certificates />
           <Articles />
           <CodingProfiles />
           <Testimonials />
