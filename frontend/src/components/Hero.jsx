@@ -20,10 +20,10 @@ const MARQUEE_SKILLS = [
 ];
 
 const RUNNING_LOGOS = [
-  { name: "Gears",  color: "text-white/40"     },
   { name: "Rahi",   color: "text-blue-400/50"  },
   { name: "idp",    color: "text-green-400/50" },
   { name: "Google", color: "text-red-400/50"   },
+  { name: "Gears",  color: "text-white/40"     },
 ];
 
 const WaveformIcon = ({ playing, size = 16 }) => {
@@ -50,7 +50,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── CYLINDER BEAD BACKGROUND — Clean, static rendering from the reference image ──
+// ── ROTATING CYLINDER BEAD BACKGROUND (INTERACTIVE LOOP) ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
@@ -59,100 +59,114 @@ const CylinderBeadBackground = () => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width  = W * dpr;
-    canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    let animationFrameId;
+    let time = 0;
 
-    const cx = W * 0.5;
-    const cy = H * 0.5;
-    const scale = Math.min(W, H) / 800;
-
-    // Adjusted parameters to mimic the deep texture density and lighting profile
-    const RINGS    = 70;       
-    const STRANDS  = 400;      
-    const MAIN_R   = 190 * scale; 
-    const TUBE_R   = 95  * scale; 
-    const SPHERE_R = 14  * scale; 
-    const PERSP    = 2200;
-    const WRAPS    = Math.PI * 11;
-    const Y_SPAN   = H * 1.5;
-
-    const particles = [];
-
-    const addArm = (tiltAngle) => {
-      const cosT = Math.cos(tiltAngle);
-      const sinT = Math.sin(tiltAngle);
-
-      for (let ring = 0; ring < RINGS; ring++) {
-        const tubeAngle = (ring / RINGS) * Math.PI * 2;
-        const tubeCosX  = Math.cos(tubeAngle) * TUBE_R;
-        const tubeSinZ  = Math.sin(tubeAngle) * TUBE_R;
-
-        for (let i = 0; i < STRANDS; i++) {
-          const p      = i / STRANDS;
-          const yWorld = (p - 0.5) * Y_SPAN;
-          const pinch  = 1 - 0.42 * Math.exp(-Math.pow((p - 0.5) * 2.8, 2));
-          const curR   = MAIN_R * pinch;
-
-          const angle = p * WRAPS;
-          const hx    = Math.cos(angle) * curR;
-          const hz    = Math.sin(angle) * curR;
-
-          const px = hx + tubeCosX;
-          const pz = hz + tubeSinZ;
-
-          const rx = px * cosT - yWorld * sinT;
-          const ry = px * sinT + yWorld * cosT;
-
-          const persp = PERSP / (PERSP + pz);
-
-          particles.push({
-            sx: cx + rx * persp,
-            sy: cy + ry * persp,
-            pz,
-            r:  SPHERE_R * persp,
-          });
-        }
+    const render = () => {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      
+      if (canvas.width !== W * dpr || canvas.height !== H * dpr) {
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      } else {
+        ctx.clearRect(0, 0, W, H);
       }
+
+      const cx = W * 0.5;
+      const cy = H * 0.5;
+      const scale = Math.min(W, H) / 800;
+
+      const RINGS    = 58;       
+      const STRANDS  = 380;      
+      const MAIN_R   = 210 * scale; 
+      const TUBE_R   = 86  * scale; 
+      const SPHERE_R = 16  * scale; 
+      const PERSP    = 2000;
+      const WRAPS    = Math.PI * 10;
+      const Y_SPAN   = H * 1.4;
+
+      // Slowly increment rotation clock ticks over execution frames
+      time += 0.0035; 
+
+      const particles = [];
+
+      const addArm = (tiltAngle, directionClock) => {
+        const cosT = Math.cos(tiltAngle);
+        const sinT = Math.sin(tiltAngle);
+
+        for (let ring = 0; ring < RINGS; ring++) {
+          const tubeAngle = (ring / RINGS) * Math.PI * 2;
+          const tubeCosX  = Math.cos(tubeAngle) * TUBE_R;
+          const tubeSinZ  = Math.sin(tubeAngle) * TUBE_R;
+
+          for (let i = 0; i < STRANDS; i++) {
+            const p      = i / STRANDS;
+            const yWorld = (p - 0.5) * Y_SPAN;
+            const pinch  = 1 - 0.48 * Math.exp(-Math.pow((p - 0.5) * 2.9, 2));
+            const curR   = MAIN_R * pinch;
+
+            // Calculates animated rotational offset geometry based on system trajectory clocks
+            const angle = p * WRAPS + (directionClock * time);
+            const hx    = Math.cos(angle) * curR;
+            const hz    = Math.sin(angle) * curR;
+
+            const px = hx + tubeCosX;
+            const pz = hz + tubeSinZ;
+
+            const rx = px * cosT - yWorld * sinT;
+            const ry = px * sinT + yWorld * cosT;
+
+            const persp = PERSP / (PERSP + pz);
+
+            particles.push({
+              sx: cx + rx * persp,
+              sy: cy + ry * persp,
+              pz,
+              r:  SPHERE_R * persp,
+            });
+          }
+        }
+      };
+
+      // Add arms rotating in opposing balanced sequences
+      addArm(0.54, 1);  
+      addArm(-0.54, -1); 
+
+      // Deep layout layering depth sorter
+      particles.sort((a, b) => a.pz - b.pz);
+
+      particles.forEach(({ sx, sy, pz, r }) => {
+        const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
+        const hi = 0.06 + depth * 0.18; 
+
+        const g = ctx.createRadialGradient(
+          sx - r * 0.36, sy - r * 0.40, r * 0.01,
+          sx,            sy,            r
+        );
+        g.addColorStop(0,    `rgba(80,76,72,${hi * 1.15})`);
+        g.addColorStop(0.20, `rgba(28,26,24,0.98)`);
+        g.addColorStop(0.60, `rgba(10,9,8,1)`);
+        g.addColorStop(1,    `rgba(3,3,4,1)`);
+
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(145,140,132,${hi * 0.6})`;
+        ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.11, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      animationFrameId = requestAnimationFrame(render);
     };
 
-    // Formulates the classic structured crossed layout directly from the artwork
-    addArm(0.56);  
-    addArm(-0.56); 
-
-    // Depth sort for authentic 3D overlay layers
-    particles.sort((a, b) => a.pz - b.pz);
-
-    particles.forEach(({ sx, sy, pz, r }) => {
-      const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
-      
-      // Fine-tuned low exposure variables to match the moody signature look
-      const hi = 0.05 + depth * 0.16; 
-
-      const g = ctx.createRadialGradient(
-        sx - r * 0.36, sy - r * 0.40, r * 0.01,
-        sx,            sy,            r
-      );
-      g.addColorStop(0,    `rgba(75,72,68,${hi * 1.2})`);
-      g.addColorStop(0.22, `rgba(24,22,20,0.98)`);
-      g.addColorStop(0.65, `rgba(8,7,6,1)`);
-      g.addColorStop(1,    `rgba(2,2,2,1)`);
-
-      ctx.beginPath();
-      ctx.fillStyle = g;
-      ctx.arc(sx, sy, r, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Subtle surface reflection highlight structure
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(135,130,123,${hi * 0.55})`;
-      ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.11, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
+    render();
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
   return (
@@ -236,37 +250,48 @@ export const Hero = () => {
         style={{ left: 0, top: 0 }}
       />
 
+      {/* FIXED FLOATING NAVBAR (Logo-Only left side block, zero buttons on right side) */}
+      <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-5 pointer-events-none">
+        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 pointer-events-auto">
+          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+          <span className="text-xs font-bold tracking-[0.18em] uppercase text-white font-sans">Cloud Canvas</span>
+        </div>
+        <div className="hidden md:block" />
+      </nav>
+
       <section
         id="home"
         data-testid="hero-section"
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#030304" }}
       >
-        {/* Abstract Bead Background Mesh */}
+        {/* Animated Spin Dynamic Matrix Background Layer */}
         <CylinderBeadBackground />
 
-        {/* Updated dark exposure layer matching the image vignetting */}
+        {/* Ambient Dark Exposure overlay mask */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.15) 0%, rgba(3,3,4,0.7) 100%)"
+              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.1) 0%, rgba(3,3,4,0.75) 100%)"
           }}
         />
 
         {/* ── HERO CENTER BLOCK ── */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full pt-16">
 
           <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
             text-4xl sm:text-5xl md:text-[4.2rem]">
 
-          <span className="block mb-2">
-            <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
-            <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle transform translate-y-[-2px]">
-              <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
+            <span className="block mb-2">
+              <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
+              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle transform translate-y-[-2px]">
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
+              </span>
+              <span className="text-white">Saranmani</span>
             </span>
-            <span className="text-white">Saranmani</span>
-          </span>
 
             <span className="block mb-2">
               <span className="text-white/60 font-medium">An </span>
@@ -324,10 +349,17 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── BOTTOM BLOCK ── */}
+        {/* ── BOTTOM STACK WITH INTERESTED COMPANIES HEADLINE ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
+          
+          {/* STATIC CATEGORY ANCHOR */}
+          <div className="mb-4">
+            <span className="text-[10px] sm:text-[11px] tracking-[0.3em] font-bold text-white/30 uppercase font-sans">
+              Interested Companies
+            </span>
+          </div>
 
-          <div className="w-full overflow-hidden mb-4 sm:mb-6">
+          <div className="w-full overflow-hidden mb-5 sm:mb-6">
             <div className="flex gap-8 sm:gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform items-center h-8">
               {loopLogos.map((logo, i) => (
                 <span key={i} className={`text-sm sm:text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
