@@ -23,7 +23,6 @@ const RUNNING_LOGOS = [
   { name: "Rahi",   color: "text-blue-400/50"  },
   { name: "idp",    color: "text-green-400/50" },
   { name: "Google", color: "text-red-400/50"   },
-  { name: "amazon", color: "text-orange-400/50"},
   { name: "Gears",  color: "text-white/40"     },
 ];
 
@@ -51,7 +50,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── 3D SPINNING CROSS-BEAD MESH BACKDROP ──
+// ── 3D ACTIVELY SPINNING CROSS-BEAD BACKGROUND ENGINE ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
@@ -80,17 +79,18 @@ const CylinderBeadBackground = () => {
       const cy = H * 0.5;
       const scale = Math.min(W, H) / 800;
 
-      const RINGS    = 64;       
-      const STRANDS  = 390;      
-      const MAIN_R   = 200 * scale; 
-      const TUBE_R   = 90  * scale; 
-      const SPHERE_R = 15  * scale; 
+      // High-density parameters matching the bold tactile texture look
+      const RINGS    = 70;       
+      const STRANDS  = 420;      
+      const MAIN_R   = 195 * scale; 
+      const TUBE_R   = 95  * scale; 
+      const SPHERE_R = 14.5 * scale; 
       const PERSP    = 2000;
       const WRAPS    = Math.PI * 10;
       const Y_SPAN   = H * 1.4;
 
-      // Constant spinning velocity update calculation
-      time += 0.0035; 
+      // Active spinning velocity clock increment
+      time += 0.004; 
 
       const particles = [];
 
@@ -106,10 +106,10 @@ const CylinderBeadBackground = () => {
           for (let i = 0; i < STRANDS; i++) {
             const p      = i / STRANDS;
             const yWorld = (p - 0.5) * Y_SPAN;
-            const pinch  = 1 - 0.45 * Math.exp(-Math.pow((p - 0.5) * 2.9, 2));
+            const pinch  = 1 - 0.42 * Math.exp(-Math.pow((p - 0.5) * 2.8, 2));
             const curR   = MAIN_R * pinch;
 
-            // Compute rotational offset parameters relative to current clock state
+            // Mathematical rotation calculation over continuous frame variations
             const angle = p * WRAPS + (directionClock * time);
             const hx    = Math.cos(angle) * curR;
             const hz    = Math.sin(angle) * curR;
@@ -132,24 +132,24 @@ const CylinderBeadBackground = () => {
         }
       };
 
-      // Two interlocking structures balancing each other out
-      addArm(0.54, 1);  
-      addArm(-0.54, -1); 
+      // Perfect interlocking X-shape arrangement
+      addArm(0.52, 1);  
+      addArm(-0.52, -1); 
 
-      // Sort coordinates linearly for a precise deep rendering sequence matching the image style
+      // Sort coordinates depth-first to produce uniform lighting structures
       particles.sort((a, b) => a.pz - b.pz);
 
       particles.forEach(({ sx, sy, pz, r }) => {
         const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
-        const hi = 0.05 + depth * 0.16; 
+        const hi = 0.04 + depth * 0.15; 
 
         const g = ctx.createRadialGradient(
-          sx - r * 0.36, sy - r * 0.40, r * 0.01,
+          sx - r * 0.38, sy - r * 0.42, r * 0.01,
           sx,            sy,            r
         );
-        g.addColorStop(0,    `rgba(75,72,68,${hi * 1.2})`);
-        g.addColorStop(0.22, `rgba(24,22,20,0.98)`);
-        g.addColorStop(0.65, `rgba(8,7,6,1)`);
+        g.addColorStop(0,    `rgba(72,69,65,${hi * 1.25})`);
+        g.addColorStop(0.25, `rgba(22,20,18,0.99)`);
+        g.addColorStop(0.70, `rgba(6,5,5,1)`);
         g.addColorStop(1,    `rgba(3,3,4,1)`);
 
         ctx.beginPath();
@@ -157,9 +157,10 @@ const CylinderBeadBackground = () => {
         ctx.arc(sx, sy, r, 0, Math.PI * 2);
         ctx.fill();
 
+        // Matte dynamic light sheen highlight spots
         ctx.beginPath();
-        ctx.fillStyle = `rgba(135,130,123,${hi * 0.55})`;
-        ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.11, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(130,125,118,${hi * 0.52})`;
+        ctx.arc(sx - r * 0.32, sy - r * 0.34, r * 0.10, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -251,11 +252,11 @@ export const Hero = () => {
         style={{ left: 0, top: 0 }}
       />
 
-      {/* NAVBAR CONTAINER (Left logo token, completely cleared right container) */}
+      {/* FIXED TOP NAVIGATION BAR (Left company logo token, right menu button cleared) */}
       <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-5 pointer-events-none">
         <div className="flex items-center gap-2.5 bg-black/20 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 pointer-events-auto">
-          {/* Custom Multi-Loop Dynamic Token Graphics */}
-          <svg className="w-5 h-5 text-white" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Company Logo Brand Icon Token Shape */}
+          <svg className="w-5 h-5 text-white animate-spin-slow" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 6c5.523 0 10 4.477 10 10s-4.477 10-10 10S6 23.523 6 10s4.477-10 10-10z" fill="currentColor" fillOpacity="0.15"/>
             <path d="M10 14c0-3.314 2.686-6 6-6s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6z" fill="currentColor"/>
           </svg>
@@ -269,19 +270,19 @@ export const Hero = () => {
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#030304" }}
       >
-        {/* Continuous Active Spinning 3D Canvas Context Layer */}
+        {/* HTML5 Canvas Component Rendering Active 3D Rotational Geometry Loops */}
         <CylinderBeadBackground />
 
-        {/* Ambient Overlay Mask */}
+        {/* Shadow Overlay Gradient Coating */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.05) 0%, rgba(3,3,4,0.72) 100%)"
+              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.02) 0%, rgba(3,3,4,0.70) 100%)"
           }}
         />
 
-        {/* ── HERO TEXT WRAPPER BLOCK ── */}
+        {/* ── MAIN CONTENT TYPOGRAPHY BLOCK ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full pt-16">
 
           <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
@@ -297,7 +298,7 @@ export const Hero = () => {
 
             <span className="block">
               <span className="text-white/60 font-medium">An </span>
-              <span className="text-white">Infrastructure Engineer </span>
+              <span className="text-white">Infrastructure Engineer</span>
               <span className="inline-flex items-center justify-center bg-white/5 px-2 py-1 h-7 sm:h-9 md:h-11 rounded-lg border border-white/10 mx-1 align-middle transform translate-y-[-4px]">
                 <span className="text-xs sm:text-sm font-mono text-white/40">⚡</span>
               </span>
@@ -344,10 +345,10 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── FOOTER LAYER WITH INTERESTED COMPANIES ROW ── */}
+        {/* ── FOOTER CONTAINER WITH INTERESTED COMPANIES MARQUEE TRACK ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
           
-          {/* STATIC OVERHEAD ANCHOR LABEL */}
+          {/* STATIC CATEGORY ANCHOR BLOCK */}
           <div className="mb-4">
             <span className="text-[10px] sm:text-[11px] tracking-[0.3em] font-bold text-white/30 uppercase font-sans">
               Interested Companies
