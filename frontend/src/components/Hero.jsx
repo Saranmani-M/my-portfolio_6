@@ -21,6 +21,14 @@ const MARQUEE_SKILLS = [
   { label: "Git"     },
 ];
 
+// Logos tracking row exactly like Omkar's layout (Replace text strings with <img> tags if you have the asset links)
+const RUNNING_LOGOS = [
+  { name: "Gears", color: "text-white/40" },
+  { name: "Rahi", color: "text-blue-400/50" },
+  { name: "idp", color: "text-green-400/50" },
+  { name: "Google", color: "text-red-400/50" },
+];
+
 const WaveformIcon = ({ playing, size = 16 }) => {
   const bars = [0.45, 1, 0.6, 0.88, 0.5];
   return (
@@ -43,15 +51,6 @@ const WaveformIcon = ({ playing, size = 16 }) => {
     </svg>
   );
 };
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Glassy chrome bubble-helix background (reference: image 3)
-   Monochrome, glossy, high-contrast specular spheres — not flat colored
-   dots. Each "bubble" is rendered with multiple nested gradients to fake
-   glass refraction + chrome reflection, all in greyscale.
-═══════════════════════════════════════════════════════════════════════ */
-const VIRTUAL_W = 1600;
-const VIRTUAL_H = 1000;
 
 const GlassBubbleBackground = () => {
   const canvasRef = useRef(null);
@@ -162,6 +161,9 @@ const GlassBubbleBackground = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
 };
 
+const VIRTUAL_W = 1600;
+const VIRTUAL_H = 1000;
+
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
@@ -181,7 +183,19 @@ const SkillsMarquee = () => {
 
 export const Hero = () => {
   const audioRef = useRef(null);
+  const cursorRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (cursorRef.current) {
+        cursorRef.current.style.left = `${e.clientX}px`;
+        cursorRef.current.style.top = `${e.clientY}px`;
+      }
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   useEffect(() => {
     const audio = new Audio(encodeURI("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller__mp3_pm_.mp3"));
@@ -198,13 +212,25 @@ export const Hero = () => {
     else         { audio.play().catch(() => {}); setPlaying(true); }
   }, [playing]);
 
+  // Double up logos array for smooth looping track
+  const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
+
   return (
     <>
       <style>{`
+        html, body, #root, a, button, img, svg, [role="button"] {
+          cursor: none !important;
+        }
         @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
+
+      <div
+        ref={cursorRef}
+        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] -translate-x-1/2 -translate-y-1/2 mix-blend-difference will-change-transform transition-transform duration-75 ease-out"
+        style={{ left: "-100px", top: "-100px" }}
+      />
 
       <section
         id="home"
@@ -219,7 +245,6 @@ export const Hero = () => {
             "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
-
 
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
           <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
@@ -252,7 +277,6 @@ export const Hero = () => {
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a
                 key={k} href={url} target="_blank" rel="noopener noreferrer"
-                
                 className="text-white/50 hover:text-white transition-colors"
               >
                 <Icon size={20} strokeWidth={1.5} />
@@ -263,7 +287,6 @@ export const Hero = () => {
               onClick={toggleMusic}
               aria-label={playing ? "Pause music" : "Play music"}
               title={playing ? "Pause music" : "Play music"}
-              
               className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
             >
               <WaveformIcon playing={playing} size={18} />
@@ -271,14 +294,12 @@ export const Hero = () => {
             <span className="w-px h-5 bg-white/20" />
             <a
               href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              
               className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
             >
               Résumé →
             </a>
             <a
               href={`mailto:${PROFILE.email}`}
-              
               className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
             >
               Say hi ↗
@@ -286,18 +307,34 @@ export const Hero = () => {
           </div>
         </div>
 
-        <div className="relative z-10 flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase mb-8 px-6">
-          <span>Scroll down</span>
-          <div className="h-px w-28 md:w-40 bg-white/15" />
-          <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
-            <motion.div
-              className="w-1 h-1.5 bg-white/60 rounded-full"
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            />
+        {/* Bottom Interactive Blocks Frame Container */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6">
+          
+          {/* Running Brand Logo Marquee exactly above the mouse layout line */}
+          <div className="w-full max-w-[650px] overflow-hidden mb-6 masked-marquee">
+            <div className="flex gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
+              {loopLogos.map((logo, i) => (
+                <span key={i} className={`text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
+                  {logo.name}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="h-px w-28 md:w-40 bg-white/15" />
-          <span>to see projects</span>
+
+          {/* Mouse Line Tracker Element */}
+          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase">
+            <span>Scroll down</span>
+            <div className="h-px flex-1 max-w-[160px] bg-white/15" />
+            <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
+              <motion.div
+                className="w-1 h-1.5 bg-white/60 rounded-full"
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </div>
+            <div className="h-px flex-1 max-w-[160px] bg-white/15" />
+            <span>to see projects</span>
+          </div>
         </div>
 
         <SkillsMarquee />
