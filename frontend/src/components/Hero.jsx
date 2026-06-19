@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
 import { PROFILE, SOCIALS } from "../lib/data";
 
-const easeOut = [0.16, 1, 0.3, 1];
-
 const SOCIAL_ICONS = [
   { Icon: Linkedin,  url: SOCIALS.linkedin,  k: "linkedin"  },
   { Icon: Github,    url: SOCIALS.github,    k: "github"    },
@@ -32,6 +30,21 @@ const RUNNING_LOGOS = [
   { name: "NetApp",   color: "#0067C5" },
 ];
 
+// ─── Drop animation variants ────────────────────────────────────────────────
+const dropVariants = {
+  hidden: { opacity: 0, y: -40 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.12,
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  }),
+};
+
+// ─── Waveform ────────────────────────────────────────────────────────────────
 const WaveformIcon = ({ playing, size = 16 }) => {
   const bars = [0.45, 1, 0.6, 0.88, 0.5];
   return (
@@ -55,6 +68,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
+// ─── Canvas background ───────────────────────────────────────────────────────
 const VIRTUAL_W = 1600;
 const VIRTUAL_H = 1000;
 
@@ -95,7 +109,11 @@ const GlassBubbleBackground = () => {
     }
 
     let isScrolling = false, scrollTimer;
-    const onScroll = () => { isScrolling = true; clearTimeout(scrollTimer); scrollTimer = setTimeout(() => { isScrolling = false; }, 150); };
+    const onScroll = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
 
     let t = 0;
@@ -160,12 +178,13 @@ const GlassBubbleBackground = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
 };
 
+// ─── Skills marquee (bottom strip) ──────────────────────────────────────────
 const BASE_ICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
 
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-4 mt-auto overflow-hidden">
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-4 overflow-hidden">
       <div
         className="flex items-center gap-8 whitespace-nowrap will-change-transform"
         style={{ animation: "marquee-scroll 34s linear infinite", width: "max-content" }}
@@ -173,14 +192,9 @@ const SkillsMarquee = () => {
         {items.map(({ label, icon }, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-2 text-white/55 hover:text-white transition-colors text-[11px] tracking-[0.12em] uppercase font-mono shrink-0"
+            className="inline-flex items-center gap-2 text-white/55 text-[11px] tracking-[0.12em] uppercase font-mono shrink-0"
           >
-            <img
-              src={`${BASE_ICON}${icon}`}
-              alt={label}
-              className="w-4 h-4 opacity-70"
-              style={{ filter: "brightness(1.4)" }}
-            />
+            <img src={`${BASE_ICON}${icon}`} alt={label} className="w-4 h-4 opacity-70" style={{ filter: "brightness(1.4)" }} />
             {label}
             <span className="text-white/15 ml-1">·</span>
           </span>
@@ -190,11 +204,52 @@ const SkillsMarquee = () => {
   );
 };
 
-// Detect touch/mobile device
+// ─── Logos marquee (fills the empty gap above skills) ────────────────────────
+const LogosMarquee = () => {
+  // Triple for seamless looping
+  const items = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
+  return (
+    <div className="relative z-10 w-full border-t border-white/[0.04] bg-black/20 py-3 overflow-hidden">
+      {/* Row 1 — left to right */}
+      <div
+        className="flex items-center gap-10 whitespace-nowrap will-change-transform mb-2"
+        style={{ animation: "marquee-scroll 22s linear infinite", width: "max-content" }}
+      >
+        {items.map((logo, i) => (
+          <span
+            key={i}
+            className="text-[11px] font-bold tracking-[0.2em] select-none font-sans uppercase shrink-0 opacity-80"
+            style={{ color: logo.color }}
+          >
+            {logo.name}
+          </span>
+        ))}
+      </div>
+      {/* Row 2 — right to left (reverse direction) */}
+      <div
+        className="flex items-center gap-10 whitespace-nowrap will-change-transform"
+        style={{ animation: "marquee-scroll-reverse 28s linear infinite", width: "max-content" }}
+      >
+        {[...items].reverse().map((logo, i) => (
+          <span
+            key={i}
+            className="text-[11px] font-bold tracking-[0.2em] select-none font-sans uppercase shrink-0 opacity-60"
+            style={{ color: logo.color }}
+          >
+            {logo.name}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Touch detection ─────────────────────────────────────────────────────────
 const isTouchDevice = () =>
   typeof window !== "undefined" &&
   ("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 export const Hero = () => {
   const audioRef = useRef(null);
   const cursorRef = useRef(null);
@@ -205,22 +260,17 @@ export const Hero = () => {
   // Custom cursor — desktop only
   useEffect(() => {
     if (isTouch) return;
-    const handleMouseMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
+    const handleMouseMove = (e) => { mousePos.current = { x: e.clientX, y: e.clientY }; };
     let animFrameId;
-    const updateCursorPosition = () => {
+    const tick = () => {
       if (cursorRef.current) {
         cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
       }
-      animFrameId = requestAnimationFrame(updateCursorPosition);
+      animFrameId = requestAnimationFrame(tick);
     };
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    animFrameId = requestAnimationFrame(updateCursorPosition);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animFrameId);
-    };
+    animFrameId = requestAnimationFrame(tick);
+    return () => { window.removeEventListener("mousemove", handleMouseMove); cancelAnimationFrame(animFrameId); };
   }, [isTouch]);
 
   useEffect(() => {
@@ -235,45 +285,20 @@ export const Hero = () => {
     const audio = audioRef.current;
     if (!audio) return;
     if (playing) { audio.pause(); setPlaying(false); }
-    else         { audio.play().catch(() => {}); setPlaying(true); }
+    else { audio.play().catch(() => {}); setPlaying(true); }
   }, [playing]);
-
-  const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
 
   return (
     <>
       <style>{`
-        /* Custom cursor only on non-touch devices */
-        ${!isTouch ? `
-          html, body, #root, a, button, img, svg, [role="button"] { cursor: none !important; }
-        ` : ""}
-        @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        ${!isTouch ? `html, body, #root, a, button, img, svg, [role="button"] { cursor: none !important; }` : ""}
+        @keyframes marquee-scroll         { from{transform:translateX(0)}    to{transform:translateX(-33.333%)} }
+        @keyframes marquee-scroll-reverse { from{transform:translateX(-33.333%)} to{transform:translateX(0)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
-        @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
-
-        /* Mobile touch target sizing */
-        @media (max-width: 640px) {
-          .social-icon-link {
-            padding: 6px;
-            min-width: 36px;
-            min-height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .music-btn {
-            padding: 6px;
-            min-width: 36px;
-            min-height: 36px;
-          }
-          .cta-btn {
-            padding: 10px 20px;
-            font-size: 10px;
-          }
-        }
+        @media(prefers-reduced-motion:reduce){ [style*="animation"]{animation:none !important} }
+        .social-link { display:inline-flex; align-items:center; justify-content:center; padding:6px; min-width:36px; min-height:36px; }
       `}</style>
 
-      {/* Custom cursor — hidden on touch */}
       {!isTouch && (
         <div
           ref={cursorRef}
@@ -285,164 +310,153 @@ export const Hero = () => {
       <section
         id="home"
         data-testid="hero-section"
-        className="relative min-h-screen overflow-hidden flex flex-col justify-between"
+        className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#070708" }}
       >
         <GlassBubbleBackground />
 
+        {/* Overlay */}
         <div className="absolute inset-0 z-[1]" style={{
           background:
             "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.82) 75%)," +
             "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        {/* Navbar — tighter on mobile, no overflow */}
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-row items-center gap-3 select-none bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.06] shadow-xl whitespace-nowrap max-w-[calc(100vw-2rem)]">
+        {/* ── Navbar ── */}
+        <motion.div
+          variants={dropVariants}
+          initial="hidden"
+          animate="visible"
+          custom={0}
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-row items-center gap-3 select-none bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.06] shadow-xl whitespace-nowrap max-w-[calc(100vw-2rem)]"
+        >
           <button
             onClick={toggleMusic}
             aria-label={playing ? "Pause music" : "Play music"}
-            className={`music-btn transition-colors flex items-center justify-center rounded-full ${playing ? "text-white" : "text-white/40 hover:text-white active:text-white"}`}
+            className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${playing ? "text-white" : "text-white/40 hover:text-white active:text-white"}`}
           >
             <WaveformIcon playing={playing} size={15} />
           </button>
           <span className="text-white/20 font-light text-sm">|</span>
-          <div className="flex items-center gap-1 sm:gap-3">
+          <div className="flex items-center gap-0.5 sm:gap-2">
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              <a
-                key={k}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-link text-white/40 hover:text-white active:text-white transition-colors"
-              >
+              <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="social-link text-white/40 hover:text-white active:text-white transition-colors">
                 <Icon size={15} strokeWidth={1.8} />
               </a>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Spacer for fixed navbar */}
-        <div className="w-full pt-20 invisible" aria-hidden="true" />
+        {/* Spacer */}
+        <div className="pt-20" aria-hidden="true" />
 
-        {/* Main content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-10 max-w-5xl mx-auto w-full">
+        {/* ── Main content ── */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-10 max-w-5xl mx-auto w-full py-6">
 
-          {/* Status badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-5 backdrop-blur-sm select-none">
+          {/* Badge — drop 1 */}
+          <motion.div
+            variants={dropVariants} initial="hidden" animate="visible" custom={1}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-5 backdrop-blur-sm select-none"
+          >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
             </span>
             <span className="text-[10px] uppercase tracking-[0.18em] font-mono text-green-400/90 font-medium">
               Live // Open to Work
             </span>
-          </div>
+          </motion.div>
 
-          {/* Heading — scales down properly on mobile */}
+          {/* Heading — each line drops in sequence */}
           <h1 className="font-extrabold tracking-tight leading-[1.2] text-white w-full">
-            {/* Line 1 */}
-            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1">
+
+            {/* Line 1: Hey, I'm [photo] Saranmani M — drop 2 */}
+            <motion.span
+              variants={dropVariants} initial="hidden" animate="visible" custom={2}
+              className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1"
+            >
               <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
               <span className="inline-block w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
                 <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
               </span>
               <span>Saranmani M</span>
-            </span>
-            {/* Line 2 */}
-            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1">
+            </motion.span>
+
+            {/* Line 2: Aspiring Cloud & Storage Engineer — drop 3 */}
+            <motion.span
+              variants={dropVariants} initial="hidden" animate="visible" custom={3}
+              className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1"
+            >
               <span className="text-white/40 font-normal">Aspiring</span>
-              <span>Cloud &amp; Storage</span>
-            </span>
-            {/* "Engineer" on its own line on mobile to avoid overflow */}
-            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1">
-              <span>Engineer</span>
-            </span>
-            {/* Line 3 */}
-            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem]">
+              <span>Cloud &amp; Storage Engineer</span>
+            </motion.span>
+
+            {/* Line 3: Building Secure Infrastructure — drop 4 */}
+            <motion.span
+              variants={dropVariants} initial="hidden" animate="visible" custom={4}
+              className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem]"
+            >
               <span className="text-white/40 font-normal">Building</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
                 Secure Infrastructure
               </span>
-            </span>
+            </motion.span>
           </h1>
 
-          {/* Bio */}
-          <p className="mt-5 text-sm md:text-base text-white/45 max-w-[520px] leading-relaxed px-2">
+          {/* Bio — drop 5 */}
+          <motion.p
+            variants={dropVariants} initial="hidden" animate="visible" custom={5}
+            className="mt-5 text-sm md:text-base text-white/45 max-w-[520px] leading-relaxed px-2"
+          >
             I enjoy working with Linux systems, cloud infrastructure, and storage technologies, building reliable,
             secure, and scalable environments while continuously learning and improving my skills.
-          </p>
+          </motion.p>
 
-          {/* CTAs */}
-          <div className="mt-7 flex items-center justify-center gap-4 sm:gap-5 flex-wrap">
+          {/* CTAs — drop 6 */}
+          <motion.div
+            variants={dropVariants} initial="hidden" animate="visible" custom={6}
+            className="mt-7 flex items-center justify-center gap-4 sm:gap-5 flex-wrap"
+          >
             <a
-              href={PROFILE.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cta-btn text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white active:text-white transition-colors py-2 px-1"
+              href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
+              className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white active:text-white transition-colors py-2 px-1"
             >
               Résumé →
             </a>
             <span className="w-px h-5 bg-white/20" />
             <a
               href={`mailto:${PROFILE.email}`}
-              className="cta-btn inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full hover:opacity-90 active:opacity-80 transition-opacity"
+              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full hover:opacity-90 active:opacity-80 transition-opacity"
             >
               Say hi ↗
             </a>
-          </div>
-
-          {/* Dream Stacks marquee */}
-          <div className="w-full max-w-[500px] mt-12 flex flex-col items-center gap-3">
-            <span className="text-[10px] tracking-[0.22em] uppercase font-mono text-white/25 select-none">
-              Dream Stacks &amp; Engineering Ambitions
-            </span>
-            <div className="w-full overflow-hidden py-1">
-              <div
-                className="flex gap-10 whitespace-nowrap will-change-transform items-center"
-                style={{ animation: "marquee-scroll 25s linear infinite", width: "max-content" }}
-              >
-                {loopLogos.map((logo, i) => (
-                  <span
-                    key={i}
-                    className="text-[11px] font-bold tracking-widest select-none font-sans uppercase shrink-0"
-                    style={{ color: logo.color }}
-                  >
-                    {logo.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Scroll hint — hidden on very small screens to save space */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto hidden sm:flex flex-col items-center mb-6 px-6 mt-auto">
-          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase">
-            <span>Scroll down</span>
-            <div className="h-px flex-1 max-w-[120px] bg-white/15" />
-            <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
-              <motion.div
-                className="w-1 h-1.5 bg-white/60 rounded-full"
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </div>
-            <div className="h-px flex-1 max-w-[120px] bg-white/15" />
-            <span>to see projects</span>
-          </div>
-        </div>
-
-        {/* Scroll hint for mobile — compact version */}
-        <div className="relative z-10 flex sm:hidden justify-center mb-5 mt-2">
-          <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
+        {/* ── Scroll hint (compact, centered) — drop 7 ── */}
+        <motion.div
+          variants={dropVariants} initial="hidden" animate="visible" custom={7}
+          className="relative z-10 flex justify-center items-center gap-4 mb-4 text-white/30 text-[10px] tracking-[0.18em] uppercase"
+        >
+          <div className="h-px w-16 bg-white/10" />
+          <div className="w-5 h-8 rounded-full border border-white/25 flex items-start justify-center pt-1.5 shrink-0">
             <motion.div
-              className="w-1 h-1.5 bg-white/60 rounded-full"
+              className="w-1 h-1.5 bg-white/50 rounded-full"
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             />
           </div>
-        </div>
+          <div className="h-px w-16 bg-white/10" />
+        </motion.div>
 
+        {/* ── Logos marquee — fills empty space ── */}
+        <motion.div
+          variants={dropVariants} initial="hidden" animate="visible" custom={8}
+        >
+          <LogosMarquee />
+        </motion.div>
+
+        {/* ── Skills strip (very bottom) ── */}
         <SkillsMarquee />
       </section>
     </>
