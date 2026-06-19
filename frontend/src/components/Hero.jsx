@@ -12,7 +12,6 @@ const SOCIAL_ICONS = [
   { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
 ];
 
-/* ── tiny inline SVG factory ─────────────────────────────────────────── */
 const svgIcon = (viewBox, path) =>
   ({ size = 20, className = "" }) => (
     <svg viewBox={viewBox} width={size} height={size} fill="currentColor" className={className} aria-hidden="true">
@@ -46,10 +45,10 @@ const MARQUEE_SKILLS = [
   { label: "PyCharm", Icon: SiPycharm   },
 ];
 
-/* ── Music src — file must be placed in your project's /public folder ─ */
+/* ── Music file in /public ───────────────────────────────────────────── */
 const MUSIC_SRC = "/Running_Up_That_Hill_A_Deal_With_God.mp3";
 
-/* ── Animated waveform icon ──────────────────────────────────────────── */
+/* ── Waveform bars icon ──────────────────────────────────────────────── */
 const WaveformIcon = ({ playing, size = 18 }) => {
   const bars = [0.45, 1, 0.6, 0.88, 0.5, 0.78, 0.38];
   return (
@@ -73,126 +72,18 @@ const WaveformIcon = ({ playing, size = 18 }) => {
   );
 };
 
-/* ── Music toggle — import into your Navbar right after the logo ─────── */
-export const MusicToggle = () => {
-  const audioRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio      = new Audio(MUSIC_SRC);
-    audio.loop       = true;
-    audio.volume     = 0.6;
-    audioRef.current = audio;
-    return () => { audio.pause(); audio.src = ""; };
-  }, []);
-
-  const toggle = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-    } else {
-      audio.play().catch(() => {});
-      setPlaying(true);
-    }
-  }, [playing]);
-
-  return (
-    <button
-      onClick={toggle}
-      aria-label={playing ? "Pause music" : "Play music"}
-      title={playing ? "Pause music" : "Play music"}
-      style={{ cursor: "none" }}
-      className={`
-        inline-flex items-center justify-center
-        w-8 h-8 rounded-md transition-colors duration-200
-        ${playing
-          ? "text-white bg-white/10"
-          : "text-white/50 hover:text-white hover:bg-white/8"}
-      `}
-    >
-      <WaveformIcon playing={playing} size={18} />
-    </button>
-  );
-};
-
-/* ── Global white-dot cursor (active for every page) ─────────────────── */
-export const GlobalCursor = () => {
-  const dotRef   = useRef(null);
-  const outerRef = useRef(null);
-  const pos      = useRef({ x: -100, y: -100 });
-  const smooth   = useRef({ x: -100, y: -100 });
-
-  useEffect(() => {
-    document.documentElement.style.cursor = "none";
-
-    const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener("mousemove", onMove);
-
-    let raf;
-    const tick = () => {
-      raf = requestAnimationFrame(tick);
-      if (dotRef.current) {
-        dotRef.current.style.transform =
-          `translate(${pos.current.x - 4}px,${pos.current.y - 4}px)`;
-      }
-      smooth.current.x += (pos.current.x - smooth.current.x) * 0.13;
-      smooth.current.y += (pos.current.y - smooth.current.y) * 0.13;
-      if (outerRef.current) {
-        outerRef.current.style.transform =
-          `translate(${smooth.current.x - 18}px,${smooth.current.y - 18}px)`;
-      }
-    };
-    tick();
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(raf);
-      document.documentElement.style.cursor = "";
-    };
-  }, []);
-
-  return (
-    <>
-      {/* Solid white dot — snaps instantly */}
-      <div
-        ref={dotRef}
-        style={{
-          position: "fixed", top: 0, left: 0,
-          width: 8, height: 8, borderRadius: "50%",
-          background: "#ffffff",
-          pointerEvents: "none", zIndex: 99999,
-          willChange: "transform",
-        }}
-      />
-      {/* Lagging outer ring */}
-      <div
-        ref={outerRef}
-        style={{
-          position: "fixed", top: 0, left: 0,
-          width: 36, height: 36, borderRadius: "50%",
-          border: "1.5px solid rgba(255,255,255,0.4)",
-          pointerEvents: "none", zIndex: 99998,
-          willChange: "transform",
-        }}
-      />
-    </>
-  );
-};
-
-/* ── Dark monochrome sphere canvas ───────────────────────────────────── */
+/* ── Dark monochrome bubble background (image 1 style) ───────────────── */
 const VIRTUAL_W = 1600;
 const VIRTUAL_H = 1000;
 
 const DARK_PALETTE = [
-  [24,  24,  24],
-  [36,  36,  36],
-  [48,  48,  48],
-  [20,  20,  20],
-  [42,  42,  42],
-  [30,  30,  30],
-  [56,  56,  56],
+  [24, 24, 24],
+  [38, 38, 38],
+  [50, 50, 50],
+  [20, 20, 20],
+  [44, 44, 44],
+  [32, 32, 32],
+  [58, 58, 58],
 ];
 
 const DarkSphereBackground = () => {
@@ -209,60 +100,43 @@ const DarkSphereBackground = () => {
     canvas.height = VIRTUAL_H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    /* Build atoms */
-    const atoms  = [];
-    const STEPS  = 140;
-    const TURNS  = 5.5;
-    const HR     = 1.45;   // helix radius
-    const HH     = 3.0;   // helix height
+    const atoms = [];
+    const STEPS = 140, TURNS = 5.5, HR = 1.45, HH = 3.0;
 
     for (let i = 0; i < STEPS; i++) {
       const frac  = i / STEPS;
       const angle = frac * Math.PI * 2 * TURNS;
       const y     = (frac - 0.5) * HH;
+      const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
+      const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
 
-      // Strand 1
-      atoms.push({ x: Math.cos(angle) * HR, y, z: Math.sin(angle) * HR, r: 1.05, color: DARK_PALETTE[i % 3] });
-      // Strand 2
-      atoms.push({ x: Math.cos(angle + Math.PI) * HR, y, z: Math.sin(angle + Math.PI) * HR, r: 1.05, color: DARK_PALETTE[(i + 2) % 3] });
+      atoms.push({ x: x1, y, z: z1, r: 1.05, color: DARK_PALETTE[i % 3] });
+      atoms.push({ x: x2, y, z: z2, r: 1.05, color: DARK_PALETTE[(i+2)%3] });
 
-      // Rungs
       if (i % 2 === 0) {
-        const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
-        const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
         for (let j = 1; j < 5; j++) {
-          const t = j / 5;
+          const t = j/5;
           atoms.push({ x: x1+(x2-x1)*t, y, z: z1+(z2-z1)*t, r: 0.7, color: DARK_PALETTE[3+(j%4)] });
         }
       }
-
-      // Small sugar atoms
       for (let k = 0; k < 3; k++) {
-        const n    = ((k * 137.5) % 1) * 0.18 - 0.09;
-        const ao   = angle + n * Math.PI;
-        const ro   = HR + 0.14 + n * 0.1;
-        atoms.push({ x: Math.cos(ao)*ro,           y: y+n*0.15, z: Math.sin(ao)*ro,           r: 0.48, color: DARK_PALETTE[(i+k+4)%7] });
-        atoms.push({ x: Math.cos(ao+Math.PI)*ro,   y: y+n*0.15, z: Math.sin(ao+Math.PI)*ro,   r: 0.48, color: DARK_PALETTE[(i+k+1)%7] });
+        const n = ((k*137.5)%1)*0.18-0.09, ao = angle+n*Math.PI, ro = HR+0.14+n*0.1;
+        atoms.push({ x: Math.cos(ao)*ro,          y: y+n*0.15, z: Math.sin(ao)*ro,          r: 0.48, color: DARK_PALETTE[(i+k+4)%7] });
+        atoms.push({ x: Math.cos(ao+Math.PI)*ro,  y: y+n*0.15, z: Math.sin(ao+Math.PI)*ro,  r: 0.48, color: DARK_PALETTE[(i+k+1)%7] });
       }
     }
-
-    // Edge-fill scatter atoms
     for (let i = 0; i < 260; i++) {
       atoms.push({
-        x: (((i*73.137+17)%100)/100 - 0.5) * 4.4,
-        y: (((i*41.293+5) %100)/100 - 0.5) * 3.2,
-        z: (((i*29.817+31)%100)/100 - 0.5) * 2.4,
-        r: 0.25 + ((i*17.391)%100)/100 * 0.85,
-        color: DARK_PALETTE[i % 7],
+        x: (((i*73.137+17)%100)/100-0.5)*4.4,
+        y: (((i*41.293+5) %100)/100-0.5)*3.2,
+        z: (((i*29.817+31)%100)/100-0.5)*2.4,
+        r: 0.25+((i*17.391)%100)/100*0.85,
+        color: DARK_PALETTE[i%7],
       });
     }
 
     let isScrolling = false, scrollTimer;
-    const onScroll = () => {
-      isScrolling = true;
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
-    };
+    const onScroll = () => { isScrolling = true; clearTimeout(scrollTimer); scrollTimer = setTimeout(() => { isScrolling = false; }, 150); };
     window.addEventListener("scroll", onScroll, { passive: true });
 
     let t = 0;
@@ -271,88 +145,57 @@ const DarkSphereBackground = () => {
       if (isScrolling) return;
       ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
       t += 0.006;
+      const cx = VIRTUAL_W*0.5, cy = VIRTUAL_H*0.5, scale = Math.min(VIRTUAL_W,VIRTUAL_H)*0.60;
+      const cosY = Math.cos(t*0.4), sinY = Math.sin(t*0.4), cosX = Math.cos(0.18), sinX = Math.sin(0.18);
 
-      const cx    = VIRTUAL_W * 0.5;
-      const cy    = VIRTUAL_H * 0.5;
-      const scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.60;
-      const cosY  = Math.cos(t * 0.4), sinY = Math.sin(t * 0.4);
-      const cosX  = Math.cos(0.18),    sinX = Math.sin(0.18);
-
-      const proj = atoms.map((a) => {
-        const rx  =  a.x*cosY - a.z*sinY;
-        const rz  =  a.x*sinY + a.z*cosY;
-        const ry  =  a.y*cosX - rz*sinX;
-        const rz2 =  a.y*sinX + rz*cosX;
-        const psp = 2.5 / (2.5 + rz2);
+      const proj = atoms.map(a => {
+        const rx = a.x*cosY-a.z*sinY, rz = a.x*sinY+a.z*cosY;
+        const ry = a.y*cosX-rz*sinX, rz2 = a.y*sinX+rz*cosX;
+        const psp = 2.5/(2.5+rz2);
         return { sx: cx+rx*scale*psp, sy: cy+ry*scale*psp, z: rz2, r: a.r*scale*0.065*psp, color: a.color };
       });
-      proj.sort((a, b) => a.z - b.z);
+      proj.sort((a,b) => a.z-b.z);
 
-      proj.forEach((p) => {
-        const dep = Math.max(0, Math.min(1, (p.z + 1.5) / 3.0));
-        const [cr, cg, cb] = p.color;
-        const dr = Math.round(cr*(0.4+0.6*dep));
-        const dg = Math.round(cg*(0.4+0.6*dep));
-        const db = Math.round(cb*(0.4+0.6*dep));
+      proj.forEach(p => {
+        const dep = Math.max(0,Math.min(1,(p.z+1.5)/3.0));
+        const [cr,cg,cb] = p.color;
+        const dr = Math.round(cr*(0.4+0.6*dep)), dg = Math.round(cg*(0.4+0.6*dep)), db = Math.round(cb*(0.4+0.6*dep));
 
-        // Glow
         const glow = ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,p.r*1.8);
-        glow.addColorStop(0, `rgba(${dr},${dg},${db},0.13)`);
-        glow.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.beginPath(); ctx.fillStyle = glow;
-        ctx.arc(p.sx, p.sy, p.r*1.8, 0, Math.PI*2); ctx.fill();
+        glow.addColorStop(0,`rgba(${dr},${dg},${db},0.13)`); glow.addColorStop(1,"rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.fillStyle=glow; ctx.arc(p.sx,p.sy,p.r*1.8,0,Math.PI*2); ctx.fill();
 
-        // Body
         const body = ctx.createRadialGradient(p.sx-p.r*.35,p.sy-p.r*.4,p.r*.05,p.sx,p.sy,p.r);
-        body.addColorStop(0,   `rgba(${Math.min(255,dr+55)},${Math.min(255,dg+55)},${Math.min(255,db+55)},1)`);
-        body.addColorStop(0.5, `rgba(${dr},${dg},${db},1)`);
-        body.addColorStop(1,   `rgba(${Math.round(dr*.2)},${Math.round(dg*.2)},${Math.round(db*.2)},1)`);
-        ctx.beginPath(); ctx.fillStyle = body;
-        ctx.arc(p.sx, p.sy, p.r, 0, Math.PI*2); ctx.fill();
+        body.addColorStop(0,`rgba(${Math.min(255,dr+55)},${Math.min(255,dg+55)},${Math.min(255,db+55)},1)`);
+        body.addColorStop(0.5,`rgba(${dr},${dg},${db},1)`);
+        body.addColorStop(1,`rgba(${Math.round(dr*.2)},${Math.round(dg*.2)},${Math.round(db*.2)},1)`);
+        ctx.beginPath(); ctx.fillStyle=body; ctx.arc(p.sx,p.sy,p.r,0,Math.PI*2); ctx.fill();
 
-        // Specular
         const spec = ctx.createRadialGradient(p.sx-p.r*.28,p.sy-p.r*.32,0,p.sx-p.r*.28,p.sy-p.r*.32,p.r*.38);
-        spec.addColorStop(0, `rgba(255,255,255,${0.22*dep})`);
-        spec.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.beginPath(); ctx.fillStyle = spec;
-        ctx.arc(p.sx, p.sy, p.r, 0, Math.PI*2); ctx.fill();
+        spec.addColorStop(0,`rgba(255,255,255,${0.22*dep})`); spec.addColorStop(1,"rgba(255,255,255,0)");
+        ctx.beginPath(); ctx.fillStyle=spec; ctx.arc(p.sx,p.sy,p.r,0,Math.PI*2); ctx.fill();
       });
     };
-
     draw();
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(scrollTimer);
-    };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("scroll",onScroll); clearTimeout(scrollTimer); };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 z-0"
-      style={{ opacity: 1, width: "100%", height: "100%" }}
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ opacity:1, width:"100%", height:"100%" }} />;
 };
 
 /* ── Skills marquee ──────────────────────────────────────────────────── */
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
-    <div
-      data-testid="skills-marquee"
-      className="relative z-10 w-full border-t border-b border-white/10 py-5"
-    >
+    <div data-testid="skills-marquee" className="relative z-10 w-full border-t border-b border-white/10 py-5">
       <div className="max-w-6xl mx-auto px-6 md:px-10 overflow-hidden">
         <div className="marquee-track flex items-center whitespace-nowrap will-change-transform">
-          {[0, 1].map((copy) => (
+          {[0,1].map(copy => (
             <div key={copy} className="flex items-center shrink-0">
               {items.map(({ label, Icon }, i) => (
                 <React.Fragment key={`${copy}-${label}-${i}`}>
                   <span className="inline-flex items-center gap-2 px-6 text-white/80" title={label}>
-                    <Icon size={20} />
-                    <span className="sr-only">{label}</span>
+                    <Icon size={20} /><span className="sr-only">{label}</span>
                   </span>
                   <span className="text-white/30 text-[10px]">•</span>
                 </React.Fragment>
@@ -361,66 +204,164 @@ const SkillsMarquee = () => {
           ))}
         </div>
       </div>
-
       <style>{`
-        .marquee-track {
-          width: max-content;
-          animation: marquee-scroll 38s linear infinite;
-        }
-        .marquee-track:hover { animation-play-state: paused; }
-        @keyframes marquee-scroll {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
-        @keyframes waveBar {
-          from { transform: scaleY(0.3); }
-          to   { transform: scaleY(1);   }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .marquee-track { animation: none; }
-        }
+        .marquee-track { width:max-content; animation:marquee-scroll 38s linear infinite; }
+        .marquee-track:hover { animation-play-state:paused; }
+        @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
+        @media(prefers-reduced-motion:reduce){ .marquee-track{animation:none} }
+
+        /* ── Global cursor — hides default everywhere ── */
+        *, *::before, *::after { cursor: none !important; }
       `}</style>
     </div>
   );
 };
 
-/* ── Hero (main export) ──────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════
+   HERO — main export
+   Contains: cursor + music toggle (top-left inline) + dark sphere bg
+═══════════════════════════════════════════════════════════════════════ */
 export const Hero = () => {
+  /* ── Custom cursor state ── */
+  const dotRef   = useRef(null);
+  const outerRef = useRef(null);
+  const pos      = useRef({ x: -200, y: -200 });
+  const smooth   = useRef({ x: -200, y: -200 });
+
+  /* ── Music state ── */
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  /* ── Init cursor ── */
+  useEffect(() => {
+    // Force hide native cursor everywhere
+    const style = document.createElement("style");
+    style.id = "no-cursor-style";
+    style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
+    document.head.appendChild(style);
+
+    const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener("mousemove", onMove);
+
+    let raf;
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      const dot = dotRef.current, ring = outerRef.current;
+      if (dot) dot.style.transform = `translate(${pos.current.x - 4}px,${pos.current.y - 4}px)`;
+      smooth.current.x += (pos.current.x - smooth.current.x) * 0.13;
+      smooth.current.y += (pos.current.y - smooth.current.y) * 0.13;
+      if (ring) ring.style.transform = `translate(${smooth.current.x - 18}px,${smooth.current.y - 18}px)`;
+    };
+    tick();
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(raf);
+      const el = document.getElementById("no-cursor-style");
+      if (el) el.remove();
+    };
+  }, []);
+
+  /* ── Init audio ── */
+  useEffect(() => {
+    const audio = new Audio(MUSIC_SRC);
+    audio.loop = true;
+    audio.volume = 0.6;
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ""; };
+  }, []);
+
+  const toggleMusic = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else         { audio.play().catch(() => {}); setPlaying(true); }
+  }, [playing]);
+
   return (
     <>
-      {/* White dot cursor — affects the entire page */}
-      <GlobalCursor />
+      {/* ── White dot cursor (fixed, always on top) ── */}
+      <div
+        ref={dotRef}
+        style={{
+          position:"fixed", top:0, left:0, width:8, height:8,
+          borderRadius:"50%", background:"#fff",
+          pointerEvents:"none", zIndex:999999,
+          willChange:"transform",
+        }}
+      />
+      <div
+        ref={outerRef}
+        style={{
+          position:"fixed", top:0, left:0, width:36, height:36,
+          borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.4)",
+          pointerEvents:"none", zIndex:999998,
+          willChange:"transform",
+        }}
+      />
 
       <section
         id="home"
         data-testid="hero-section"
         className="relative min-h-[100svh] overflow-hidden flex flex-col"
-        style={{ background: "#080808" }}
+        style={{ background:"#080808" }}
       >
         <DarkSphereBackground />
 
         {/* Overlay */}
-        <div
-          className="absolute inset-0 z-[1]"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 45%, transparent 18%, rgba(0,0,0,0.68) 65%)," +
-              "linear-gradient(180deg, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.12) 40%, rgba(0,0,0,0.80) 100%)",
-          }}
-        />
+        <div className="absolute inset-0 z-[1]" style={{
+          background:
+            "radial-gradient(ellipse at 50% 45%, transparent 18%, rgba(0,0,0,0.68) 65%)," +
+            "linear-gradient(180deg,rgba(0,0,0,0.60) 0%,rgba(0,0,0,0.12) 40%,rgba(0,0,0,0.80) 100%)",
+        }}/>
 
-        {/* Content */}
+        {/* ── Music toggle — top left, sits over the canvas ── */}
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
+             style={{ left: "auto", right: "auto" }}>
+          {/* We pin it just below/beside where your existing Navbar logo sits.
+              Position: fixed top-left so it always shows regardless of Navbar */}
+        </div>
+
+        {/* Music button — fixed top-left corner, always visible */}
+        <button
+          onClick={toggleMusic}
+          aria-label={playing ? "Pause music" : "Play music"}
+          title={playing ? "Pause music" : "Play music"}
+          style={{ cursor:"none" }}
+          className={`
+            fixed top-4 z-[9999]
+            inline-flex items-center gap-2
+            px-3 py-2 rounded-lg
+            border transition-all duration-200
+            text-[11px] tracking-widest uppercase font-medium
+            ${playing
+              ? "border-white/30 bg-white/10 text-white"
+              : "border-white/15 bg-black/40 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/8"}
+          `}
+          style={{
+            cursor: "none",
+            /* Sits right after your logo in the top bar — adjust left value to
+               match your logo width. Your logo block is ~140px wide typically. */
+            left: "168px",
+            top: "16px",
+          }}
+        >
+          <WaveformIcon playing={playing} size={16} />
+          <span>{playing ? "playing" : "music"}</span>
+        </button>
+
+        {/* ── Main content ── */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-10 md:pb-12 flex-1 flex flex-col items-center text-center">
           <motion.div
-            initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
+            initial={{ opacity:0, y:24, filter:"blur(8px)" }}
+            animate={{ opacity:1, y:0,  filter:"blur(0px)" }}
+            transition={{ duration:1.2, ease:easeOut, delay:0.3 }}
             className="max-w-[920px] mt-4 md:mt-8 flex flex-col items-center"
           >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.7 }}
+              initial={{ opacity:0 }} animate={{ opacity:1 }}
+              transition={{ duration:0.8, delay:0.7 }}
               data-testid="badge-open-to-work"
               className="inline-flex items-center gap-2.5 mb-6 md:mb-8 px-3 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[11px] tracking-[0.18em] uppercase"
             >
@@ -433,24 +374,15 @@ export const Hero = () => {
               className="font-sans font-extrabold tracking-[-0.02em] leading-[0.95] text-white text-[2.75rem] sm:text-[3.5rem] md:text-[4.25rem] lg:text-[5.25rem] flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
             >
               <span>Hey, I&rsquo;m</span>
-              <span
-                className="inline-block w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/20 align-middle mx-1"
-                style={{ verticalAlign: "middle" }}
-              >
-                <img
-                  src={PROFILE.photoUrl}
-                  alt="Saranmani M"
-                  className="w-full h-full object-cover"
-                  style={{ filter: "grayscale(0.3)" }}
-                />
+              <span className="inline-block w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/20 align-middle mx-1" style={{ verticalAlign:"middle" }}>
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover" style={{ filter:"grayscale(0.3)" }} />
               </span>
               <span>Saranmani M</span>
             </h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.9, ease: easeOut }}
+              initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
+              transition={{ duration:1, delay:0.9, ease:easeOut }}
               className="mt-6 text-[16px] md:text-[18px] text-white/60 max-w-[600px] leading-relaxed"
             >
               IT Graduate — Cloud Security &amp; Linux Engineer. Building reliable
@@ -461,56 +393,40 @@ export const Hero = () => {
           <div className="flex-1 min-h-[24px] md:min-h-[32px]" />
 
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.2, ease: easeOut }}
+            initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
+            transition={{ duration:1, delay:1.2, ease:easeOut }}
             className="flex items-center justify-center gap-6 mb-10"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              <a
-                key={k}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid={`hero-social-${k}`}
-                style={{ cursor: "none" }}
-                className="text-white/50 hover:text-white transition-colors"
-              >
+              <a key={k} href={url} target="_blank" rel="noopener noreferrer"
+                data-testid={`hero-social-${k}`} style={{ cursor:"none" }}
+                className="text-white/50 hover:text-white transition-colors">
                 <Icon size={22} strokeWidth={1.5} />
               </a>
             ))}
             <span className="w-px h-5 bg-white/20" />
-            <a
-              href={PROFILE.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="cta-resume"
-              style={{ cursor: "none" }}
-              className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
-            >
+            <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
+              data-testid="cta-resume" style={{ cursor:"none" }}
+              className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors">
               Résumé →
             </a>
-            <a
-              href={`mailto:${PROFILE.email}`}
-              style={{ cursor: "none" }}
-              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
-            >
+            <a href={`mailto:${PROFILE.email}`} style={{ cursor:"none" }}
+              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
               Say hi ↗
             </a>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.6 }}
+            initial={{ opacity:0 }} animate={{ opacity:1 }}
+            transition={{ duration:1, delay:1.6 }}
             className="flex items-center gap-4 text-white/30 text-[11px] tracking-[0.2em] uppercase mb-6"
           >
             <div className="h-px w-24 bg-white/20" />
             <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
               <motion.div
                 className="w-1 h-1.5 bg-white/60 rounded-full"
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ y:[0,8,0] }}
+                transition={{ duration:1.5, repeat:Infinity, ease:"easeInOut" }}
               />
             </div>
             <div className="h-px w-24 bg-white/20" />
