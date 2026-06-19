@@ -34,6 +34,7 @@ export const Research = () => {
         </Reveal>
 
         <div className="mt-14 grid grid-cols-12 gap-8 md:gap-14">
+
           {/* Meta */}
           <div className="col-span-12 md:col-span-4">
             <Reveal>
@@ -128,6 +129,7 @@ export const Research = () => {
               </div>
             </Reveal>
           </div>
+
         </div>
       </div>
     </section>
