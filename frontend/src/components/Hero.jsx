@@ -262,7 +262,7 @@ export const Hero = () => {
         }} />
 
         {/* --- BRAND HEADER (TOP LEFT SIDE) --- */}
-        <div className="absolute top-8 left-8 md:top-10 md:left-10 z-50 flex items-center gap-3.5 select-none">
+        <div className="fixed top-8 left-8 md:top-10 md:left-10 z-50 flex items-center gap-3.5 select-none bg-black/20 backdrop-blur-sm p-2 rounded-lg">
           <a href="#home" className="flex flex-col text-left font-bold text-white text-xs tracking-wider leading-tight hover:opacity-80 transition-opacity">
             <span>Saranmani</span>
             <span className="text-white/60">M</span>
