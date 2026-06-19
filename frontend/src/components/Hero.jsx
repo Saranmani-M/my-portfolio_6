@@ -31,25 +31,26 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 20 16" fill="none" aria-hidden="true">
       {bars.map((h, i) => (
-        <rect
-          key={i}
-          x={i * 3.2 + 1}
-          y={8 - h * 6}
-          width={2}
-          height={h * 12}
-          rx={1}
-          fill="currentColor"
-          style={playing ? {
-            animation: `waveBar ${0.45 + i * 0.08}s ease-in-out ${i * 0.04}s infinite alternate`,
-            transformOrigin: "50% 100%",
-          } : {}}
-        />
+        <React.Fragment key={i}>
+          <rect
+            x={i * 3.2 + 1}
+            y={8 - h * 6}
+            width={2}
+            height={h * 12}
+            rx={1}
+            fill="currentColor"
+            style={playing ? {
+              animation: `waveBar ${0.45 + i * 0.08}s ease-in-out ${i * 0.04}s infinite alternate`,
+              transformOrigin: "50% 100%",
+            } : {}}
+          />
+        </React.Fragment>
       ))}
     </svg>
   );
 };
 
-// ── CYLINDER BEAD BACKGROUND — static, drawn once ──
+// ── CYLINDER BEAD BACKGROUND — Clean, static rendering from the reference image ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
@@ -69,14 +70,15 @@ const CylinderBeadBackground = () => {
     const cy = H * 0.5;
     const scale = Math.min(W, H) / 800;
 
-    const RINGS    = 56;
-    const STRANDS  = 360;
-    const MAIN_R   = 230 * scale;
-    const TUBE_R   = 82  * scale;
-    const SPHERE_R = 18  * scale;
-    const PERSP    = 2000;
-    const WRAPS    = Math.PI * 9;
-    const Y_SPAN   = H * 1.35;
+    // Adjusted parameters to mimic the deep texture density and lighting profile
+    const RINGS    = 70;       
+    const STRANDS  = 400;      
+    const MAIN_R   = 190 * scale; 
+    const TUBE_R   = 95  * scale; 
+    const SPHERE_R = 14  * scale; 
+    const PERSP    = 2200;
+    const WRAPS    = Math.PI * 11;
+    const Y_SPAN   = H * 1.5;
 
     const particles = [];
 
@@ -92,10 +94,9 @@ const CylinderBeadBackground = () => {
         for (let i = 0; i < STRANDS; i++) {
           const p      = i / STRANDS;
           const yWorld = (p - 0.5) * Y_SPAN;
-          const pinch  = 1 - 0.50 * Math.exp(-Math.pow((p - 0.5) * 3.0, 2));
+          const pinch  = 1 - 0.42 * Math.exp(-Math.pow((p - 0.5) * 2.8, 2));
           const curR   = MAIN_R * pinch;
 
-          // Fixed angle — t = 0, no rotation ever
           const angle = p * WRAPS;
           const hx    = Math.cos(angle) * curR;
           const hz    = Math.sin(angle) * curR;
@@ -118,23 +119,26 @@ const CylinderBeadBackground = () => {
       }
     };
 
-    addArm( 0.52);   // arm tilting /
-    addArm(-0.52);   // arm tilting \
+    // Formulates the classic structured crossed layout directly from the artwork
+    addArm(0.56);  
+    addArm(-0.56); 
 
-    // Sort once by depth, draw once — completely static
+    // Depth sort for authentic 3D overlay layers
     particles.sort((a, b) => a.pz - b.pz);
 
     particles.forEach(({ sx, sy, pz, r }) => {
       const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
-      const hi    = 0.10 + depth * 0.22;
+      
+      // Fine-tuned low exposure variables to match the moody signature look
+      const hi = 0.05 + depth * 0.16; 
 
       const g = ctx.createRadialGradient(
         sx - r * 0.36, sy - r * 0.40, r * 0.01,
         sx,            sy,            r
       );
-      g.addColorStop(0,    `rgba(85,82,78,${hi})`);
-      g.addColorStop(0.18, `rgba(34,32,30,0.97)`);
-      g.addColorStop(0.58, `rgba(12,11,10,1)`);
+      g.addColorStop(0,    `rgba(75,72,68,${hi * 1.2})`);
+      g.addColorStop(0.22, `rgba(24,22,20,0.98)`);
+      g.addColorStop(0.65, `rgba(8,7,6,1)`);
       g.addColorStop(1,    `rgba(2,2,2,1)`);
 
       ctx.beginPath();
@@ -142,9 +146,10 @@ const CylinderBeadBackground = () => {
       ctx.arc(sx, sy, r, 0, Math.PI * 2);
       ctx.fill();
 
+      // Subtle surface reflection highlight structure
       ctx.beginPath();
-      ctx.fillStyle = `rgba(155,150,143,${hi * 0.65})`;
-      ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.115, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(135,130,123,${hi * 0.55})`;
+      ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.11, 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -235,17 +240,17 @@ export const Hero = () => {
         id="home"
         data-testid="hero-section"
         className="relative min-h-screen overflow-hidden flex flex-col"
-        style={{ background: "#050507" }}
+        style={{ background: "#030304" }}
       >
         {/* Abstract Bead Background Mesh */}
         <CylinderBeadBackground />
 
-        {/* ── UPDATED OVERLAY ── */}
+        {/* Updated dark exposure layer matching the image vignetting */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 0%, rgba(5,5,7,0.55) 100%)"
+              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.15) 0%, rgba(3,3,4,0.7) 100%)"
           }}
         />
 
@@ -255,13 +260,13 @@ export const Hero = () => {
           <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
             text-4xl sm:text-5xl md:text-[4.2rem]">
 
-            <span className="block mb-2">
-              <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
-              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle transform translate-y-[-2px]">
-                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
-              </span>
-              <span className="text-white">Saranmani</span>
+          <span className="block mb-2">
+            <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
+            <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle transform translate-y-[-2px]">
+              <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
             </span>
+            <span className="text-white">Saranmani</span>
+          </span>
 
             <span className="block mb-2">
               <span className="text-white/60 font-medium">An </span>
