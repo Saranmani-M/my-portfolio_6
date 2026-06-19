@@ -264,45 +264,48 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
 
-        {/* ── HERO CENTER BLOCK — truly vertically centred ── */}
+        {/* ── HERO CENTER BLOCK — Omkar's Immersive Inline Design Layout ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
 
-          <h1 className="font-extrabold tracking-tight leading-[1.18] text-white flex flex-col items-center gap-1
-            text-[1.65rem] sm:text-4xl md:text-[3.4rem]">
-
-            {/* Line 1: Hey, I'm + avatar + name */}
-            <span className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
-              <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
-              <span className="inline-block w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
-                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
+          <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
+            text-4xl sm:text-5xl md:text-[4.2rem]">
+            
+            {/* Line 1: Hey, I'm [Avatar] Saranmani */}
+            <span className="block mb-2">
+              <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
+              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 vertical-middle align-middle transform translate-y-[-2px]">
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
               </span>
-              <span>Saranmani</span>
+              <span className="text-white">Saranmani</span>
             </span>
 
-            {/* Line 2: An Infrastructure Engineer */}
-            <span className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
-              <span className="text-white/40 font-normal">An</span>
-              <span>Infrastructure Engineer</span>
+            {/* Line 2: An Infrastructure Engineer [Graphics Badge] */}
+            <span className="block mb-2">
+              <span className="text-white/60 font-medium">An </span>
+              <span className="text-white">Infrastructure Engineer </span>
+              <span className="inline-flex items-center justify-center bg-white/5 px-2 py-1 h-7 sm:h-9 md:h-11 rounded-lg border border-white/10 mx-1 align-middle transform translate-y-[-4px]">
+                <span className="text-xs sm:text-sm font-mono text-white/40">⚡</span>
+              </span>
             </span>
 
             {/* Line 3: At Cloud Canvas */}
-            <span className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
-              <span className="text-white/40 font-normal">At</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
+            <span className="block">
+              <span className="text-white/60 font-medium">At </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 font-extrabold">
                 Cloud Canvas
               </span>
             </span>
           </h1>
 
           {/* Tagline */}
-          <p className="mt-4 sm:mt-6 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed">
+          <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed font-normal">
             I enjoy taking messy, complicated infrastructure architectures and
             making them feel automated, secure, and effortless for global
             engineering teams.
           </p>
 
           {/* Action bar */}
-          <div className="mt-5 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+          <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
 
             {/* Socials */}
             <div className="flex items-center gap-3 sm:gap-4">
