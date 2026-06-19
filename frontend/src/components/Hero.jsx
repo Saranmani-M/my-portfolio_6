@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
 import { PROFILE, SOCIALS } from "../lib/data";
@@ -182,9 +183,12 @@ const SkillsMarquee = () => {
 export const Hero = () => {
   const dotRef = useRef(null);
   const pos    = useRef({ x: -200, y: -200 });
+  const [mounted, setMounted] = useState(false);
 
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     // Idempotent: reuse the existing style tag if Hero re-mounts, and
@@ -240,16 +244,19 @@ export const Hero = () => {
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
-      <div
-        ref={dotRef}
-        style={{
-          position: "fixed", top: 0, left: 0, width: 12, height: 12,
-          borderRadius: "50%", background: "#fff",
-          pointerEvents: "none", zIndex: 999999,
-          willChange: "transform",
-          boxShadow: "0 0 8px 2px rgba(255,255,255,0.5)",
-        }}
-      />
+      {mounted && createPortal(
+        <div
+          ref={dotRef}
+          style={{
+            position: "fixed", top: 0, left: 0, width: 16, height: 16,
+            borderRadius: "50%", background: "#fff",
+            pointerEvents: "none", zIndex: 2147483647,
+            willChange: "transform",
+            boxShadow: "0 0 14px 4px rgba(255,255,255,0.65), 0 0 2px 1px rgba(255,255,255,0.9)",
+          }}
+        />,
+        document.body
+      )}
 
       <section
         id="home"
@@ -265,22 +272,30 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
 
-        {/* Music toggle only — sits immediately before your existing "Home"
-            nav link / hamburger menu, which lives in your Navbar component
-            and is rendered alongside this Hero, not duplicated here. */}
-        <div className="relative z-20 flex items-center px-6 md:px-10 pt-6 pb-2">
+        {/* ── Top-left: logo/name, with music toggle stacked right below it ── */}
+        <div className="relative z-20 flex flex-col items-start gap-2.5 px-6 md:px-10 pt-6 pb-2">
+          <div className="flex items-center gap-3">
+            <span className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white font-black text-sm">
+              {PROFILE.initials || "S"}
+            </span>
+            <span className="text-white font-semibold leading-tight text-sm">
+              Saranmani<br />M
+            </span>
+          </div>
+
           <button
             onClick={toggleMusic}
             aria-label={playing ? "Pause music" : "Play music"}
             title={playing ? "Pause music" : "Play music"}
             style={{ cursor: "none" }}
-            className={`inline-flex items-center justify-center w-9 h-9 rounded-xl border transition-all duration-200 ${
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] tracking-widest uppercase font-medium transition-all duration-200 ${
               playing
                 ? "border-white/30 bg-white/10 text-white"
                 : "border-white/10 bg-white/[0.03] text-white/40 hover:text-white hover:border-white/25"
             }`}
           >
-            <WaveformIcon playing={playing} size={16} />
+            <WaveformIcon playing={playing} size={14} />
+            <span>{playing ? "playing" : "music"}</span>
           </button>
         </div>
 
@@ -311,24 +326,30 @@ export const Hero = () => {
             engineering teams.
           </p>
 
-          <div className="mt-8 flex items-center justify-center gap-4 text-white/50">
-            {SOCIAL_ICONS.slice(0, 1).map(({ Icon, url, k }) => (
-              <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                <Icon size={18} />
+          <div className="mt-8 flex items-center justify-center gap-5">
+            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
+              <a
+                key={k} href={url} target="_blank" rel="noopener noreferrer"
+                style={{ cursor: "none" }}
+                className="text-white/50 hover:text-white transition-colors"
+              >
+                <Icon size={20} strokeWidth={1.5} />
               </a>
             ))}
-            <span className="w-px h-4 bg-white/15" />
-            <a href={`tel:${PROFILE.phone || ""}`} className="hover:text-white transition-colors" aria-label="Call">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
+            <span className="w-px h-5 bg-white/20" />
+            <a
+              href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
+              style={{ cursor: "none" }}
+              className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
+            >
+              Résumé →
             </a>
-            <span className="w-px h-4 bg-white/15" />
-            <a href={`mailto:${PROFILE.email}`} className="hover:text-white transition-colors" aria-label="Email">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="M22 6l-10 7L2 6" />
-              </svg>
+            <a
+              href={`mailto:${PROFILE.email}`}
+              style={{ cursor: "none" }}
+              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
+            >
+              Say hi ↗
             </a>
           </div>
         </div>
