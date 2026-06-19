@@ -12,12 +12,6 @@ const SOCIAL_ICONS = [
   { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
 ];
 
-const NAV_LINKS = [
-  { label: "Home",     href: "#home"     },
-  { label: "About Me", href: "#about"    },
-  { label: "Resume",   href: PROFILE.resumeUrl },
-];
-
 const MARQUEE_SKILLS = [
   { label: "Python"  },
   { label: "AWS"     },
@@ -193,10 +187,16 @@ export const Hero = () => {
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    const style = document.createElement("style");
-    style.id = "no-cursor-style";
-    style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
-    document.head.appendChild(style);
+    // Idempotent: reuse the existing style tag if Hero re-mounts, and
+    // always re-append it last so it wins any cascade tie against other
+    // global stylesheets that might also touch `cursor`.
+    let style = document.getElementById("no-cursor-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "no-cursor-style";
+      style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
+    }
+    document.head.appendChild(style); // appendChild moves it if it already exists
 
     const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener("mousemove", onMove);
@@ -265,39 +265,24 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
 
-        <header className="relative z-20 flex items-center justify-between px-6 md:px-10 pt-6 pb-2">
-          <div className="flex items-center gap-3">
-            <span className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white font-black text-sm">
-              {PROFILE.initials || "S"}
-            </span>
-            <button
-              onClick={toggleMusic}
-              aria-label={playing ? "Pause music" : "Play music"}
-              title={playing ? "Pause music" : "Play music"}
-              className={`inline-flex items-center justify-center w-9 h-9 rounded-xl border transition-all duration-200 ${
-                playing
-                  ? "border-white/30 bg-white/10 text-white"
-                  : "border-white/10 bg-white/[0.03] text-white/40 hover:text-white hover:border-white/25"
-              }`}
-            >
-              <WaveformIcon playing={playing} size={16} />
-            </button>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-8 text-[13px] text-white/70">
-            {NAV_LINKS.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                target={label === "Resume" ? "_blank" : undefined}
-                rel={label === "Resume" ? "noopener noreferrer" : undefined}
-                className="hover:text-white transition-colors"
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
-        </header>
+        {/* Music toggle only — sits immediately before your existing "Home"
+            nav link / hamburger menu, which lives in your Navbar component
+            and is rendered alongside this Hero, not duplicated here. */}
+        <div className="relative z-20 flex items-center px-6 md:px-10 pt-6 pb-2">
+          <button
+            onClick={toggleMusic}
+            aria-label={playing ? "Pause music" : "Play music"}
+            title={playing ? "Pause music" : "Play music"}
+            style={{ cursor: "none" }}
+            className={`inline-flex items-center justify-center w-9 h-9 rounded-xl border transition-all duration-200 ${
+              playing
+                ? "border-white/30 bg-white/10 text-white"
+                : "border-white/10 bg-white/[0.03] text-white/40 hover:text-white hover:border-white/25"
+            }`}
+          >
+            <WaveformIcon playing={playing} size={16} />
+          </button>
+        </div>
 
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
           <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
