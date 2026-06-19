@@ -4,26 +4,19 @@ import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
 import { PROFILE, SOCIALS } from "../lib/data";
 
 const SOCIAL_ICONS = [
-  { Icon: Linkedin,  url: SOCIALS.linkedin,  k: "linkedin"  },
-  { Icon: Github,    url: SOCIALS.github,    k: "github"    },
+  { Icon: Linkedin, url: SOCIALS.linkedin, k: "linkedin" },
+  { Icon: Github, url: SOCIALS.github, k: "github" },
   { Icon: Instagram, url: SOCIALS.instagram, k: "instagram" },
-  { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
+  { Icon: Twitter, url: SOCIALS.twitter, k: "x" },
 ];
 
 const MARQUEE_SKILLS = [
-  { label: "Python"  },
-  { label: "AWS"     },
-  { label: "Linux"   },
-  { label: "Bash"    },
-  { label: "Docker"  },
-  { label: "Git"     },
-];
-
-const RUNNING_LOGOS = [
-  { name: "Gears",  color: "text-white/40"     },
-  { name: "Rahi",   color: "text-blue-400/50"  },
-  { name: "idp",    color: "text-green-400/50" },
-  { name: "Google", color: "text-red-400/50"   },
+  { label: "Python" },
+  { label: "AWS" },
+  { label: "Linux" },
+  { label: "Bash" },
+  { label: "Docker" },
+  { label: "Git" },
 ];
 
 const WaveformIcon = ({ playing, size = 16 }) => {
@@ -49,167 +42,6 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── ROTATING DNA DOUBLE HELIX — large, vivid, fills viewport ──
-const DNAHelixBackground = () => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let animId;
-
-    const setSize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width  = window.innerWidth  * dpr;
-      canvas.height = window.innerHeight * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    setSize();
-    window.addEventListener("resize", setSize);
-
-    let t = 0;
-
-    const draw = () => {
-      animId = requestAnimationFrame(draw);
-      t += 0.005;
-
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-      ctx.clearRect(0, 0, W, H);
-
-      // Center of the helix on screen
-      const cx = W * 0.5;
-      const cy = H * 0.5;
-
-      // Helix geometry — made large so beads span the full screen height
-      const BEADS        = 90;       // beads per strand
-      const TURNS        = 2.5;      // full rotations top to bottom
-      const HELIX_RADIUS = W * 0.22; // wide enough to fill screen horizontally
-      const HELIX_HEIGHT = H * 1.1;  // taller than screen so it overflows nicely
-      const BRIDGE_EVERY = 5;        // cross-bridge every N beads
-
-      // Slow Y-axis spin + gentle X tilt
-      const rotY  = t * 0.3;
-      const tiltX = 0.28;
-      const cosY  = Math.cos(rotY), sinY = Math.sin(rotY);
-      const cosTX = Math.cos(tiltX), sinTX = Math.sin(tiltX);
-
-      // Build bead list for both strands
-      const beads = [];
-      for (let s = 0; s < 2; s++) {
-        const phase = s * Math.PI; // 0 and π → double helix
-
-        for (let i = 0; i < BEADS; i++) {
-          const frac  = i / (BEADS - 1);                        // 0→1
-          const angle = frac * Math.PI * 2 * TURNS + phase + t * 0.4;
-          const yW    = (frac - 0.5) * HELIX_HEIGHT;            // world Y
-
-          // Helix local coords
-          const xL = Math.cos(angle) * HELIX_RADIUS;
-          const zL = Math.sin(angle) * HELIX_RADIUS;
-
-          // Rotate around Y (spin)
-          const xR  =  xL * cosY - zL * sinY;
-          const zR1 =  xL * sinY + zL * cosY;
-
-          // Tilt around X
-          const yR  = yW * cosTX - zR1 * sinTX;
-          const zR  = yW * sinTX + zR1 * cosTX;
-
-          // Perspective projection
-          const FOV = 1800;
-          const psp = FOV / (FOV + zR);
-          const sx  = cx + xR * psp;
-          const sy  = cy + yR * psp;
-
-          // Depth cue: 0 = back, 1 = front
-          const depth  = Math.max(0, Math.min(1, (-zR + FOV * 0.5) / FOV));
-          const radius = psp * (6 + depth * 10);          // 6–16 px
-          const alpha  = 0.35 + depth * 0.65;             // 0.35–1.0
-
-          beads.push({ sx, sy, zR, radius, depth, alpha, strand: s, idx: i });
-        }
-      }
-
-      // Painter's sort — back to front
-      beads.sort((a, b) => a.zR - b.zR);
-
-      // Index beads by idx for bridge drawing
-      const byIdx = {};
-      beads.forEach(b => {
-        if (!byIdx[b.idx]) byIdx[b.idx] = [];
-        byIdx[b.idx].push(b);
-      });
-
-      // ── Draw cross-bridges ──
-      for (let i = 0; i < BEADS; i += BRIDGE_EVERY) {
-        const pair = byIdx[i];
-        if (!pair || pair.length < 2) continue;
-        const [a, b] = pair;
-        const d = (a.depth + b.depth) / 2;
-
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(130,160,255,${0.12 + d * 0.30})`;
-        ctx.lineWidth   = 1.5 + d * 2;
-        ctx.moveTo(a.sx, a.sy);
-        ctx.lineTo(b.sx, b.sy);
-        ctx.stroke();
-      }
-
-      // ── Draw beads ──
-      beads.forEach(({ sx, sy, radius, depth, alpha }) => {
-        const hi  = Math.floor(120 + depth * 135);   // 120–255
-        const lo  = Math.floor(hi * 0.1);
-
-        // Glow halo
-        const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, radius * 3);
-        glow.addColorStop(0, `rgba(${hi},${hi},${hi + 15},${alpha * 0.22})`);
-        glow.addColorStop(1, `rgba(0,0,0,0)`);
-        ctx.beginPath();
-        ctx.fillStyle = glow;
-        ctx.arc(sx, sy, radius * 3, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Sphere body
-        const gx   = sx - radius * 0.3;
-        const gy   = sy - radius * 0.35;
-        const body = ctx.createRadialGradient(gx, gy, 0, sx, sy, radius);
-        body.addColorStop(0,    `rgba(${Math.min(255, hi + 80)},${Math.min(255, hi + 80)},${Math.min(255, hi + 90)},${alpha})`);
-        body.addColorStop(0.45, `rgba(${hi},${hi},${hi},${alpha * 0.9})`);
-        body.addColorStop(1,    `rgba(${lo},${lo},${lo + 10},${alpha * 0.85})`);
-        ctx.beginPath();
-        ctx.fillStyle = body;
-        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Specular highlight
-        const spec = ctx.createRadialGradient(gx, gy, 0, gx, gy, radius * 0.5);
-        spec.addColorStop(0, `rgba(255,255,255,${0.55 * depth})`);
-        spec.addColorStop(1, `rgba(255,255,255,0)`);
-        ctx.beginPath();
-        ctx.fillStyle = spec;
-        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    };
-
-    draw();
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", setSize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 z-0 pointer-events-none"
-      style={{ width: "100%", height: "100%" }}
-    />
-  );
-};
-
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
@@ -228,9 +60,9 @@ const SkillsMarquee = () => {
 };
 
 export const Hero = () => {
-  const audioRef  = useRef(null);
+  const audioRef = useRef(null);
   const cursorRef = useRef(null);
-  const mousePos  = useRef({ x: -100, y: -100 });
+  const mousePos = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -257,10 +89,8 @@ export const Hero = () => {
   const toggleMusic = useCallback(() => {
     const a = audioRef.current; if (!a) return;
     if (playing) { a.pause(); setPlaying(false); }
-    else         { a.play().catch(() => {}); setPlaying(true); }
+    else { a.play().catch(() => {}); setPlaying(true); }
   }, [playing]);
-
-  const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
 
   return (
     <>
@@ -282,24 +112,19 @@ export const Hero = () => {
       <section
         id="home"
         data-testid="hero-section"
-        className="relative min-h-screen overflow-hidden flex flex-col"
-        style={{ background: "#060608" }}
+        className="relative min-h-screen overflow-hidden flex flex-col bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('/image_3c72aa.jpg')` }}
       >
-        <DNAHelixBackground />
-
-        {/* Gentle radial dim only — keep helix visible */}
+        {/* Cinematic dark overlay to ensure text contrast over the starry background */}
         <div className="absolute inset-0 z-[1]" style={{
           background:
-            "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.0) 100%)," +
-            "linear-gradient(180deg, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.85) 100%)",
+            "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.75) 100%)",
         }} />
 
         {/* ── HERO TEXT ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
-
-          <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl leading-[1.2]
-            text-4xl sm:text-5xl md:text-[4.2rem]">
-
+          <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl leading-[1.2] text-4xl sm:text-5xl md:text-[4.2rem]">
             <span className="block mb-2">
               <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
               <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle translate-y-[-2px]">
@@ -357,18 +182,8 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── BOTTOM BLOCK ── */}
+        {/* ── BOTTOM BLOCK (Company Logos Removed, Scroll Indicator Maintained) ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
-          <div className="w-full overflow-hidden mb-4 sm:mb-6">
-            <div className="flex gap-8 sm:gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform items-center h-8">
-              {loopLogos.map((logo, i) => (
-                <span key={i} className={`text-sm sm:text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
-                  {logo.name}
-                </span>
-              ))}
-            </div>
-          </div>
-
           <div className="w-full flex items-center justify-center gap-3 sm:gap-4 text-white/35 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
             <span className="hidden sm:inline">Scroll down</span>
             <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
