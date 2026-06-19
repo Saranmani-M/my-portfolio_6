@@ -49,10 +49,8 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-const VIRTUAL_W = 1600;
-const VIRTUAL_H = 1000;
-
-const GlassBubbleBackground = () => {
+// ── OMKAR'S SIGNATURE ROTATING PARAMETRIC BACKGROUND ──
+const ParametricMeshBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -61,111 +59,112 @@ const GlassBubbleBackground = () => {
     const ctx = canvas.getContext("2d");
     let animId;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width  = VIRTUAL_W * dpr;
-    canvas.height = VIRTUAL_H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const bubbles = [];
-    const STEPS = 18, TURNS = 2.4, HR = 1.55, HH = 4.4;
-
-    for (let i = 0; i < STEPS; i++) {
-      const frac  = i / STEPS;
-      const angle = frac * Math.PI * 2 * TURNS;
-      const y     = (frac - 0.5) * HH;
-      const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
-      const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
-      bubbles.push({ x: x1, y, z: z1, r: 0.62 + (i % 3) * 0.07, seed: i });
-      bubbles.push({ x: x2, y, z: z2, r: 0.58 + ((i + 1) % 3) * 0.07, seed: i + 50 });
-    }
-    for (let i = 0; i < 10; i++) {
-      bubbles.push({
-        x: (((i * 73.13) % 100) / 100 - 0.5) * 3.6,
-        y: (((i * 41.29) % 100) / 100 - 0.5) * 4.0,
-        z: (((i * 29.81) % 100) / 100 - 0.5) * 2.0,
-        r: 0.22 + ((i * 17.3) % 100) / 100 * 0.3,
-        seed: i + 100,
-      });
-    }
-
-    let isScrolling = false, scrollTimer;
-    const onScroll = () => {
-      isScrolling = true;
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    resize();
+    window.addEventListener("resize", resize);
 
     let t = 0;
     const draw = () => {
       animId = requestAnimationFrame(draw);
-      ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
-      if (!isScrolling) t += 0.0035;
+      t += 0.006;
 
-      const cx = VIRTUAL_W * 0.5, cy = VIRTUAL_H * 0.46;
-      const scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.62;
-      const cosY = Math.cos(t * 0.5), sinY = Math.sin(t * 0.5);
-      const cosX = Math.cos(0.35), sinX = Math.sin(0.35);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
 
-      const proj = bubbles.map(b => {
-        const rx = b.x * cosY - b.z * sinY, rz = b.x * sinY + b.z * cosY;
-        const ry = b.y * cosX - rz * sinX, rz2 = b.y * sinX + rz * cosX;
-        const psp = 2.6 / (2.6 + rz2);
-        return {
-          sx: cx + rx * scale * psp,
-          sy: cy + ry * scale * psp,
-          z: rz2,
-          r: b.r * scale * 0.34 * psp,
-          seed: b.seed,
-        };
-      });
-      proj.sort((a, b) => a.z - b.z);
+      // Center the grid calculation to align cleanly behind the main text
+      const cx = w * 0.5;
+      const cy = h * 0.44;
 
-      proj.forEach(p => {
-        const dep = Math.max(0, Math.min(1, (p.z + 1.8) / 3.4));
-        const base = 60 + dep * 70;
+      // Adjust density and dimensions of the mesh
+      const rows = 38;
+      const cols = 38;
+      const spacing = Math.min(w, h) * 0.038;
 
-        const glow = ctx.createRadialGradient(p.sx, p.sy, p.r * 0.4, p.sx, p.sy, p.r * 1.5);
-        glow.addColorStop(0, `rgba(${base},${base},${base},0.10)`);
-        glow.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.beginPath(); ctx.fillStyle = glow; ctx.arc(p.sx, p.sy, p.r * 1.5, 0, Math.PI * 2); ctx.fill();
+      // Camera orientation angles matching the original portfolio frame
+      const rotY = t * 0.15; 
+      const rotX = 1.1;
 
-        const body = ctx.createLinearGradient(p.sx - p.r, p.sy - p.r, p.sx + p.r, p.sy + p.r);
-        body.addColorStop(0,   `rgba(${base * 0.18},${base * 0.18},${base * 0.18},1)`);
-        body.addColorStop(0.35,`rgba(${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},1)`);
-        body.addColorStop(0.5, `rgba(${base * 0.35},${base * 0.35},${base * 0.35},1)`);
-        body.addColorStop(0.7, `rgba(${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},1)`);
-        body.addColorStop(1,   `rgba(${base * 0.12},${base * 0.12},${base * 0.12},1)`);
-        ctx.beginPath(); ctx.fillStyle = body; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
 
-        ctx.save();
-        ctx.beginPath(); ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.clip();
-        for (let k = 0; k < 4; k++) {
-          const ringR = p.r * (0.3 + k * 0.22);
-          const ringOpacity = 0.10 + 0.05 * Math.sin(t * 3 + p.seed + k);
+      // Pre-calculate 3D spatial points matrix coordinates
+      const points = [];
+      for (let r = 0; r < rows; r++) {
+        points[r] = [];
+        for (let c = 0; c < cols; c++) {
+          // Normalize coordinates centered at the zero point axis
+          const nx = (c - cols * 0.5) * spacing;
+          const nz = (r - rows * 0.5) * spacing;
+
+          // Trigonometric wave ripples moving across deep space coordinates
+          const dist = Math.sqrt(nx * nx + nz * nz) * 0.007;
+          const ny = Math.sin(dist * 4.5 - t * 2.0) * Math.cos(nx * 0.003) * 65;
+
+          // Apply 3D matrix coordinate axis rotations
+          const x1 = nx * cosY - nz * sinY;
+          const z1 = nx * sinY + nz * cosY;
+
+          const y2 = ny * cosX - z1 * sinX;
+          const z2 = ny * sinX + z1 * cosX;
+
+          // Standard 3D perspective projection formula scaling
+          const psp = 700 / (700 + z2);
+          points[r][c] = {
+            sx: cx + x1 * psp,
+            sy: cy + y2 * psp,
+            depth: z2
+          };
+        }
+      }
+
+      // Draw horizontal line segments across columns
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols - 1; c++) {
+          const p1 = points[r][c];
+          const p2 = points[r][c + 1];
+
+          // Compute dynamic line transparency values based on point tracking depth values
+          const opacity = Math.max(0, Math.min(0.09, (400 - p1.depth) * 0.0002));
           ctx.beginPath();
-          ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, ringOpacity)})`;
-          ctx.lineWidth = p.r * 0.05;
-          ctx.ellipse(p.sx, p.sy - p.r * 0.1, ringR, ringR * 0.5, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+          ctx.lineWidth = 0.75;
+          ctx.moveTo(p1.sx, p1.sy);
+          ctx.lineTo(p2.sx, p2.sy);
           ctx.stroke();
         }
-        ctx.restore();
+      }
 
-        const spec = ctx.createRadialGradient(p.sx - p.r * 0.3, p.sy - p.r * 0.35, 0, p.sx - p.r * 0.3, p.sy - p.r * 0.35, p.r * 0.35);
-        spec.addColorStop(0, `rgba(255,255,255,${0.55 * dep})`);
-        spec.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.beginPath(); ctx.fillStyle = spec; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
-      });
+      // Draw vertical line segments across rows
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows - 1; r++) {
+          const p1 = points[r][c];
+          const p2 = points[r + 1][c];
+
+          const opacity = Math.max(0, Math.min(0.09, (400 - p1.depth) * 0.0002));
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+          ctx.lineWidth = 0.75;
+          ctx.moveTo(p1.sx, p1.sy);
+          ctx.lineTo(p2.sx, p2.sy);
+          ctx.stroke();
+        }
+      }
     };
+
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(scrollTimer);
+      window.removeEventListener("resize", resize);
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" style={{ width: "100%", height: "100%" }} />;
 };
 
 const SkillsMarquee = () => {
@@ -191,7 +190,6 @@ export const Hero = () => {
   const mousePos = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
 
-  // Smooth GPU cursor — desktop only
   useEffect(() => {
     const handleMouseMove = (e) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
@@ -211,7 +209,6 @@ export const Hero = () => {
     };
   }, []);
 
-  // FIX: exact filename, no encodeURI
   useEffect(() => {
     const audio = new Audio("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller_(mp3.pm).mp3");
     audio.loop = true;
@@ -232,7 +229,6 @@ export const Hero = () => {
   return (
     <>
       <style>{`
-        /* Custom cursor only on devices with a real pointer */
         @media (hover: hover) and (pointer: fine) {
           html, body, #root, a, button, img, svg, [role="button"] {
             cursor: none !important;
@@ -243,7 +239,6 @@ export const Hero = () => {
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
-      {/* Custom cursor dot — hidden on touch/mobile */}
       <div
         ref={cursorRef}
         className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform hidden md:block"
@@ -256,21 +251,19 @@ export const Hero = () => {
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#070708" }}
       >
-        <GlassBubbleBackground />
+        <ParametricMeshBackground />
 
         <div className="absolute inset-0 z-[1]" style={{
           background:
-            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
-            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
+            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 75%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        {/* ── HERO CENTER BLOCK — Omkar's Immersive Inline Design Layout ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
 
           <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
             text-4xl sm:text-5xl md:text-[4.2rem]">
             
-            {/* Line 1: Hey, I'm [Avatar] Saranmani */}
             <span className="block mb-2">
               <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
               <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 vertical-middle align-middle transform translate-y-[-2px]">
@@ -279,7 +272,6 @@ export const Hero = () => {
               <span className="text-white">Saranmani</span>
             </span>
 
-            {/* Line 2: An Infrastructure Engineer [Graphics Badge] */}
             <span className="block mb-2">
               <span className="text-white/60 font-medium">An </span>
               <span className="text-white">Infrastructure Engineer </span>
@@ -288,7 +280,6 @@ export const Hero = () => {
               </span>
             </span>
 
-            {/* Line 3: At Cloud Canvas */}
             <span className="block">
               <span className="text-white/60 font-medium">At </span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 font-extrabold">
@@ -297,17 +288,13 @@ export const Hero = () => {
             </span>
           </h1>
 
-          {/* Tagline */}
           <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed font-normal">
             I enjoy taking messy, complicated infrastructure architectures and
             making them feel automated, secure, and effortless for global
             engineering teams.
           </p>
 
-          {/* Action bar */}
           <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
-
-            {/* Socials */}
             <div className="flex items-center gap-3 sm:gap-4">
               {SOCIAL_ICONS.map(({ Icon, url, k }) => (
                 <a key={k} href={url} target="_blank" rel="noopener noreferrer"
@@ -317,10 +304,8 @@ export const Hero = () => {
               ))}
             </div>
 
-            {/* Divider */}
             <span className="w-px h-5 bg-white/20" />
 
-            {/* Music */}
             <button
               onClick={toggleMusic}
               aria-label={playing ? "Pause music" : "Play music"}
@@ -330,16 +315,13 @@ export const Hero = () => {
               <WaveformIcon playing={playing} size={18} />
             </button>
 
-            {/* Divider */}
             <span className="w-px h-5 bg-white/20" />
 
-            {/* Résumé */}
             <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
               className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors">
               Résumé →
             </a>
 
-            {/* Say hi */}
             <a href={`mailto:${PROFILE.email}`}
               className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase px-3 sm:px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
               Say hi ↗
@@ -347,10 +329,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── BOTTOM BLOCK ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
-
-          {/* Logo marquee — stable height, no jumping */}
           <div className="w-full overflow-hidden mb-4 sm:mb-6">
             <div className="flex gap-8 sm:gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform items-center h-8">
               {loopLogos.map((logo, i) => (
@@ -361,7 +340,6 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Scroll indicator */}
           <div className="w-full flex items-center justify-center gap-3 sm:gap-4 text-white/35 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
             <span className="hidden sm:inline">Scroll down</span>
             <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
