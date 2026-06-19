@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
 import { PROFILE, SOCIALS } from "../lib/data";
@@ -181,55 +180,11 @@ const SkillsMarquee = () => {
 };
 
 export const Hero = () => {
-  const dotRef = useRef(null);
-  const pos    = useRef({ x: -200, y: -200 });
-  const [mounted, setMounted] = useState(false);
-
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
-
   useEffect(() => {
-    // Belt-and-suspenders: a global stylesheet rule AND a direct inline
-    // !important override on html/body. Inline style + !important always
-    // wins the CSS cascade over any external stylesheet rule, even if that
-    // stylesheet also uses !important — this is the strongest override
-    // available without touching other files.
-    let style = document.getElementById("no-cursor-style");
-    if (!style) {
-      style = document.createElement("style");
-      style.id = "no-cursor-style";
-      style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
-    }
-    document.head.appendChild(style);
-
-    document.documentElement.style.setProperty("cursor", "none", "important");
-    document.body.style.setProperty("cursor", "none", "important");
-
-    const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener("mousemove", onMove);
-
-    let raf;
-    const tick = () => {
-      raf = requestAnimationFrame(tick);
-      const dot = dotRef.current;
-      if (dot) dot.style.transform = `translate(${pos.current.x - 6}px,${pos.current.y - 6}px)`;
-    };
-    tick();
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(raf);
-      const el = document.getElementById("no-cursor-style");
-      if (el) el.remove();
-      document.documentElement.style.removeProperty("cursor");
-      document.body.style.removeProperty("cursor");
-    };
-  }, []);
-
-  useEffect(() => {
-    const audio = new Audio(encodeURI("/Paul_C__Schmidt_-_Interstellar_Main_Theme__mp3_pm_.mp3"));
+    const audio = new Audio(encodeURI("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller__mp3_pm_.mp3"));
     audio.loop = true;
     audio.volume = 0.5;
     audioRef.current = audio;
@@ -251,20 +206,6 @@ export const Hero = () => {
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
-      {mounted && createPortal(
-        <div
-          ref={dotRef}
-          style={{
-            position: "fixed", top: 0, left: 0, width: 16, height: 16,
-            borderRadius: "50%", background: "#fff",
-            pointerEvents: "none", zIndex: 2147483647,
-            willChange: "transform",
-            boxShadow: "0 0 14px 4px rgba(255,255,255,0.65), 0 0 2px 1px rgba(255,255,255,0.9)",
-          }}
-        />,
-        document.body
-      )}
-
       <section
         id="home"
         data-testid="hero-section"
@@ -279,24 +220,6 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
 
-        {/* ── Music pill — sits beside your existing logo/name in the real
-             Navbar (not duplicated here). Matches the "🔊 MUSIC" pill style
-             from your reference. Tune `left` to land right after your logo
-             block ends. ── */}
-        <button
-          onClick={toggleMusic}
-          aria-label={playing ? "Pause music" : "Play music"}
-          title={playing ? "Pause music" : "Play music"}
-          style={{ cursor: "none", left: "168px", top: "20px" }}
-          className={`fixed z-20 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] tracking-widest uppercase font-medium transition-all duration-200 ${
-            playing
-              ? "border-white/30 bg-white/10 text-white"
-              : "border-white/10 bg-white/[0.04] text-white/50 hover:text-white hover:border-white/25"
-          }`}
-        >
-          <WaveformIcon playing={playing} size={14} />
-          <span>{playing ? "playing" : "music"}</span>
-        </button>
 
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
           <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
@@ -329,7 +252,7 @@ export const Hero = () => {
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a
                 key={k} href={url} target="_blank" rel="noopener noreferrer"
-                style={{ cursor: "none" }}
+                
                 className="text-white/50 hover:text-white transition-colors"
               >
                 <Icon size={20} strokeWidth={1.5} />
@@ -340,7 +263,7 @@ export const Hero = () => {
               onClick={toggleMusic}
               aria-label={playing ? "Pause music" : "Play music"}
               title={playing ? "Pause music" : "Play music"}
-              style={{ cursor: "none" }}
+              
               className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
             >
               <WaveformIcon playing={playing} size={18} />
@@ -348,14 +271,14 @@ export const Hero = () => {
             <span className="w-px h-5 bg-white/20" />
             <a
               href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              style={{ cursor: "none" }}
+              
               className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
             >
               Résumé →
             </a>
             <a
               href={`mailto:${PROFILE.email}`}
-              style={{ cursor: "none" }}
+              
               className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
             >
               Say hi ↗
