@@ -191,16 +191,21 @@ export const Hero = () => {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    // Idempotent: reuse the existing style tag if Hero re-mounts, and
-    // always re-append it last so it wins any cascade tie against other
-    // global stylesheets that might also touch `cursor`.
+    // Belt-and-suspenders: a global stylesheet rule AND a direct inline
+    // !important override on html/body. Inline style + !important always
+    // wins the CSS cascade over any external stylesheet rule, even if that
+    // stylesheet also uses !important — this is the strongest override
+    // available without touching other files.
     let style = document.getElementById("no-cursor-style");
     if (!style) {
       style = document.createElement("style");
       style.id = "no-cursor-style";
       style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
     }
-    document.head.appendChild(style); // appendChild moves it if it already exists
+    document.head.appendChild(style);
+
+    document.documentElement.style.setProperty("cursor", "none", "important");
+    document.body.style.setProperty("cursor", "none", "important");
 
     const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener("mousemove", onMove);
@@ -218,6 +223,8 @@ export const Hero = () => {
       cancelAnimationFrame(raf);
       const el = document.getElementById("no-cursor-style");
       if (el) el.remove();
+      document.documentElement.style.removeProperty("cursor");
+      document.body.style.removeProperty("cursor");
     };
   }, []);
 
@@ -272,32 +279,24 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
 
-        {/* ── Top-left: logo/name, with music toggle stacked right below it ── */}
-        <div className="relative z-20 flex flex-col items-start gap-2.5 px-6 md:px-10 pt-6 pb-2">
-          <div className="flex items-center gap-3">
-            <span className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white font-black text-sm">
-              {PROFILE.initials || "S"}
-            </span>
-            <span className="text-white font-semibold leading-tight text-sm">
-              Saranmani<br />M
-            </span>
-          </div>
-
-          <button
-            onClick={toggleMusic}
-            aria-label={playing ? "Pause music" : "Play music"}
-            title={playing ? "Pause music" : "Play music"}
-            style={{ cursor: "none" }}
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] tracking-widest uppercase font-medium transition-all duration-200 ${
-              playing
-                ? "border-white/30 bg-white/10 text-white"
-                : "border-white/10 bg-white/[0.03] text-white/40 hover:text-white hover:border-white/25"
-            }`}
-          >
-            <WaveformIcon playing={playing} size={14} />
-            <span>{playing ? "playing" : "music"}</span>
-          </button>
-        </div>
+        {/* ── Music pill — sits beside your existing logo/name in the real
+             Navbar (not duplicated here). Matches the "🔊 MUSIC" pill style
+             from your reference. Tune `left` to land right after your logo
+             block ends. ── */}
+        <button
+          onClick={toggleMusic}
+          aria-label={playing ? "Pause music" : "Play music"}
+          title={playing ? "Pause music" : "Play music"}
+          style={{ cursor: "none", left: "168px", top: "20px" }}
+          className={`fixed z-20 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] tracking-widest uppercase font-medium transition-all duration-200 ${
+            playing
+              ? "border-white/30 bg-white/10 text-white"
+              : "border-white/10 bg-white/[0.04] text-white/50 hover:text-white hover:border-white/25"
+          }`}
+        >
+          <WaveformIcon playing={playing} size={14} />
+          <span>{playing ? "playing" : "music"}</span>
+        </button>
 
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
           <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
@@ -336,6 +335,16 @@ export const Hero = () => {
                 <Icon size={20} strokeWidth={1.5} />
               </a>
             ))}
+            <span className="w-px h-5 bg-white/20" />
+            <button
+              onClick={toggleMusic}
+              aria-label={playing ? "Pause music" : "Play music"}
+              title={playing ? "Pause music" : "Play music"}
+              style={{ cursor: "none" }}
+              className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
+            >
+              <WaveformIcon playing={playing} size={18} />
+            </button>
             <span className="w-px h-5 bg-white/20" />
             <a
               href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
