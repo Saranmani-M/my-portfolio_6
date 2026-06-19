@@ -49,128 +49,126 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── TWISTED CYLINDER BEAD BACKGROUND (FROM IMAGE) ──
+// ── UPDATED CYLINDER BEAD BACKGROUND ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
-    let animId;
+    let frame;
+    let t = 0;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width  = window.innerWidth  * dpr;
+      canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
+
     resize();
     window.addEventListener("resize", resize);
 
-    const TOTAL_BEADS = 380; 
-    let t = 0;
+    const drawStructure = (centerX, centerY, rotationDirection, tilt) => {
+      const particles = [];
 
-    const draw = () => {
-      animId = requestAnimationFrame(draw);
-      t += 0.004; // Smooth animation speed
+      const rings = 32;
+      const strands = 260;
 
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-      ctx.clearRect(0, 0, W, H);
+      for (let ring = 0; ring < rings; ring++) {
+        for (let i = 0; i < strands; i++) {
+          const p = i / strands;
 
-      const cx = W * 0.5;
-      const cy = H * 0.5;
-      const baseRadius = Math.min(W, H) * 0.14;
-      const allBeads = [];
+          const y = (p - 0.5) * window.innerHeight * 1.5;
 
-      // 1. FRONT STRUCTURE: Leans right, rotates RIGHT (+t)
-      for (let i = 0; i < TOTAL_BEADS; i++) {
-        const pct = i / (TOTAL_BEADS - 1);
-        const yWorld = (pct - 0.5) * H * 0.85;
-        
-        // Helix spiral mapping
-        const angle = pct * Math.PI * 12 + t * 0.4;
-        const xLocal = Math.sin(angle) * baseRadius;
-        const zLocal = Math.cos(angle) * baseRadius;
+          const angle =
+            p * Math.PI * 14 +
+            t * rotationDirection +
+            ring * 0.22;
 
-        // Lean alignment
-        const tilt = 0.45;
-        const xRot = xLocal * Math.cos(tilt) - yWorld * Math.sin(tilt);
-        const yRot = xLocal * Math.sin(tilt) + yWorld * Math.cos(tilt);
+          const mainRadius = 220 + Math.sin(p * Math.PI * 4) * 40;
 
-        const psp = 900 / (900 + zLocal);
-        const sx = cx + xRot * psp - (W * 0.04);
-        const sy = cy + yRot * psp;
+          const x = Math.cos(angle) * mainRadius;
+          const z = Math.sin(angle) * mainRadius;
 
-        allBeads.push({ sx, sy, zDepth: zLocal, psp, isFront: true });
+          const tubeAngle = (ring / rings) * Math.PI * 2;
+          const tubeRadius = 80;
+
+          const tx = Math.cos(tubeAngle) * tubeRadius;
+          const tz = Math.sin(tubeAngle) * tubeRadius;
+
+          const px = x + tx;
+          const pz = z + tz;
+
+          const rx = px * Math.cos(tilt) - y * Math.sin(tilt);
+          const ry = px * Math.sin(tilt) + y * Math.cos(tilt);
+
+          const perspective = 1800 / (1800 + pz);
+
+          particles.push({
+            x: centerX + rx * perspective,
+            y: centerY + ry * perspective,
+            z: pz,
+            r: 12 * perspective,
+          });
+        }
       }
 
-      // 2. BACK STRUCTURE: Leans left, rotates LEFT (-t)
-      for (let i = 0; i < TOTAL_BEADS; i++) {
-        const pct = i / (TOTAL_BEADS - 1);
-        const yWorld = (pct - 0.5) * H * 0.85;
-        
-        const angle = pct * Math.PI * 12 - t * 0.4;
-        const xLocal = Math.sin(angle) * baseRadius;
-        // Pushed back into depth space (+ 160)
-        const zLocal = Math.cos(angle) * baseRadius + 160;
+      particles.sort((a, b) => a.z - b.z);
 
-        const tilt = -0.45;
-        const xRot = xLocal * Math.cos(tilt) - yWorld * Math.sin(tilt);
-        const yRot = xLocal * Math.sin(tilt) + yWorld * Math.cos(tilt);
-
-        const psp = 900 / (900 + zLocal);
-        const sx = cx + xRot * psp + (W * 0.04);
-        const sy = cy + yRot * psp;
-
-        allBeads.push({ sx, sy, zDepth: zLocal, psp, isFront: false });
-      }
-
-      // Sort depth sequence to maintain proper layout occlusion
-      allBeads.sort((a, b) => b.zDepth - a.zDepth);
-
-      // Render beads
-      allBeads.forEach(({ sx, sy, zDepth, psp, isFront }) => {
-        const radius = psp * 6.8; 
-        const normDepth = (zDepth + 200) / 450;
-        const opacity = isFront ? 0.95 : 0.6;
-
-        // Dark Matte Shadow Base
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(8, 8, 10, ${opacity})`;
-        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Chiaroscuro Specular Gradient Rim Accent
-        const highlightX = sx - radius * 0.35;
-        const highlightY = sy - radius * 0.4;
-        
-        const glossGlow = ctx.createRadialGradient(
-          highlightX, highlightY, 0,
-          highlightX, highlightY, radius * 0.95
+      particles.forEach((p) => {
+        const g = ctx.createRadialGradient(
+          p.x - p.r * 0.4,
+          p.y - p.r * 0.4,
+          0,
+          p.x,
+          p.y,
+          p.r
         );
-        glossGlow.addColorStop(0, `rgba(245, 245, 255, ${0.42 * (1 - normDepth)})`);
-        glossGlow.addColorStop(0.2, `rgba(85, 85, 95, ${0.22 * (1 - normDepth)})`);
-        glossGlow.addColorStop(0.7, `rgba(14, 14, 18, ${opacity})`);
-        glossGlow.addColorStop(1, `rgba(4, 4, 6, ${opacity})`);
+
+        g.addColorStop(0,    "rgba(255,255,255,0.25)");
+        g.addColorStop(0.2,  "rgba(120,120,120,0.15)");
+        g.addColorStop(0.65, "rgba(18,18,18,1)");
+        g.addColorStop(1,    "rgba(0,0,0,1)");
 
         ctx.beginPath();
-        ctx.fillStyle = glossGlow;
-        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Precision Highlight Point
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.55 * (1 - normDepth)})`;
-        ctx.arc(highlightX, highlightY, radius * 0.11, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+        ctx.arc(
+          p.x - p.r * 0.3,
+          p.y - p.r * 0.3,
+          p.r * 0.12,
+          0,
+          Math.PI * 2
+        );
         ctx.fill();
       });
     };
 
-    draw();
+    const animate = () => {
+      frame = requestAnimationFrame(animate);
+
+      t += 0.0008;
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      ctx.clearRect(0, 0, W, H);
+
+      drawStructure(W * 0.38, H * 0.55,  1,  0.6);
+      drawStructure(W * 0.62, H * 0.45, -1, -0.6);
+    };
+
+    animate();
+
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
     };
   }, []);
@@ -265,12 +263,14 @@ export const Hero = () => {
         {/* Abstract Bead Background Mesh */}
         <CylinderBeadBackground />
 
-        {/* Framing Contrast Vignette Layer */}
-        <div className="absolute inset-0 z-[1]" style={{
-          background:
-            "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 0%, rgba(5,5,7,0.88) 82%)," +
-            "linear-gradient(180deg, rgba(5,5,7,0.65) 0%, rgba(0,0,0,0) 40%, rgba(5,5,7,0.98) 100%)",
-        }} />
+        {/* ── UPDATED OVERLAY ── */}
+        <div
+          className="absolute inset-0 z-[1]"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%)"
+          }}
+        />
 
         {/* ── HERO CENTER BLOCK ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
