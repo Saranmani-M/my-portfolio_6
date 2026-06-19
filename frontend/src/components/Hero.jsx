@@ -47,15 +47,14 @@ const MARQUEE_SKILLS = [
 const VIRTUAL_W = 1600;
 const VIRTUAL_H = 1000;
 
-// Atom colors like a real molecular model
 const ATOM_COLORS = [
-  [220, 80,  80],   // red   - oxygen
-  [80,  140, 220],  // blue  - nitrogen
-  [200, 200, 200],  // grey  - carbon
-  [220, 180, 60],   // yellow - sulfur/phosphorus
-  [100, 200, 120],  // green  - misc
-  [180, 100, 220],  // purple - misc
-  [230, 130, 60],   // orange - misc
+  [220, 80,  80],
+  [80,  140, 220],
+  [200, 200, 200],
+  [220, 180, 60],
+  [100, 200, 120],
+  [180, 100, 220],
+  [230, 130, 60],
 ];
 
 const BubbleBackground = () => {
@@ -74,31 +73,36 @@ const BubbleBackground = () => {
     canvas.height = height * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // --- Build DNA double helix ---
+    // ── DNA double helix ──────────────────────────────────────────────
     const atoms = [];
-    const STEPS = 80;       // rungs along the helix
-    const TURNS = 4.5;      // full rotations
-    const HELIX_R = 0.55;   // radius of each strand
-    const HELIX_H = 2.2;    // total height span
+
+    // Increased from 80 → 140 for denser coverage
+    const STEPS = 140;
+    // More turns for more spread
+    const TURNS = 5.5;
+    // Key change: wider radius so strands reach toward the canvas edges
+    const HELIX_R = 1.45;
+    // Taller helix so it fills vertical space too
+    const HELIX_H = 3.0;
 
     for (let i = 0; i < STEPS; i++) {
       const frac = i / STEPS;
       const angle = frac * Math.PI * 2 * TURNS;
       const y = (frac - 0.5) * HELIX_H;
 
-      // Strand 1 backbone atoms (large)
+      // Strand 1 backbone
       const x1 = Math.cos(angle) * HELIX_R;
       const z1 = Math.sin(angle) * HELIX_R;
-      const col1 = ATOM_COLORS[i % 3]; // red/blue/grey cycling
+      const col1 = ATOM_COLORS[i % 3];
       atoms.push({ x: x1, y, z: z1, r: 1.0, color: col1, type: "backbone" });
 
-      // Strand 2 backbone atoms (large, opposite side)
+      // Strand 2 backbone (opposite side)
       const x2 = Math.cos(angle + Math.PI) * HELIX_R;
       const z2 = Math.sin(angle + Math.PI) * HELIX_R;
       const col2 = ATOM_COLORS[(i + 2) % 3];
       atoms.push({ x: x2, y, z: z2, r: 1.0, color: col2, type: "backbone" });
 
-      // Base-pair rungs (connecting the two strands) — every ~2 steps
+      // Base-pair rungs every ~2 steps
       if (i % 2 === 0) {
         const RUNG_STEPS = 5;
         for (let j = 1; j < RUNG_STEPS; j++) {
@@ -115,26 +119,26 @@ const BubbleBackground = () => {
         }
       }
 
-      // Smaller sugar/phosphate atoms clustered around backbone
+      // Smaller sugar/phosphate atoms around backbone
       for (let k = 0; k < 3; k++) {
         const noise = ((k * 137.5) % 1) * 0.18 - 0.09;
         const aoff = angle + noise * Math.PI;
-        const rx = Math.cos(aoff) * (HELIX_R + 0.12 + noise * 0.08);
-        const rz = Math.sin(aoff) * (HELIX_R + 0.12 + noise * 0.08);
+        const rx = Math.cos(aoff) * (HELIX_R + 0.14 + noise * 0.1);
+        const rz = Math.sin(aoff) * (HELIX_R + 0.14 + noise * 0.1);
         atoms.push({
           x: rx,
-          y: y + noise * 0.12,
+          y: y + noise * 0.15,
           z: rz,
           r: 0.45,
           color: ATOM_COLORS[(i + k + 4) % ATOM_COLORS.length],
           type: "small",
         });
 
-        const rx2 = Math.cos(aoff + Math.PI) * (HELIX_R + 0.12 + noise * 0.08);
-        const rz2 = Math.sin(aoff + Math.PI) * (HELIX_R + 0.12 + noise * 0.08);
+        const rx2 = Math.cos(aoff + Math.PI) * (HELIX_R + 0.14 + noise * 0.1);
+        const rz2 = Math.sin(aoff + Math.PI) * (HELIX_R + 0.14 + noise * 0.1);
         atoms.push({
           x: rx2,
-          y: y + noise * 0.12,
+          y: y + noise * 0.15,
           z: rz2,
           r: 0.45,
           color: ATOM_COLORS[(i + k + 1) % ATOM_COLORS.length],
@@ -143,7 +147,24 @@ const BubbleBackground = () => {
       }
     }
 
-    // Scroll pause logic
+    // ── Extra scattered atoms to fill the full canvas width/corners ───
+    // Using a seeded-ish deterministic pattern so atoms don't jump on re-render
+    const SCATTER_COUNT = 260;
+    for (let i = 0; i < SCATTER_COUNT; i++) {
+      // Spread across a wider x range than the helix (−2.2 to +2.2)
+      const px = (((i * 73.137 + 17) % 100) / 100 - 0.5) * 4.4;
+      const py = (((i * 41.293 + 5)  % 100) / 100 - 0.5) * 3.2;
+      const pz = (((i * 29.817 + 31) % 100) / 100 - 0.5) * 2.4;
+      const pr = 0.25 + ((i * 17.391) % 100) / 100 * 0.85;
+      atoms.push({
+        x: px, y: py, z: pz,
+        r: pr,
+        color: ATOM_COLORS[i % ATOM_COLORS.length],
+        type: "scatter",
+      });
+    }
+
+    // ── Scroll pause ──────────────────────────────────────────────────
     let isScrolling = false;
     let scrollTimer;
     const onScroll = () => {
@@ -159,25 +180,24 @@ const BubbleBackground = () => {
       if (isScrolling) return;
 
       ctx.clearRect(0, 0, width, height);
-      t += 0.006; // gentle rotation speed
+      t += 0.006;
 
       const cx = width * 0.5;
       const cy = height * 0.5;
-      const scale = Math.min(width, height) * 0.38;
 
-      // Rotate around Y axis
+      // ── KEY CHANGE: larger scale fills the full canvas ──────────────
+      // was 0.38 → now 0.60, so the wide helix spans edge-to-edge
+      const scale = Math.min(width, height) * 0.60;
+
       const cosY = Math.cos(t * 0.4);
       const sinY = Math.sin(t * 0.4);
-      // Slight tilt around X
       const cosX = Math.cos(0.18);
       const sinX = Math.sin(0.18);
 
       const projected = atoms.map((a) => {
-        // Y-axis rotation
-        const rx = a.x * cosY - a.z * sinY;
-        const rz = a.x * sinY + a.z * cosY;
-        // X-axis tilt
-        const ry = a.y * cosX - rz * sinX;
+        const rx  = a.x * cosY - a.z * sinY;
+        const rz  = a.x * sinY + a.z * cosY;
+        const ry  = a.y * cosX - rz * sinX;
         const rz2 = a.y * sinX + rz * cosX;
 
         const persp = 2.5 / (2.5 + rz2);
@@ -191,13 +211,13 @@ const BubbleBackground = () => {
         };
       });
 
+      // Painter's algorithm — back to front
       projected.sort((a, b) => a.z - b.z);
 
       projected.forEach((p) => {
         const depth = Math.max(0, Math.min(1, (p.z + 1.5) / 3.0));
         const [cr, cg, cb] = p.color;
 
-        // Darken by depth
         const dr = Math.round(cr * (0.35 + 0.65 * depth));
         const dg = Math.round(cg * (0.35 + 0.65 * depth));
         const db = Math.round(cb * (0.35 + 0.65 * depth));
@@ -212,8 +232,8 @@ const BubbleBackground = () => {
         ctx.fill();
 
         // Main sphere
-        const lx = p.sx - p.r * 0.35;
-        const ly = p.sy - p.r * 0.4;
+        const lx   = p.sx - p.r * 0.35;
+        const ly   = p.sy - p.r * 0.4;
         const body = ctx.createRadialGradient(lx, ly, p.r * 0.05, p.sx, p.sy, p.r);
         body.addColorStop(0, `rgba(${Math.min(255,dr+80)},${Math.min(255,dg+80)},${Math.min(255,db+80)},1)`);
         body.addColorStop(0.45, `rgba(${dr},${dg},${db},1)`);
@@ -224,8 +244,8 @@ const BubbleBackground = () => {
         ctx.fill();
 
         // Specular highlight
-        const sx = p.sx - p.r * 0.28;
-        const sy = p.sy - p.r * 0.32;
+        const sx   = p.sx - p.r * 0.28;
+        const sy   = p.sy - p.r * 0.32;
         const spec = ctx.createRadialGradient(sx, sy, 0, sx, sy, p.r * 0.42);
         spec.addColorStop(0, `rgba(255,255,255,${0.55 * depth})`);
         spec.addColorStop(1, "rgba(255,255,255,0)");
