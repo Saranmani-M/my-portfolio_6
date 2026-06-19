@@ -261,17 +261,17 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        {/* --- BRAND HEADER (TOP LEFT SIDE) --- */}
-        <div className="fixed top-8 left-8 md:top-10 md:left-10 z-50 flex items-center gap-3.5 select-none bg-black/20 backdrop-blur-sm p-2 rounded-lg">
-          <a href="#home" className="flex flex-col text-left font-bold text-white text-xs tracking-wider leading-tight hover:opacity-80 transition-opacity">
+        {/* --- STICKY / FIXED BRAND HEADER AT TOP-LEFT --- */}
+        <div className="fixed top-8 left-8 md:top-10 md:left-10 z-50 flex flex-row items-center gap-3.5 select-none bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/[0.06]">
+          <a href="#home" className="flex flex-row items-center gap-1.5 font-bold text-white text-[13px] tracking-wider whitespace-nowrap hover:opacity-80 transition-opacity">
             <span>Saranmani</span>
             <span className="text-white/60">M</span>
           </a>
-          <span className="text-white/20 font-light text-sm">|</span>
+          <span className="text-white/20 font-light text-sm select-none">|</span>
           <button
             onClick={toggleMusic}
             aria-label={playing ? "Pause music" : "Play music"}
-            className={`transition-colors flex items-center justify-center p-1 rounded ${playing ? "text-white" : "text-white/30 hover:text-white"}`}
+            className={`transition-colors flex items-center justify-center p-0.5 rounded ${playing ? "text-white" : "text-white/40 hover:text-white"}`}
           >
             <WaveformIcon playing={playing} size={15} />
           </button>
