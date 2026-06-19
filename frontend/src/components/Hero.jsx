@@ -22,10 +22,14 @@ const MARQUEE_SKILLS = [
 ];
 
 const RUNNING_LOGOS = [
-  { name: "Gears", color: "text-white/40" },
-  { name: "Rahi", color: "text-blue-400/50" },
-  { name: "idp", color: "text-green-400/50" },
-  { name: "Google", color: "text-red-400/50" },
+  { name: "AWS", color: "text-[#FF9900]" },
+  { name: "Microsoft", color: "text-[#F25022]" },
+  { name: "Google", color: "text-[#4285F4]" },
+  { name: "Red Hat", color: "text-[#EE0000]" },
+  { name: "Cisco", color: "text-[#1BA0D7]" },
+  { name: "VMware", color: "text-[#607078]" },
+  { name: "Dell EMC", color: "text-[#007DB8]" },
+  { name: "NetApp", color: "text-[#0067C5]" },
 ];
 
 const WaveformIcon = ({ playing, size = 16 }) => {
@@ -233,7 +237,6 @@ export const Hero = () => {
         }
         @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
-        @keyframes subtle-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
@@ -258,13 +261,29 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        {/* Outer container spacing helpers for true full screen centering balance */}
+        {/* --- BRAND HEADER (TOP LEFT SIDE) --- */}
+        <div className="absolute top-8 left-8 md:top-10 md:left-10 z-50 flex items-center gap-3.5 select-none">
+          <a href="#home" className="flex flex-col text-left font-bold text-white text-xs tracking-wider leading-tight hover:opacity-80 transition-opacity">
+            <span>Saranmani</span>
+            <span className="text-white/60">M</span>
+          </a>
+          <span className="text-white/20 font-light text-sm">|</span>
+          <button
+            onClick={toggleMusic}
+            aria-label={playing ? "Pause music" : "Play music"}
+            className={`transition-colors flex items-center justify-center p-1 rounded ${playing ? "text-white" : "text-white/30 hover:text-white"}`}
+          >
+            <WaveformIcon playing={playing} size={15} />
+          </button>
+        </div>
+
+        {/* Top Spacer for perfect viewport balancing */}
         <div className="w-full pt-12 md:pt-16 invisible" aria-hidden="true" />
 
         {/* Central Core Content Container */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto w-full">
           
-          {/* Animated Active / Open To Work Status Badge */}
+          {/* Glowing Open To Work Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-6 backdrop-blur-sm select-none">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -275,34 +294,33 @@ export const Hero = () => {
             </span>
           </div>
 
-          {/* Core Introduction Typography */}
+          {/* Centered Main Header Text */}
           <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
             <span className="flex items-center gap-3 flex-wrap justify-center">
               <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
               <span className="inline-block w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle">
                 <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
               </span>
-              <span>Saranmani</span>
+              <span>Saranmani M</span>
             </span>
             <span className="flex items-center gap-3 flex-wrap justify-center">
-              <span className="text-white/40 font-normal">An</span>
-              <span>Infrastructure Engineer</span>
+              <span className="text-white/40 font-normal">Aspiring</span>
+              <span>Cloud & Storage Engineer</span>
             </span>
             <span className="flex items-center gap-3 flex-wrap justify-center">
-              <span className="text-white/40 font-normal">At</span>
+              <span className="text-white/40 font-normal">Building</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
-                Cloud Canvas
+                Secure Infrastructure
               </span>
             </span>
           </h1>
 
           <p className="mt-6 text-sm md:text-base text-white/45 max-w-[560px] leading-relaxed">
-            I enjoy taking messy, complicated infrastructure architectures and
-            making them feel automated, secure, and effortless for global
-            engineering teams.
+            I enjoy working with Linux systems, cloud infrastructure, and storage technologies, building reliable,
+            secure, and scalable environments while continuously learning and improving my skills.
           </p>
 
-          {/* Action Links & Utility Actions Block */}
+          {/* Social and Action Buttons */}
           <div className="mt-8 flex items-center justify-center gap-5">
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a
@@ -336,10 +354,10 @@ export const Hero = () => {
             </a>
           </div>
 
-          {/* Target Dream Companies Target Brand Stream */}
+          {/* Target Ambitions & Dream Teams Section */}
           <div className="w-full max-w-[500px] mt-16 flex flex-col items-center gap-3">
             <span className="text-[10px] tracking-[0.25em] uppercase font-mono text-white/25 select-none">
-              Engineering Ambitions & Core Target Spaces
+              Dream Stacks & Engineering Ambitions
             </span>
             <div className="w-full overflow-hidden masked-marquee py-1">
               <div className="flex gap-14 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
@@ -353,7 +371,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Bottom Interactive Navigation Block Context */}
+        {/* Bottom Interactive Navigation Block */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6 mt-auto">
           <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase">
             <span>Scroll down</span>
