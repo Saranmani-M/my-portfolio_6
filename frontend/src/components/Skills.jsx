@@ -2,220 +2,105 @@ import React from "react";
 import { motion } from "framer-motion";
 import { SKILL_GROUPS } from "../lib/data";
 
-const TICKER_TOP = [
-  "Python",
-  "AWS",
-  "Linux",
-  "SAN / NAS",
-  "RAID",
-  "IAM",
-  "S3",
-  "EC2",
-  "Homomorphic Encryption",
-  "Paillier",
-  "ElGamal",
-  "Networking",
-  "Backup & Recovery",
-  "PuTTY",
-  "Git",
-  "Django",
-];
-
-const TICKER_BOTTOM = [
-  "Cloud Security",
-  "Cryptography",
-  "OpenCV",
-  "Spring Boot",
-  "Angular",
-  "Web Security",
-  "IEEE",
-  "ICIRCA 2026",
-  "CYBERNIX '25",
-  "Vel Tech",
-  "Storage Admin",
-  "Cloud Engineer",
-];
-
-const HEADLINE_TICKER = [
-  "Cloud Engineer",
-  "Storage Administrator",
-  "Cybersecurity",
-  "Python Developer",
-  "IEEE Researcher",
-];
-
-const TECH = [
-  { name: "Python", icon: "python/python-original.svg" },
-  { name: "Linux", icon: "linux/linux-original.svg" },
-  { name: "AWS", icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg" },
-  { name: "Ubuntu", icon: "ubuntu/ubuntu-plain.svg" },
-  { name: "Django", icon: "django/django-plain.svg" },
-  { name: "OpenCV", icon: "opencv/opencv-original.svg" },
-  { name: "Git", icon: "git/git-original.svg" },
-  { name: "GitHub", icon: "github/github-original.svg" },
-  { name: "Java", icon: "java/java-original.svg" },
-  { name: "Spring", icon: "spring/spring-original.svg" },
-  { name: "Angular", icon: "angularjs/angularjs-original.svg" },
-  { name: "VS Code", icon: "vscode/vscode-original.svg" },
-  { name: "PyCharm", icon: "pycharm/pycharm-original.svg" },
-  { name: "NumPy", icon: "numpy/numpy-original.svg" },
-  { name: "Bash", icon: "bash/bash-original.svg" },
-  { name: "MongoDB", icon: "mongodb/mongodb-original.svg" },
-  { name: "Pandas", icon: "pandas/pandas-original.svg" },
-  { name: "FastAPI", icon: "fastapi/fastapi-original.svg" },
-  { name: "Docker", icon: "docker/docker-original.svg" },
-  { name: "Kubernetes", icon: "kubernetes/kubernetes-plain.svg" },
-  { name: "Nginx", icon: "nginx/nginx-original.svg" },
-  { name: "Postgres", icon: "postgresql/postgresql-original.svg" },
-  { name: "Redis", icon: "redis/redis-original.svg" },
-  { name: "Bitbucket", icon: "bitbucket/bitbucket-original.svg" },
-];
-
-const Ticker = ({ items, direction = "left", italic = false, accent = false, size = "lg" }) => (
-  <div className="relative overflow-hidden border-y border-white/10 py-4 md:py-5">
-    <div
-      className={`flex gap-10 whitespace-nowrap ${
-        direction === "right" ? "marquee-track-rev" : "marquee-track"
-      }`}
-    >
-      {[...items, ...items].map((t, i) => (
-        <span
-          key={`${t}-${i}`}
-          className={`font-serif ${
-            size === "xl"
-              ? "text-4xl md:text-6xl"
-              : "text-2xl md:text-5xl"
-          } ${italic ? "italic" : ""} ${
-            accent ? "text-[#e8ff47]/85" : "text-white/75"
-          }`}
-        >
-          {t}{" "}
-          <span className="text-white/15 mx-2">{accent ? "✦" : "·"}</span>
-        </span>
-      ))}
-    </div>
-  </div>
+/* Flatten every item across your skill groups into one tag list,
+   de-duplicated, in the order the groups appear. */
+const SKILL_TAGS = Array.from(
+  new Set(SKILL_GROUPS.flatMap((g) => g.items))
 );
+
+const TOOLKIT = [
+  { name: "Python",  icon: "python/python-original.svg",                          sub: "Scripting & automation" },
+  { name: "Linux",   icon: "linux/linux-original.svg",                            sub: "Systems administration" },
+  { name: "AWS",     icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg", sub: "Cloud infrastructure" },
+  { name: "Ubuntu",  icon: "ubuntu/ubuntu-plain.svg",                              sub: "Server environments" },
+  { name: "Django",  icon: "django/django-plain.svg",                             sub: "Backend framework" },
+  { name: "OpenCV",  icon: "opencv/opencv-original.svg",                          sub: "Computer vision" },
+  { name: "Git",     icon: "git/git-original.svg",                                sub: "Version control" },
+  { name: "GitHub",  icon: "github/github-original.svg",                          sub: "Source hosting" },
+  { name: "Java",    icon: "java/java-original.svg",                              sub: "Spring Boot" },
+  { name: "Spring",  icon: "spring/spring-original.svg",                          sub: "Application framework" },
+  { name: "Angular", icon: "angularjs/angularjs-original.svg",                     sub: "Frontend framework" },
+  { name: "VS Code", icon: "vscode/vscode-original.svg",                          sub: "Code editor" },
+  { name: "PyCharm", icon: "pycharm/pycharm-original.svg",                        sub: "Python IDE" },
+  { name: "Docker",  icon: "docker/docker-original.svg",                          sub: "Containerization" },
+  { name: "Kubernetes", icon: "kubernetes/kubernetes-plain.svg",                  sub: "Orchestration" },
+  { name: "Nginx",   icon: "nginx/nginx-original.svg",                            sub: "Web server" },
+  { name: "Postgres", icon: "postgresql/postgresql-original.svg",                 sub: "Relational database" },
+  { name: "MongoDB", icon: "mongodb/mongodb-original.svg",                        sub: "NoSQL database" },
+];
 
 export const Skills = () => {
   return (
     <section
       id="skills"
       data-testid="skills-section"
-      className="relative py-10 md:py-16 px-6 md:px-12"
+      className="relative py-16 md:py-24 px-6 md:px-12"
     >
-      {/* Headline running ticker (above section) */}
-      <div className="-mx-6 md:-mx-12 mb-12 md:mb-16">
-        <Ticker items={HEADLINE_TICKER} italic size="xl" accent />
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-10 md:mb-14">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-4">
-              (Skills · 05)
-            </div>
-            <h2 className="font-serif text-4xl md:text-6xl font-light text-white text-balance leading-[1]">
-              A quiet, deliberate <em className="italic">toolkit</em>.
-            </h2>
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.15 }}
-            className="max-w-sm text-sm leading-relaxed text-white/55"
-          >
-            Tools I&rsquo;ve lived inside long enough to trust. No grand stack
-            chart, no progress bars — just the things I keep reaching for.
-          </motion.p>
-        </div>
-
-        {/* Tech logo grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+      <div className="max-w-5xl mx-auto text-center">
+        {/* ── Skills tag cloud ── */}
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="mb-12 md:mb-16"
-          data-testid="tech-grid"
+          transition={{ duration: 0.7 }}
+          className="text-3xl md:text-4xl font-bold text-white mb-8"
         >
-          <div className="text-[10px] tracking-[0.28em] uppercase text-white/40 mb-5">
-            (Stack · Tools)
-          </div>
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5 md:gap-3">
-            {TECH.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: i * 0.03 }}
-                whileHover={{ y: -3 }}
-                className="group relative aspect-square rounded-2xl border border-white/10 bg-[#0D0D0D]/60 backdrop-blur-sm grid place-items-center hover:border-[#e8ff47]/30 transition-colors"
-                title={t.name}
-              >
-                <img
-                  src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
-                  alt={t.name}
-                  loading="lazy"
-                  className="w-7 h-7 md:w-9 md:h-9 opacity-65 group-hover:opacity-100 transition-all duration-500"
-                  style={{ filter: "grayscale(0.6) brightness(1.6)" }}
-                />
-                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] tracking-[0.18em] uppercase text-white/0 group-hover:text-white/60 transition-colors whitespace-nowrap">
-                  {t.name}
-                </span>
-              </motion.div>
-            ))}
-          </div>
+          Skills
+        </motion.h2>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="flex flex-wrap items-center justify-center gap-2.5 md:gap-3 mb-20 md:mb-28"
+          data-testid="skill-tag-cloud"
+        >
+          {SKILL_TAGS.map((tag, i) => (
+            <span
+              key={tag}
+              className="px-3.5 py-1.5 rounded-md border border-white/15 bg-white/[0.02] text-[13px] text-white/80 hover:border-white/30 hover:text-white transition-colors"
+            >
+              {tag}
+            </span>
+          ))}
         </motion.div>
 
-        {/* Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 md:gap-y-12 md:gap-x-12">
-          {SKILL_GROUPS.map((g, idx) => (
+        {/* ── Toolkit grid ── */}
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="text-3xl md:text-4xl font-bold text-white mb-8"
+        >
+          Toolkit
+        </motion.h2>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-left">
+          {TOOLKIT.map((t, i) => (
             <motion.div
-              key={g.title}
-              data-testid={`skill-group-${g.index}`}
-              initial={{ opacity: 0, y: 30 }}
+              key={t.name}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.9, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative pt-6 border-t border-white/10"
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6, delay: i * 0.04 }}
+              whileHover={{ y: -3 }}
+              className="rounded-xl border border-white/12 bg-[#0c0c0c] p-5 flex flex-col gap-3"
             >
-              <div className="flex items-start justify-between mb-4">
-                <span className="font-mono text-[11px] text-white/40 tracking-widest">
-                  {g.index}
-                </span>
-                <span className="text-[10px] tracking-[0.28em] uppercase text-white/30">
-                  Category
-                </span>
+              <img
+                src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
+                alt={t.name}
+                loading="lazy"
+                className="w-7 h-7"
+                style={{ filter: "grayscale(0.15) brightness(1.1)" }}
+              />
+              <div>
+                <p className="text-white font-semibold text-[15px] leading-tight">{t.name}</p>
+                <p className="text-white/45 text-[13px] leading-tight mt-0.5">{t.sub}</p>
               </div>
-              <h3 className="font-serif text-3xl md:text-4xl font-light text-white leading-tight mb-5 transition-transform group-hover:-translate-y-0.5">
-                {g.title}
-              </h3>
-              <ul className="space-y-2">
-                {g.items.map((item) => (
-                  <li
-                    key={item}
-                    className="text-[15px] text-white/65 tracking-wide flex items-center gap-3"
-                  >
-                    <span className="w-1 h-1 rounded-full bg-white/40" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
             </motion.div>
           ))}
-        </div>
-
-        {/* Running ticker — single line */}
-        <div className="mt-12 md:mt-16">
-          <Ticker items={TICKER_TOP} direction="left" italic />
         </div>
       </div>
     </section>
