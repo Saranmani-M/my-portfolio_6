@@ -27,7 +27,7 @@ const SiAmazons3 = svgIcon("0 0 24 24", "M12 2L4 5.5v5.24c0 4.52 3.4 8.76 8 9.76
 const SiAmazonec2 = svgIcon("0 0 24 24", "M4 4h16v2H4zm0 14h16v2H4zm-2-2V8h2v8zm20-8v8h-2V8zM8 8h8v8H8z");
 const SiGnubash = svgIcon("0 0 24 24", "M2 4h20v2H2zm0 7h12v2H2zm0 7h20v2H2zM16 8l4 5-4 5");
 const SiGit = svgIcon("0 0 24 24", "M21.62 11.108l-8.731-8.729a1.294 1.294 0 00-1.823 0L9.257 4.19l2.299 2.3a1.532 1.532 0 011.939 1.95l2.214 2.217a1.532 1.532 0 011.784 2.369 1.533 1.533 0 01-1.517 1.527 1.53 1.53 0 01-1.517-1.527v-.012a1.529 1.529 0 00-.994-1.429L11.61 9.61v4.09a1.533 1.533 0 11-1.51.001V9.36a1.533 1.533 0 01-.449-2.861L7.397 4.19 1.379 10.208a1.294 1.294 0 000 1.822l8.731 8.729a1.294 1.294 0 001.822 0l9.689-9.652a1.294 1.294 0 000-1.999");
-const SiDocker = svgIcon("0 0 24 24", "M4.5 10.5v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v-2h-2v2zm2-8v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm2-8v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm2-8v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2z");
+const SiDocker = svgIcon("0 0 24 24", "M4.5 10.5v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm2-6v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm2-6v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm2-6v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2zm0 2v2h2v-2z");
 const SiPycharm = svgIcon("0 0 24 24", "M4 2h16v20H4zm2 2v16h12V4zm2 2h8v2H8zm0 4h8v2H8zm0 4h5v2H8z");
 
 const MARQUEE_SKILLS = [
@@ -47,13 +47,26 @@ const MARQUEE_SKILLS = [
 const VIRTUAL_W = 1600;
 const VIRTUAL_H = 1000;
 
+// Atom colors like a real molecular model
+const ATOM_COLORS = [
+  [220, 80,  80],   // red   - oxygen
+  [80,  140, 220],  // blue  - nitrogen
+  [200, 200, 200],  // grey  - carbon
+  [220, 180, 60],   // yellow - sulfur/phosphorus
+  [100, 200, 120],  // green  - misc
+  [180, 100, 220],  // purple - misc
+  [230, 130, 60],   // orange - misc
+];
+
 const BubbleBackground = () => {
   const canvasRef = useRef(null);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animId;
+
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const width = VIRTUAL_W;
     const height = VIRTUAL_H;
@@ -61,111 +74,174 @@ const BubbleBackground = () => {
     canvas.height = height * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Dense sphere cluster — many more bubbles, tighter packing
-    const BUBBLES = 2200;
-    const bubbles = [];
-    const STRANDS = 14;
-    const TURNS = 2.0;
+    // --- Build DNA double helix ---
+    const atoms = [];
+    const STEPS = 80;       // rungs along the helix
+    const TURNS = 4.5;      // full rotations
+    const HELIX_R = 0.55;   // radius of each strand
+    const HELIX_H = 2.2;    // total height span
 
-    for (let i = 0; i < BUBBLES; i++) {
-      const strand = i % STRANDS;
-      const along = Math.floor(i / STRANDS) / Math.ceil(BUBBLES / STRANDS);
-      const u = along * Math.PI * 2 * TURNS;
-      const pathX = Math.sin(u * 1.3) * 0.6;
-      const pathY = (along - 0.5) * 2.0;
-      const pathZ = Math.cos(u * 0.9) * 0.6;
-      const strandAngle = (strand / STRANDS) * Math.PI * 2 + along * 2.5;
-      const tubeR = 0.42; // fatter tube = denser mass
-      const offX = Math.cos(strandAngle) * tubeR;
-      const offZ = Math.sin(strandAngle) * tubeR;
-      bubbles.push({
-        x: pathX + offX,
-        y: pathY,
-        z: pathZ + offZ,
-        r: Math.random() * 0.45 + 0.7,
-        jitter: Math.random() * Math.PI * 2,
-      });
+    for (let i = 0; i < STEPS; i++) {
+      const frac = i / STEPS;
+      const angle = frac * Math.PI * 2 * TURNS;
+      const y = (frac - 0.5) * HELIX_H;
+
+      // Strand 1 backbone atoms (large)
+      const x1 = Math.cos(angle) * HELIX_R;
+      const z1 = Math.sin(angle) * HELIX_R;
+      const col1 = ATOM_COLORS[i % 3]; // red/blue/grey cycling
+      atoms.push({ x: x1, y, z: z1, r: 1.0, color: col1, type: "backbone" });
+
+      // Strand 2 backbone atoms (large, opposite side)
+      const x2 = Math.cos(angle + Math.PI) * HELIX_R;
+      const z2 = Math.sin(angle + Math.PI) * HELIX_R;
+      const col2 = ATOM_COLORS[(i + 2) % 3];
+      atoms.push({ x: x2, y, z: z2, r: 1.0, color: col2, type: "backbone" });
+
+      // Base-pair rungs (connecting the two strands) — every ~2 steps
+      if (i % 2 === 0) {
+        const RUNG_STEPS = 5;
+        for (let j = 1; j < RUNG_STEPS; j++) {
+          const t = j / RUNG_STEPS;
+          const rx = x1 + (x2 - x1) * t;
+          const rz = z1 + (z2 - z1) * t;
+          const rungColorIdx = 3 + (j % 4);
+          atoms.push({
+            x: rx, y, z: rz,
+            r: 0.65,
+            color: ATOM_COLORS[rungColorIdx],
+            type: "rung",
+          });
+        }
+      }
+
+      // Smaller sugar/phosphate atoms clustered around backbone
+      for (let k = 0; k < 3; k++) {
+        const noise = ((k * 137.5) % 1) * 0.18 - 0.09;
+        const aoff = angle + noise * Math.PI;
+        const rx = Math.cos(aoff) * (HELIX_R + 0.12 + noise * 0.08);
+        const rz = Math.sin(aoff) * (HELIX_R + 0.12 + noise * 0.08);
+        atoms.push({
+          x: rx,
+          y: y + noise * 0.12,
+          z: rz,
+          r: 0.45,
+          color: ATOM_COLORS[(i + k + 4) % ATOM_COLORS.length],
+          type: "small",
+        });
+
+        const rx2 = Math.cos(aoff + Math.PI) * (HELIX_R + 0.12 + noise * 0.08);
+        const rz2 = Math.sin(aoff + Math.PI) * (HELIX_R + 0.12 + noise * 0.08);
+        atoms.push({
+          x: rx2,
+          y: y + noise * 0.12,
+          z: rz2,
+          r: 0.45,
+          color: ATOM_COLORS[(i + k + 1) % ATOM_COLORS.length],
+          type: "small",
+        });
+      }
     }
+
+    // Scroll pause logic
+    let isScrolling = false;
+    let scrollTimer;
+    const onScroll = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     let t = 0;
     const draw = () => {
+      animId = requestAnimationFrame(draw);
+      if (isScrolling) return;
+
       ctx.clearRect(0, 0, width, height);
-      t += 0.0009; // slow, heavy rotation
+      t += 0.006; // gentle rotation speed
 
       const cx = width * 0.5;
       const cy = height * 0.5;
-      const baseRadius = Math.max(width, height) * 0.56; // fills screen more
-      const cosA = Math.cos(t);
-      const sinA = Math.sin(t);
-      const cosB = Math.cos(0.12);
-      const sinB = Math.sin(0.12);
+      const scale = Math.min(width, height) * 0.38;
 
-      const projected = bubbles.map((b) => {
-        const breathe = 1 + Math.sin(t * 1.2 + b.jitter) * 0.025;
-        const x1 = b.x * cosA - b.z * sinA;
-        const z1 = b.x * sinA + b.z * cosA;
-        const y2 = b.y * cosB - z1 * sinB;
-        const z2 = b.y * sinB + z1 * cosB;
-        const perspective = 2.8 / (2.8 + z2);
+      // Rotate around Y axis
+      const cosY = Math.cos(t * 0.4);
+      const sinY = Math.sin(t * 0.4);
+      // Slight tilt around X
+      const cosX = Math.cos(0.18);
+      const sinX = Math.sin(0.18);
+
+      const projected = atoms.map((a) => {
+        // Y-axis rotation
+        const rx = a.x * cosY - a.z * sinY;
+        const rz = a.x * sinY + a.z * cosY;
+        // X-axis tilt
+        const ry = a.y * cosX - rz * sinX;
+        const rz2 = a.y * sinX + rz * cosX;
+
+        const persp = 2.5 / (2.5 + rz2);
         return {
-          sx: cx + x1 * baseRadius * perspective,
-          sy: cy + y2 * baseRadius * perspective,
-          z: z2,
-          r: b.r * (baseRadius * 0.1) * perspective * breathe,
+          sx: cx + rx * scale * persp,
+          sy: cy + ry * scale * persp,
+          z: rz2,
+          r: a.r * scale * 0.065 * persp,
+          color: a.color,
+          type: a.type,
         };
       });
 
       projected.sort((a, b) => a.z - b.z);
 
       projected.forEach((p) => {
-        const depth = (p.z + 1.4) / 2.8;
+        const depth = Math.max(0, Math.min(1, (p.z + 1.5) / 3.0));
+        const [cr, cg, cb] = p.color;
 
-        // Subtle outer glow
-        const glow = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, p.r * 2.0);
-        glow.addColorStop(0, `rgba(15,15,15,${0.28 * depth})`);
+        // Darken by depth
+        const dr = Math.round(cr * (0.35 + 0.65 * depth));
+        const dg = Math.round(cg * (0.35 + 0.65 * depth));
+        const db = Math.round(cb * (0.35 + 0.65 * depth));
+
+        // Outer glow
+        const glow = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, p.r * 1.8);
+        glow.addColorStop(0, `rgba(${dr},${dg},${db},0.18)`);
         glow.addColorStop(1, "rgba(0,0,0,0)");
         ctx.beginPath();
         ctx.fillStyle = glow;
-        ctx.arc(p.sx, p.sy, p.r * 2.0, 0, Math.PI * 2);
+        ctx.arc(p.sx, p.sy, p.r * 1.8, 0, Math.PI * 2);
         ctx.fill();
 
-        // Main sphere body — strong highlight, deep shadow
-        const lightX = p.sx - p.r * 0.38;
-        const lightY = p.sy - p.r * 0.48;
-        const body = ctx.createRadialGradient(lightX, lightY, p.r * 0.04, p.sx, p.sy, p.r * 1.1);
-        const base = 6 + depth * 18;
-        body.addColorStop(0, `rgba(${base + 52},${base + 52},${base + 52},0.98)`);
-        body.addColorStop(0.35, `rgba(${base + 18},${base + 18},${base + 18},0.95)`);
-        body.addColorStop(0.72, `rgba(${base + 4},${base + 4},${base + 4},0.92)`);
-        body.addColorStop(1, `rgba(0,0,0,1)`);
+        // Main sphere
+        const lx = p.sx - p.r * 0.35;
+        const ly = p.sy - p.r * 0.4;
+        const body = ctx.createRadialGradient(lx, ly, p.r * 0.05, p.sx, p.sy, p.r);
+        body.addColorStop(0, `rgba(${Math.min(255,dr+80)},${Math.min(255,dg+80)},${Math.min(255,db+80)},1)`);
+        body.addColorStop(0.45, `rgba(${dr},${dg},${db},1)`);
+        body.addColorStop(1, `rgba(${Math.round(dr*0.25)},${Math.round(dg*0.25)},${Math.round(db*0.25)},1)`);
         ctx.beginPath();
         ctx.fillStyle = body;
         ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Specular highlight — small, sharp, top-left
-        const specX = p.sx - p.r * 0.3;
-        const specY = p.sy - p.r * 0.35;
-        const spec = ctx.createRadialGradient(specX, specY, 0, specX, specY, p.r * 0.38);
-        spec.addColorStop(0, `rgba(255,255,255,${0.18 * depth})`);
+        // Specular highlight
+        const sx = p.sx - p.r * 0.28;
+        const sy = p.sy - p.r * 0.32;
+        const spec = ctx.createRadialGradient(sx, sy, 0, sx, sy, p.r * 0.42);
+        spec.addColorStop(0, `rgba(255,255,255,${0.55 * depth})`);
         spec.addColorStop(1, "rgba(255,255,255,0)");
         ctx.beginPath();
         ctx.fillStyle = spec;
         ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2);
         ctx.fill();
-
-        // Thin dark rim
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(0,0,0,${0.55 * depth})`;
-        ctx.lineWidth = Math.max(0.5, p.r * 0.05);
-        ctx.arc(p.sx, p.sy, p.r * 0.97, 0, Math.PI * 2);
-        ctx.stroke();
       });
-
-      animId = requestAnimationFrame(draw);
     };
+
     draw();
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(scrollTimer);
+    };
   }, []);
 
   return (
@@ -190,10 +266,7 @@ const SkillsMarquee = () => {
             <div key={copy} className="flex items-center shrink-0">
               {items.map(({ label, Icon }, i) => (
                 <React.Fragment key={`${copy}-${label}-${i}`}>
-                  <span
-                    className="inline-flex items-center gap-2 px-6 text-white/80"
-                    title={label}
-                  >
+                  <span className="inline-flex items-center gap-2 px-6 text-white/80" title={label}>
                     <Icon size={20} />
                     <span className="sr-only">{label}</span>
                   </span>
@@ -205,18 +278,10 @@ const SkillsMarquee = () => {
         </div>
       </div>
       <style>{`
-        .marquee-track {
-          width: max-content;
-          animation: marquee-scroll 38s linear infinite;
-        }
+        .marquee-track { width: max-content; animation: marquee-scroll 38s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
-        @keyframes marquee-scroll {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .marquee-track { animation: none; }
-        }
+        @keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
       `}</style>
     </div>
   );
@@ -231,12 +296,12 @@ export const Hero = () => {
     >
       <BubbleBackground />
 
-      {/* Dark overlay */}
+      {/* Dark overlay — lighter center so helix shows through */}
       <div
         className="absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 40%, transparent 28%, rgba(0,0,0,0.82) 72%), linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.8) 100%)",
+            "radial-gradient(ellipse at 50% 45%, transparent 22%, rgba(0,0,0,0.72) 68%), linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.82) 100%)",
         }}
       />
 
@@ -248,7 +313,6 @@ export const Hero = () => {
           transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
           className="max-w-[920px] mt-4 md:mt-8 flex flex-col items-center"
         >
-          {/* Badge */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -260,7 +324,6 @@ export const Hero = () => {
             Open to Work · 2026
           </motion.div>
 
-          {/* Headline with photo inline */}
           <h1
             data-testid="hero-name"
             className="font-sans font-extrabold tracking-[-0.02em] leading-[0.95] text-white text-[2.75rem] sm:text-[3.5rem] md:text-[4.25rem] lg:text-[5.25rem] flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
@@ -293,7 +356,6 @@ export const Hero = () => {
 
         <div className="flex-1 min-h-[24px] md:min-h-[32px]" />
 
-        {/* Social icons centered */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -330,7 +392,6 @@ export const Hero = () => {
           </a>
         </motion.div>
 
-        {/* Scroll down indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
