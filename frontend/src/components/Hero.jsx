@@ -293,7 +293,7 @@ export const Hero = () => {
           className="flex items-center justify-center gap-6 mb-10"
         >
           {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-            
+           <a 
               key={k}
               href={url}
               target="_blank"
@@ -305,6 +305,7 @@ export const Hero = () => {
             </a>
           ))}
           <span className="w-px h-5 bg-white/20" />
+          <a
           
             href={PROFILE.resumeUrl}
             target="_blank"
