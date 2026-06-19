@@ -3,20 +3,29 @@ import { motion } from "framer-motion";
 import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
 import { PROFILE, SOCIALS } from "../lib/data";
 
+const easeOut = [0.16, 1, 0.3, 1];
+
 const SOCIAL_ICONS = [
-  { Icon: Linkedin, url: SOCIALS.linkedin, k: "linkedin" },
-  { Icon: Github, url: SOCIALS.github, k: "github" },
+  { Icon: Linkedin,  url: SOCIALS.linkedin,  k: "linkedin"  },
+  { Icon: Github,    url: SOCIALS.github,    k: "github"    },
   { Icon: Instagram, url: SOCIALS.instagram, k: "instagram" },
-  { Icon: Twitter, url: SOCIALS.twitter, k: "x" },
+  { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
 ];
 
 const MARQUEE_SKILLS = [
-  { label: "Python" },
-  { label: "AWS" },
-  { label: "Linux" },
-  { label: "Bash" },
-  { label: "Docker" },
-  { label: "Git" },
+  { label: "Python"  },
+  { label: "AWS"     },
+  { label: "Linux"   },
+  { label: "Bash"    },
+  { label: "Docker"  },
+  { label: "Git"     },
+];
+
+const RUNNING_LOGOS = [
+  { name: "Gears", color: "text-white/40" },
+  { name: "Rahi", color: "text-blue-400/50" },
+  { name: "idp", color: "text-green-400/50" },
+  { name: "Google", color: "text-red-400/50" },
 ];
 
 const WaveformIcon = ({ playing, size = 16 }) => {
@@ -42,14 +51,126 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
+const VIRTUAL_W = 1600;
+const VIRTUAL_H = 1000;
+
+const GlassBubbleBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = VIRTUAL_W * dpr;
+    canvas.height = VIRTUAL_H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const bubbles = [];
+    const STEPS = 18, TURNS = 2.4, HR = 1.55, HH = 4.4;
+
+    for (let i = 0; i < STEPS; i++) {
+      const frac  = i / STEPS;
+      const angle = frac * Math.PI * 2 * TURNS;
+      const y     = (frac - 0.5) * HH;
+      const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
+      const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
+
+      bubbles.push({ x: x1, y, z: z1, r: 0.62 + (i % 3) * 0.07, seed: i });
+      bubbles.push({ x: x2, y, z: z2, r: 0.58 + ((i + 1) % 3) * 0.07, seed: i + 50 });
+    }
+    for (let i = 0; i < 10; i++) {
+      bubbles.push({
+        x: (((i * 73.13) % 100) / 100 - 0.5) * 3.6,
+        y: (((i * 41.29) % 100) / 100 - 0.5) * 4.0,
+        z: (((i * 29.81) % 100) / 100 - 0.5) * 2.0,
+        r: 0.22 + ((i * 17.3) % 100) / 100 * 0.3,
+        seed: i + 100,
+      });
+    }
+
+    let isScrolling = false, scrollTimer;
+    const onScroll = () => { isScrolling = true; clearTimeout(scrollTimer); scrollTimer = setTimeout(() => { isScrolling = false; }, 150); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let t = 0;
+    const draw = () => {
+      animId = requestAnimationFrame(draw);
+      ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
+      if (!isScrolling) t += 0.0035;
+
+      const cx = VIRTUAL_W * 0.5, cy = VIRTUAL_H * 0.46;
+      const scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.62;
+      const cosY = Math.cos(t * 0.5), sinY = Math.sin(t * 0.5);
+      const cosX = Math.cos(0.35), sinX = Math.sin(0.35);
+
+      const proj = bubbles.map(b => {
+        const rx = b.x * cosY - b.z * sinY, rz = b.x * sinY + b.z * cosY;
+        const ry = b.y * cosX - rz * sinX, rz2 = b.y * sinX + rz * cosX;
+        const psp = 2.6 / (2.6 + rz2);
+        return {
+          sx: cx + rx * scale * psp,
+          sy: cy + ry * scale * psp,
+          z: rz2,
+          r: b.r * scale * 0.34 * psp,
+          seed: b.seed,
+        };
+      });
+      proj.sort((a, b) => a.z - b.z);
+
+      proj.forEach(p => {
+        const dep = Math.max(0, Math.min(1, (p.z + 1.8) / 3.4));
+        const base = 60 + dep * 70;
+
+        const glow = ctx.createRadialGradient(p.sx, p.sy, p.r * 0.4, p.sx, p.sy, p.r * 1.5);
+        glow.addColorStop(0, `rgba(${base},${base},${base},0.10)`);
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.fillStyle = glow; ctx.arc(p.sx, p.sy, p.r * 1.5, 0, Math.PI * 2); ctx.fill();
+
+        const body = ctx.createLinearGradient(p.sx - p.r, p.sy - p.r, p.sx + p.r, p.sy + p.r);
+        body.addColorStop(0,   `rgba(${base * 0.18},${base * 0.18},${base * 0.18},1)`);
+        body.addColorStop(0.35,`rgba(${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},1)`);
+        body.addColorStop(0.5, `rgba(${base * 0.35},${base * 0.35},${base * 0.35},1)`);
+        body.addColorStop(0.7, `rgba(${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},1)`);
+        body.addColorStop(1,   `rgba(${base * 0.12},${base * 0.12},${base * 0.12},1)`);
+        ctx.beginPath(); ctx.fillStyle = body; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+
+        ctx.save();
+        ctx.beginPath(); ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.clip();
+        for (let k = 0; k < 4; k++) {
+          const ringR = p.r * (0.3 + k * 0.22);
+          const ringOpacity = 0.10 + 0.05 * Math.sin(t * 3 + p.seed + k);
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, ringOpacity)})`;
+          ctx.lineWidth = p.r * 0.05;
+          ctx.ellipse(p.sx, p.sy - p.r * 0.1, ringR, ringR * 0.5, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        const spec = ctx.createRadialGradient(p.sx - p.r * 0.3, p.sy - p.r * 0.35, 0, p.sx - p.r * 0.3, p.sy - p.r * 0.35, p.r * 0.35);
+        spec.addColorStop(0, `rgba(255,255,255,${0.55 * dep})`);
+        spec.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.beginPath(); ctx.fillStyle = spec; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+      });
+    };
+    draw();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("scroll", onScroll); clearTimeout(scrollTimer); };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
+};
+
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-4">
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-5">
       <div className="overflow-hidden">
-        <div className="flex items-center shrink-0 gap-8 sm:gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
+        <div className="flex items-center shrink-0 gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
           {items.map(({ label }, i) => (
-            <span key={i} className="inline-flex items-center gap-2 text-white/35 hover:text-white/70 transition-colors text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-mono">
+            <span key={i} className="inline-flex items-center gap-2 text-white/35 hover:text-white/70 transition-colors text-[11px] tracking-[0.2em] uppercase font-mono">
               {label}
             </span>
           ))}
@@ -65,128 +186,157 @@ export const Hero = () => {
   const mousePos = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
 
+  // Butter-Smooth GPU-Accelerated Cursor Tracking
   useEffect(() => {
-    const move = (e) => { mousePos.current = { x: e.clientX, y: e.clientY }; };
-    let raf;
-    const tick = () => {
-      if (cursorRef.current)
-        cursorRef.current.style.transform =
-          `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
-      raf = requestAnimationFrame(tick);
+    const handleMouseMove = (e) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
     };
-    window.addEventListener("mousemove", move, { passive: true });
-    raf = requestAnimationFrame(tick);
-    return () => { window.removeEventListener("mousemove", move); cancelAnimationFrame(raf); };
+
+    let animFrameId;
+    const updateCursorPosition = () => {
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
+      }
+      animFrameId = requestAnimationFrame(updateCursorPosition);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    animFrameId = requestAnimationFrame(updateCursorPosition);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animFrameId);
+    };
   }, []);
 
   useEffect(() => {
-    const audio = new Audio("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller_(mp3.pm).mp3");
-    audio.loop = true; audio.volume = 0.5;
+    const audio = new Audio(encodeURI("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller__mp3_pm_.mp3"));
+    audio.loop = true;
+    audio.volume = 0.5;
     audioRef.current = audio;
     return () => { audio.pause(); audio.src = ""; };
   }, []);
 
   const toggleMusic = useCallback(() => {
-    const a = audioRef.current; if (!a) return;
-    if (playing) { a.pause(); setPlaying(false); }
-    else { a.play().catch(() => {}); setPlaying(true); }
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else         { audio.play().catch(() => {}); setPlaying(true); }
   }, [playing]);
+
+  const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
 
   return (
     <>
       <style>{`
-        @media (hover: hover) and (pointer: fine) {
-          html, body, #root, a, button, img, svg, [role="button"] { cursor: none !important; }
+        html, body, #root, a, button, img, svg, [role="button"] {
+          cursor: none !important;
         }
         @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
+      {/* Lag-free Custom Interaction Pointer Overlay */}
       <div
         ref={cursorRef}
-        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform hidden md:block"
+        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
         style={{ left: 0, top: 0 }}
       />
 
       <section
         id="home"
         data-testid="hero-section"
-        className="relative min-h-screen overflow-hidden flex flex-col bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('/image_3c72aa.jpg')` }}
+        className="relative min-h-screen overflow-hidden flex flex-col"
+        style={{ background: "#070708" }}
       >
-        {/* Cinematic dark overlay to ensure text contrast over the starry background */}
+        <GlassBubbleBackground />
+
         <div className="absolute inset-0 z-[1]" style={{
           background:
-            "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%)," +
-            "linear-gradient(180deg, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.75) 100%)",
+            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
         }} />
 
-        {/* ── HERO TEXT ── */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
-          <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl leading-[1.2] text-4xl sm:text-5xl md:text-[4.2rem]">
-            <span className="block mb-2">
-              <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
-              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle translate-y-[-2px]">
-                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
+          <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
+            <span className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
+              <span className="inline-block w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle">
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
               </span>
-              <span className="text-white">Saranmani</span>
+              <span>Saranmani</span>
             </span>
-
-            <span className="block mb-2">
-              <span className="text-white/60 font-medium">An </span>
-              <span className="text-white">Infrastructure Engineer </span>
-              <span className="inline-flex items-center justify-center bg-white/5 px-2 py-1 h-7 sm:h-9 md:h-11 rounded-lg border border-white/10 mx-1 align-middle translate-y-[-4px]">
-                <span className="text-xs sm:text-sm font-mono text-white/40">⚡</span>
-              </span>
+            <span className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-white/40 font-normal">An</span>
+              <span>Infrastructure Engineer</span>
             </span>
-
-            <span className="block">
-              <span className="text-white/60 font-medium">At </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 font-extrabold">
+            <span className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-white/40 font-normal">At</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
                 Cloud Canvas
               </span>
             </span>
           </h1>
 
-          <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/50 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed">
+          <p className="mt-6 text-sm md:text-base text-white/45 max-w-[560px] leading-relaxed">
             I enjoy taking messy, complicated infrastructure architectures and
             making them feel automated, secure, and effortless for global
             engineering teams.
           </p>
 
-          <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
-            <div className="flex items-center gap-3 sm:gap-4">
-              {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-                <a key={k} href={url} target="_blank" rel="noopener noreferrer"
-                  className="text-white/50 hover:text-white transition-colors">
-                  <Icon size={18} strokeWidth={1.5} />
-                </a>
-              ))}
-            </div>
+          <div className="mt-8 flex items-center justify-center gap-5">
+            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
+              <a
+                key={k} href={url} target="_blank" rel="noopener noreferrer"
+                className="text-white/50 hover:text-white transition-colors"
+              >
+                <Icon size={20} strokeWidth={1.5} />
+              </a>
+            ))}
             <span className="w-px h-5 bg-white/20" />
-            <button onClick={toggleMusic}
+            <button
+              onClick={toggleMusic}
               aria-label={playing ? "Pause music" : "Play music"}
-              className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}>
+              title={playing ? "Pause music" : "Play music"}
+              className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
+            >
               <WaveformIcon playing={playing} size={18} />
             </button>
             <span className="w-px h-5 bg-white/20" />
-            <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors">
+            <a
+              href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
+              className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
+            >
               Résumé →
             </a>
-            <a href={`mailto:${PROFILE.email}`}
-              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase px-3 sm:px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
+            <a
+              href={`mailto:${PROFILE.email}`}
+              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
+            >
               Say hi ↗
             </a>
           </div>
         </div>
 
-        {/* ── BOTTOM BLOCK (Company Logos Removed, Scroll Indicator Maintained) ── */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
-          <div className="w-full flex items-center justify-center gap-3 sm:gap-4 text-white/35 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
-            <span className="hidden sm:inline">Scroll down</span>
-            <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
+        {/* Bottom Navigation Frame Layout Block */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6">
+          
+          {/* Running Brand Images (Moved up by expanding spacing underneath) */}
+          <div className="w-full max-w-[650px] overflow-hidden mb-12 masked-marquee">
+            <div className="flex gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
+              {loopLogos.map((logo, i) => (
+                <span key={i} className={`text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
+                  {logo.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Scroll Down Section (Moved down by adding padding top) */}
+          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase pt-8">
+            <span>Scroll down</span>
+            <div className="h-px flex-1 max-w-[160px] bg-white/15" />
             <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
               <motion.div
                 className="w-1 h-1.5 bg-white/60 rounded-full"
@@ -194,8 +344,8 @@ export const Hero = () => {
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
-            <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
-            <span className="hidden sm:inline">to see projects</span>
+            <div className="h-px flex-1 max-w-[160px] bg-white/15" />
+            <span>to see projects</span>
           </div>
         </div>
 
