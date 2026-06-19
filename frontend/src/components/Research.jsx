@@ -109,6 +109,7 @@ export const Research = () => {
 
             <Reveal delay={0.1}>
               <div className="mt-10 flex flex-wrap items-center gap-3">
+                <a
                 
                   href="https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/4loeugtd_publised%20certificate.pdf"
                   target="_blank"
