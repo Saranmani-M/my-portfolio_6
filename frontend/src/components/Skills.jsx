@@ -13,20 +13,22 @@ const TOOLKIT = [
   { name: "Linux",   icon: "linux/linux-original.svg",                            sub: "Systems administration" },
   { name: "AWS",     icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg", sub: "Cloud infrastructure" },
   { name: "Ubuntu",  icon: "ubuntu/ubuntu-plain.svg",                              sub: "Server environments" },
-  { name: "Django",  icon: "django/django-plain.svg",                             sub: "Backend framework" },
   { name: "OpenCV",  icon: "opencv/opencv-original.svg",                          sub: "Computer vision" },
   { name: "Git",     icon: "git/git-original.svg",                                sub: "Version control" },
   { name: "GitHub",  icon: "github/github-original.svg",                          sub: "Source hosting" },
-  { name: "Java",    icon: "java/java-original.svg",                              sub: "Spring Boot" },
-  { name: "Spring",  icon: "spring/spring-original.svg",                          sub: "Application framework" },
-  { name: "Angular", icon: "angularjs/angularjs-original.svg",                     sub: "Frontend framework" },
   { name: "VS Code", icon: "vscode/vscode-original.svg",                          sub: "Code editor" },
   { name: "PyCharm", icon: "pycharm/pycharm-original.svg",                        sub: "Python IDE" },
   { name: "Docker",  icon: "docker/docker-original.svg",                          sub: "Containerization" },
-  { name: "Kubernetes", icon: "kubernetes/kubernetes-plain.svg",                  sub: "Orchestration" },
-  { name: "Nginx",   icon: "nginx/nginx-original.svg",                            sub: "Web server" },
-  { name: "Postgres", icon: "postgresql/postgresql-original.svg",                 sub: "Relational database" },
-  { name: "MongoDB", icon: "mongodb/mongodb-original.svg",                        sub: "NoSQL database" },
+];
+
+/* Small running icon ticker — shown after the Toolkit grid */
+const RUNNING_TICKER = [
+  { name: "Python", icon: "python/python-original.svg" },
+  { name: "Linux",  icon: "linux/linux-original.svg" },
+  { name: "AWS",    icon: "amazonwebservices/amazonwebservices-original.svg" },
+  { name: "Bash",   icon: "bash/bash-original.svg" },
+  { name: "Git",    icon: "git/git-original.svg" },
+  { name: "Docker", icon: "docker/docker-original.svg" },
 ];
 
 export const Skills = () => {
@@ -102,6 +104,28 @@ export const Skills = () => {
             </motion.div>
           ))}
         </div>
+      </div>
+
+      {/* ── Small running icon ticker, after Toolkit ── */}
+      <div className="relative overflow-hidden border-t border-white/10 mt-16 md:mt-20 py-4">
+        <div className="flex items-center gap-10 md:gap-14 whitespace-nowrap animate-[marquee-scroll_28s_linear_infinite] will-change-transform">
+          {[...RUNNING_TICKER, ...RUNNING_TICKER, ...RUNNING_TICKER].map((t, i) => (
+            <span key={`${t.name}-${i}`} className="inline-flex items-center gap-2.5 shrink-0">
+              <img
+                src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${t.icon}`}
+                alt={t.name}
+                loading="lazy"
+                className="w-5 h-5"
+              />
+              <span className="text-white/75 text-[15px]">{t.name}</span>
+              <span className="text-white/20 mx-1">·</span>
+            </span>
+          ))}
+        </div>
+        <style>{`
+          @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-33.333%)} }
+          @media(prefers-reduced-motion:reduce){ .animate-\\[marquee-scroll_28s_linear_infinite\\]{animation:none} }
+        `}</style>
       </div>
     </section>
   );
