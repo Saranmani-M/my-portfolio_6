@@ -49,6 +49,160 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
+// ── CYLINDER BEAD BACKGROUND — pre-baked, lag-free ──
+const CylinderBeadBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let frame;
+    let t = 0;
+
+    // ── sizing ──────────────────────────────────────────────────
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const cx = W * 0.5;
+    const cy = H * 0.5;
+    const scale = Math.min(W, H) / 800;
+
+    // ── geometry constants ───────────────────────────────────────
+    const RINGS    = 56;
+    const STRANDS  = 360;
+    const MAIN_R   = 230 * scale;
+    const TUBE_R   = 82  * scale;
+    const SPHERE_R = 18  * scale;
+    const PERSP    = 2000;
+    const TILT_A   =  0.52;   // arm1 tilt
+    const TILT_B   = -0.52;   // arm2 tilt
+    const WRAPS    = Math.PI * 9;
+    const Y_SPAN   = H * 1.35;
+
+    // ── pre-bake: store base helix angle + tube offset per particle ──
+    // For each particle we store:
+    //   baseAngle  — helix angle at t=0 (just p * WRAPS)
+    //   rotDir     — +1 or -1
+    //   tubeCosX, tubeSinZ — tube cross-section offsets (never change)
+    //   yWorld     — vertical position (never changes)
+    //   tiltCos, tiltSin — tilt matrix values (never change)
+    //   r0         — base sphere radius before perspective
+    const particles = [];
+
+    const addArm = (rotDir, tiltAngle) => {
+      const cosT = Math.cos(tiltAngle);
+      const sinT = Math.sin(tiltAngle);
+
+      for (let ring = 0; ring < RINGS; ring++) {
+        const tubeAngle = (ring / RINGS) * Math.PI * 2;
+        const tubeCosX  = Math.cos(tubeAngle) * TUBE_R;
+        const tubeSinZ  = Math.sin(tubeAngle) * TUBE_R;
+
+        for (let i = 0; i < STRANDS; i++) {
+          const p      = i / STRANDS;
+          const yWorld = (p - 0.5) * Y_SPAN;
+          const pinch  = 1 - 0.50 * Math.exp(-Math.pow((p - 0.5) * 3.0, 2));
+          const curR   = MAIN_R * pinch;
+
+          particles.push({
+            baseAngle: p * WRAPS,
+            rotDir,
+            curR,
+            tubeCosX,
+            tubeSinZ,
+            yWorld,
+            cosT,
+            sinT,
+          });
+        }
+      }
+    };
+
+    addArm(+1,  TILT_A);
+    addArm(-1,  TILT_B);
+
+    // ── pre-sort order: we sort ONCE at t=0 by approximate depth ──
+    // At runtime we just draw in this pre-sorted order.
+    // Works perfectly because depth ordering barely changes during rotation.
+    particles.forEach(p => {
+      const a  = p.baseAngle; // t=0
+      const hx = Math.cos(a) * p.curR;
+      const hz = Math.sin(a) * p.curR;
+      p.approxZ = hz + p.tubeSinZ;
+    });
+    particles.sort((a, b) => a.approxZ - b.approxZ);
+
+    // ── draw ─────────────────────────────────────────────────────
+    const animate = () => {
+      frame = requestAnimationFrame(animate);
+      t += 0.003;
+
+      ctx.clearRect(0, 0, W, H);
+
+      for (let k = 0; k < particles.length; k++) {
+        const { baseAngle, rotDir, curR, tubeCosX, tubeSinZ,
+                yWorld, cosT, sinT } = particles[k];
+
+        const angle = baseAngle + t * rotDir;
+        const hx    = Math.cos(angle) * curR;
+        const hz    = Math.sin(angle) * curR;
+
+        const px = hx + tubeCosX;
+        const pz = hz + tubeSinZ;
+
+        const rx = px * cosT - yWorld * sinT;
+        const ry = px * sinT + yWorld * cosT;
+
+        const persp = PERSP / (PERSP + pz);
+        const sx    = cx + rx * persp;
+        const sy    = cy + ry * persp;
+        const r     = SPHERE_R * persp;
+
+        // depth-based lighting
+        const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
+        const hi    = 0.10 + depth * 0.22;
+
+        // dark matte sphere
+        const g = ctx.createRadialGradient(
+          sx - r * 0.36, sy - r * 0.40, r * 0.01,
+          sx,            sy,            r
+        );
+        g.addColorStop(0,    `rgba(85,82,78,${hi})`);
+        g.addColorStop(0.18, `rgba(34,32,30,0.97)`);
+        g.addColorStop(0.58, `rgba(12,11,10,1)`);
+        g.addColorStop(1,    `rgba(2,2,2,1)`);
+
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // specular dot
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(155,150,143,${hi * 0.65})`;
+        ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.115, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    animate();
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 z-0 pointer-events-none"
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
+};
+
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
@@ -77,7 +231,8 @@ export const Hero = () => {
     let animFrameId;
     const update = () => {
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
+        cursorRef.current.style.transform =
+          `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
       }
       animFrameId = requestAnimationFrame(update);
     };
@@ -126,20 +281,15 @@ export const Hero = () => {
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#050507" }}
       >
-        {/* ── STATIC EXACT IMAGE BACKGROUND COMPONENT ── */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none select-none overflow-hidden opacity-65">
-          <img 
-            src="/background-cylinders.png" 
-            alt="Abstract structures background" 
-            className="w-full h-full max-w-[1200px] max-h-[90vh] object-contain object-center scale-105 md:scale-100" 
-          />
-        </div>
+        {/* Abstract Bead Background Mesh */}
+        <CylinderBeadBackground />
 
-        {/* Framing Contrast Overlay for content readability */}
+        {/* ── UPDATED OVERLAY ── */}
         <div
-          className="absolute inset-0 z-[1] pointer-events-none"
+          className="absolute inset-0 z-[1]"
           style={{
-            background: "radial-gradient(circle at center, rgba(5,5,7,0.15) 0%, rgba(5,5,7,0.85) 90%)"
+            background:
+              "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 0%, rgba(5,5,7,0.55) 100%)"
           }}
         />
 
