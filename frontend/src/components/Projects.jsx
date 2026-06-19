@@ -1,140 +1,201 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Asterisk, ArrowUpRight } from "lucide-react";
-import { FEATURED_PROJECT, SECOND_PROJECT, COMING_PROJECTS } from "../lib/data";
+import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
+import { PROFILE, SOCIALS } from "../lib/data";
 
-const easeOut = [0.16, 1, 0.3, 1];
+const SOCIAL_ICONS = [
+  { Icon: Linkedin,  url: SOCIALS.linkedin,  k: "linkedin"  },
+  { Icon: Github,    url: SOCIALS.github,    k: "github"    },
+  { Icon: Instagram, url: SOCIALS.instagram, k: "instagram" },
+  { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
+];
 
-const Reveal = ({ children, delay = 0, className = "" }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-    viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 1, ease: easeOut, delay }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
+const MARQUEE_SKILLS = [
+  { label: "Python"  },
+  { label: "AWS"     },
+  { label: "Linux"   },
+  { label: "Bash"    },
+  { label: "Docker"  },
+  { label: "Git"     },
+];
 
-const CaseStudy = ({ p, idx, testId, setCursorState }) => {
-  const handleProjectClick = (url) => {
-    document.body.style.opacity = "0.3";
-    setTimeout(() => {
-      window.location.href = url || "#";
-    }, 240);
-  };
+const RUNNING_LOGOS = [
+  { name: "Gears",  color: "text-white/40"     },
+  { name: "Rahi",   color: "text-blue-400/50"  },
+  { name: "idp",    color: "text-green-400/50" },
+  { name: "Google", color: "text-red-400/50"   },
+];
 
+const WaveformIcon = ({ playing, size = 16 }) => {
+  const bars = [0.45, 1, 0.6, 0.88, 0.5];
   return (
-    <article 
-      className="relative mb-32 group" 
-      data-testid={testId}
-    >
-      <div 
-        onClick={() => handleProjectClick(p.link)}
-        onMouseEnter={() => setCursorState("project")}
-        onMouseLeave={() => setCursorState("default")}
-        className="block project-card-elem"
-      >
-        {/* Subtle Number Frame Row */}
-        <div className="flex items-center gap-3 text-mono text-[10px] tracking-[0.2em] text-white/30 uppercase mb-4">
-          <span>PROJECT // 0{idx + 1}</span>
-          <div className="h-px flex-1 bg-white/[0.06]" />
-        </div>
-
-        {/* High-Contrast Typographic Header Container */}
-        <div className="grid grid-cols-12 gap-6 items-end mb-8">
-          <div className="col-span-12 md:col-span-8">
-            <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              {p.title} <span className="text-white/40 font-normal">— {p.subtitle}</span>
-            </h3>
-          </div>
-          <div className="col-span-12 md:col-span-4 flex md:justify-end gap-10 text-[11px] font-mono tracking-[0.15em] uppercase text-white/50">
-            <div>
-              <span className="text-white/20 block mb-1">Role:</span>
-              <span className="text-white/80">{p.role || "Engineer"}</span>
-            </div>
-            <div>
-              <span className="text-white/20 block mb-1">Year:</span>
-              <span className="text-white/80">{p.year}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Immersive Structural Image Visual Area */}
-        <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.02] aspect-[16/9] overflow-hidden mb-10 group-hover:border-white/20 transition-colors duration-500">
-          <img
-            src={p.cover}
-            alt={p.title}
-            className="w-full h-full object-cover opacity-60 group-hover:opacity-90 scale-100 group-hover:scale-[1.02] transition-all duration-700 ease-out will-change-transform grayscale group-hover:grayscale-0"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-transparent to-transparent opacity-80" />
-          
-          {/* Internal Magnetic Badge Trigger */}
-          <div className="absolute bottom-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
-            <ArrowUpRight size={18} />
-          </div>
-        </div>
-      </div>
-
-      {/* Structural Metadata Spec Grid */}
-      <div className="grid grid-cols-12 gap-y-6 md:gap-x-12 border-b border-white/[0.06] pb-12">
-        <div className="col-span-12 md:col-span-4">
-          <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-2">
-            Brief Overview
-          </div>
-          <p className="text-sm leading-relaxed text-white/60">
-            {p.problem || p.solution}
-          </p>
-        </div>
-
-        {p.architecture && (
-          <div className="col-span-12 md:col-span-4">
-            <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
-              Core Framework
-            </div>
-            <ul className="space-y-2 text-xs text-white/50">
-              {p.architecture.slice(0, 4).map((line, i) => (
-                <li key={i} className="flex gap-2 items-start">
-                  <span className="text-white/30 font-mono">{String(i + 1).padStart(2, "0")}.</span>
-                  <span className="leading-normal">{line}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="col-span-12 md:col-span-4">
-          <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
-            Technology Stack
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {p.technologies.map((tech) => (
-              <span
-                key={tech}
-                className="px-3 py-1 text-[11px] font-mono rounded-full bg-white/[0.03] border border-white/[0.06] text-white/70"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </article>
+    <svg width={size} height={size} viewBox="0 0 20 16" fill="none" aria-hidden="true">
+      {bars.map((h, i) => (
+        <rect
+          key={i}
+          x={i * 3.2 + 1}
+          y={8 - h * 6}
+          width={2}
+          height={h * 12}
+          rx={1}
+          fill="currentColor"
+          style={playing ? {
+            animation: `waveBar ${0.45 + i * 0.08}s ease-in-out ${i * 0.04}s infinite alternate`,
+            transformOrigin: "50% 100%",
+          } : {}}
+        />
+      ))}
+    </svg>
   );
 };
 
-export const Projects = () => {
+const VIRTUAL_W = 1600;
+const VIRTUAL_H = 1000;
+
+const GlassBubbleBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = VIRTUAL_W * dpr;
+    canvas.height = VIRTUAL_H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const bubbles = [];
+    const STEPS = 18, TURNS = 2.4, HR = 1.55, HH = 4.4;
+
+    for (let i = 0; i < STEPS; i++) {
+      const frac  = i / STEPS;
+      const angle = frac * Math.PI * 2 * TURNS;
+      const y     = (frac - 0.5) * HH;
+      const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
+      const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
+      bubbles.push({ x: x1, y, z: z1, r: 0.62 + (i % 3) * 0.07, seed: i });
+      bubbles.push({ x: x2, y, z: z2, r: 0.58 + ((i + 1) % 3) * 0.07, seed: i + 50 });
+    }
+    for (let i = 0; i < 10; i++) {
+      bubbles.push({
+        x: (((i * 73.13) % 100) / 100 - 0.5) * 3.6,
+        y: (((i * 41.29) % 100) / 100 - 0.5) * 4.0,
+        z: (((i * 29.81) % 100) / 100 - 0.5) * 2.0,
+        r: 0.22 + ((i * 17.3) % 100) / 100 * 0.3,
+        seed: i + 100,
+      });
+    }
+
+    let isScrolling = false, scrollTimer;
+    const onScroll = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let t = 0;
+    const draw = () => {
+      animId = requestAnimationFrame(draw);
+      ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
+      if (!isScrolling) t += 0.0035;
+
+      const cx = VIRTUAL_W * 0.5, cy = VIRTUAL_H * 0.46;
+      const scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.62;
+      const cosY = Math.cos(t * 0.5), sinY = Math.sin(t * 0.5);
+      const cosX = Math.cos(0.35), sinX = Math.sin(0.35);
+
+      const proj = bubbles.map(b => {
+        const rx = b.x * cosY - b.z * sinY, rz = b.x * sinY + b.z * cosY;
+        const ry = b.y * cosX - rz * sinX, rz2 = b.y * sinX + rz * cosX;
+        const psp = 2.6 / (2.6 + rz2);
+        return {
+          sx: cx + rx * scale * psp,
+          sy: cy + ry * scale * psp,
+          z: rz2,
+          r: b.r * scale * 0.34 * psp,
+          seed: b.seed,
+        };
+      });
+      proj.sort((a, b) => a.z - b.z);
+
+      proj.forEach(p => {
+        const dep = Math.max(0, Math.min(1, (p.z + 1.8) / 3.4));
+        const base = 60 + dep * 70;
+
+        const glow = ctx.createRadialGradient(p.sx, p.sy, p.r * 0.4, p.sx, p.sy, p.r * 1.5);
+        glow.addColorStop(0, `rgba(${base},${base},${base},0.10)`);
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.fillStyle = glow; ctx.arc(p.sx, p.sy, p.r * 1.5, 0, Math.PI * 2); ctx.fill();
+
+        const body = ctx.createLinearGradient(p.sx - p.r, p.sy - p.r, p.sx + p.r, p.sy + p.r);
+        body.addColorStop(0,   `rgba(${base * 0.18},${base * 0.18},${base * 0.18},1)`);
+        body.addColorStop(0.35,`rgba(${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},1)`);
+        body.addColorStop(0.5, `rgba(${base * 0.35},${base * 0.35},${base * 0.35},1)`);
+        body.addColorStop(0.7, `rgba(${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},1)`);
+        body.addColorStop(1,   `rgba(${base * 0.12},${base * 0.12},${base * 0.12},1)`);
+        ctx.beginPath(); ctx.fillStyle = body; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+
+        ctx.save();
+        ctx.beginPath(); ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.clip();
+        for (let k = 0; k < 4; k++) {
+          const ringR = p.r * (0.3 + k * 0.22);
+          const ringOpacity = 0.10 + 0.05 * Math.sin(t * 3 + p.seed + k);
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, ringOpacity)})`;
+          ctx.lineWidth = p.r * 0.05;
+          ctx.ellipse(p.sx, p.sy - p.r * 0.1, ringR, ringR * 0.5, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        const spec = ctx.createRadialGradient(p.sx - p.r * 0.3, p.sy - p.r * 0.35, 0, p.sx - p.r * 0.3, p.sy - p.r * 0.35, p.r * 0.35);
+        spec.addColorStop(0, `rgba(255,255,255,${0.55 * dep})`);
+        spec.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.beginPath(); ctx.fillStyle = spec; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+      });
+    };
+    draw();
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(scrollTimer);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
+};
+
+const SkillsMarquee = () => {
+  const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
+  return (
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-4">
+      <div className="overflow-hidden">
+        <div className="flex items-center shrink-0 gap-8 sm:gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
+          {items.map(({ label }, i) => (
+            <span key={i} className="inline-flex items-center gap-2 text-white/35 hover:text-white/70 transition-colors text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-mono">
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const Hero = () => {
+  const audioRef = useRef(null);
   const cursorRef = useRef(null);
   const mousePos = useRef({ x: -100, y: -100 });
-  const [cursorState, setCursorState] = useState("default");
+  const [playing, setPlaying] = useState(false);
 
-  // Lag-free Hardware-Accelerated Animation Loop
+  // Smooth GPU cursor — desktop only
   useEffect(() => {
     const handleMouseMove = (e) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
     };
-
     let animFrameId;
     const updateCursorPosition = () => {
       if (cursorRef.current) {
@@ -142,112 +203,181 @@ export const Projects = () => {
       }
       animFrameId = requestAnimationFrame(updateCursorPosition);
     };
-
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     animFrameId = requestAnimationFrame(updateCursorPosition);
-
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animFrameId);
     };
   }, []);
 
+  // FIX: exact filename, no encodeURI
+  useEffect(() => {
+    const audio = new Audio("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller_(mp3.pm).mp3");
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ""; };
+  }, []);
+
+  const toggleMusic = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else         { audio.play().catch(() => {}); setPlaying(true); }
+  }, [playing]);
+
+  const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
+
   return (
     <>
       <style>{`
-        /* Suppress fallback systems for fully customized experience */
-        .project-card-elem, .project-card-elem * {
-          cursor: none !important;
+        /* Custom cursor only on devices with a real pointer */
+        @media (hover: hover) and (pointer: fine) {
+          html, body, #root, a, button, img, svg, [role="button"] {
+            cursor: none !important;
+          }
         }
+        @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
+        @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
-      {/* Dynamic Cursor Target Layer */}
+      {/* Custom cursor dot — hidden on touch/mobile */}
       <div
         ref={cursorRef}
-        className="fixed pointer-events-none z-[99999] left-0 top-0 will-change-transform flex items-center justify-center transition-all duration-300 ease-out"
-      >
-        {cursorState !== "default" && (
-          <motion.div 
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="px-4 py-2 bg-white text-black text-[9px] font-bold font-mono tracking-[0.2em] uppercase rounded-full shadow-2xl border border-black/10 whitespace-nowrap"
-          >
-            UX Case Study ↗
-          </motion.div>
-        )}
-      </div>
+        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform hidden md:block"
+        style={{ left: 0, top: 0 }}
+      />
 
       <section
-        id="projects"
-        data-testid="projects-section"
-        className="relative py-24 md:py-32 px-6 md:px-12 bg-[#070708]"
+        id="home"
+        data-testid="hero-section"
+        className="relative min-h-screen overflow-hidden flex flex-col"
+        style={{ background: "#070708" }}
       >
-        <div className="max-w-6xl mx-auto">
-          
-          {/* Main Visual Header Row Block */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 md:mb-24 pb-8 border-b border-white/[0.06]">
-            <Reveal>
-              <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-[#e8ff47] block mb-3">
-                // Selected Architecture Work
+        <GlassBubbleBackground />
+
+        <div className="absolute inset-0 z-[1]" style={{
+          background:
+            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
+        }} />
+
+        {/* ── HERO CENTER BLOCK — Omkar's Immersive Inline Design Layout ── */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
+
+          <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
+            text-4xl sm:text-5xl md:text-[4.2rem]">
+            
+            {/* Line 1: Hey, I'm [Avatar] Saranmani */}
+            <span className="block mb-2">
+              <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
+              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 vertical-middle align-middle transform translate-y-[-2px]">
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
               </span>
-              <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white">
-                Case studies, <span className="text-white/40 font-normal">not cards.</span>
-              </h2>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <p className="max-w-xs text-xs md:text-sm leading-relaxed text-white/45 font-light">
-                Two infrastructure environments deployed to global production. Documented thoroughly.
-              </p>
-            </Reveal>
+              <span className="text-white">Saranmani</span>
+            </span>
+
+            {/* Line 2: An Infrastructure Engineer [Graphics Badge] */}
+            <span className="block mb-2">
+              <span className="text-white/60 font-medium">An </span>
+              <span className="text-white">Infrastructure Engineer </span>
+              <span className="inline-flex items-center justify-center bg-white/5 px-2 py-1 h-7 sm:h-9 md:h-11 rounded-lg border border-white/10 mx-1 align-middle transform translate-y-[-4px]">
+                <span className="text-xs sm:text-sm font-mono text-white/40">⚡</span>
+              </span>
+            </span>
+
+            {/* Line 3: At Cloud Canvas */}
+            <span className="block">
+              <span className="text-white/60 font-medium">At </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 font-extrabold">
+                Cloud Canvas
+              </span>
+            </span>
+          </h1>
+
+          {/* Tagline */}
+          <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed font-normal">
+            I enjoy taking messy, complicated infrastructure architectures and
+            making them feel automated, secure, and effortless for global
+            engineering teams.
+          </p>
+
+          {/* Action bar */}
+          <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+
+            {/* Socials */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              {SOCIAL_ICONS.map(({ Icon, url, k }) => (
+                <a key={k} href={url} target="_blank" rel="noopener noreferrer"
+                  className="text-white/50 hover:text-white transition-colors">
+                  <Icon size={18} strokeWidth={1.5} />
+                </a>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <span className="w-px h-5 bg-white/20" />
+
+            {/* Music */}
+            <button
+              onClick={toggleMusic}
+              aria-label={playing ? "Pause music" : "Play music"}
+              title={playing ? "Pause music" : "Play music"}
+              className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
+            >
+              <WaveformIcon playing={playing} size={18} />
+            </button>
+
+            {/* Divider */}
+            <span className="w-px h-5 bg-white/20" />
+
+            {/* Résumé */}
+            <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
+              className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors">
+              Résumé →
+            </a>
+
+            {/* Say hi */}
+            <a href={`mailto:${PROFILE.email}`}
+              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase px-3 sm:px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
+              Say hi ↗
+            </a>
           </div>
+        </div>
 
-          {/* Active Work Grid Rows */}
-          <CaseStudy p={FEATURED_PROJECT} idx={0} testId="featured-project" setCursorState={setCursorState} />
-          <CaseStudy p={SECOND_PROJECT} idx={1} testId="second-project" setCursorState={setCursorState} />
+        {/* ── BOTTOM BLOCK ── */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
 
-          {/* Backlogged/Pipeline In Motion Section */}
-          <div className="mt-28">
-            <Reveal>
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
-                <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-                  In <span className="text-white/40 font-normal">motion</span>
-                </h3>
-                <p className="text-xs text-white/45 max-w-xs font-light">
-                  Pipelines currently building. Documented and analyzed when completed.
-                </p>
-              </div>
-            </Reveal>
-
-            <div className="divide-y divide-white/[0.06] border-t border-b border-white/[0.06]">
-              {COMING_PROJECTS.map((p, i) => (
-                <motion.div
-                  key={p.title}
-                  data-testid={`coming-${i}`}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: i * 0.05, ease: easeOut }}
-                  className="group grid grid-cols-12 gap-4 py-6 md:py-8 items-center hover:bg-white/[0.01] transition-colors px-2 rounded-lg"
-                >
-                  <div className="col-span-1 font-mono text-[11px] text-white/25">
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-                  <div className="col-span-7 md:col-span-6 text-lg md:text-xl font-bold text-white/70 group-hover:text-white transition-colors">
-                    {p.title}
-                  </div>
-                  <div className="col-span-3 md:col-span-3 text-[10px] font-mono tracking-[0.15em] uppercase text-white/45">
-                    {p.discipline}
-                  </div>
-                  <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-2 text-[10px] font-mono text-white/30">
-                    <Asterisk size={10} className="text-[#e8ff47]/50 animate-spin-slow" />
-                    {p.year}
-                  </div>
-                </motion.div>
+          {/* Logo marquee — stable height, no jumping */}
+          <div className="w-full overflow-hidden mb-4 sm:mb-6">
+            <div className="flex gap-8 sm:gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform items-center h-8">
+              {loopLogos.map((logo, i) => (
+                <span key={i} className={`text-sm sm:text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
+                  {logo.name}
+                </span>
               ))}
             </div>
           </div>
 
+          {/* Scroll indicator */}
+          <div className="w-full flex items-center justify-center gap-3 sm:gap-4 text-white/35 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
+            <span className="hidden sm:inline">Scroll down</span>
+            <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
+            <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
+              <motion.div
+                className="w-1 h-1.5 bg-white/60 rounded-full"
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </div>
+            <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
+            <span className="hidden sm:inline">to see projects</span>
+          </div>
         </div>
+
+        <SkillsMarquee />
       </section>
     </>
   );
