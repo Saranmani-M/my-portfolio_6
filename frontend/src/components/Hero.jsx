@@ -198,7 +198,7 @@ export const Hero = () => {
   }, []);
 
   useEffect(() => {
-    const audio = new Audio(encodeURI("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller__mp3_pm_.mp3"));
+    const audio = new Audio(encodeURI("Hans_Zimmer_Patrik_Pietschmann_-_Interstaller__mp3_pm_.mp3"));
     audio.loop = true;
     audio.volume = 0.5;
     audioRef.current = audio;
