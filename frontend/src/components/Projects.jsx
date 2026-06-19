@@ -1,240 +1,254 @@
-import React from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Asterisk } from "lucide-react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Asterisk, ArrowUpRight } from "lucide-react";
 import { FEATURED_PROJECT, SECOND_PROJECT, COMING_PROJECTS } from "../lib/data";
+
+const easeOut = [0.16, 1, 0.3, 1];
 
 const Reveal = ({ children, delay = 0, className = "" }) => (
   <motion.div
     initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
     viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay }}
+    transition={{ duration: 1, ease: easeOut, delay }}
     className={className}
   >
     {children}
   </motion.div>
 );
 
-const CaseStudy = ({ p, idx, testId }) => {
-  const { scrollYProgress } = useScroll();
-  const imgY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+const CaseStudy = ({ p, idx, testId, setCursorState }) => {
+  const handleProjectClick = (url) => {
+    document.body.style.opacity = "0.3";
+    setTimeout(() => {
+      window.location.href = url || "#";
+    }, 240);
+  };
 
   return (
-    <article className="relative mb-24 md:mb-28" data-testid={testId}>
-      <Reveal>
-        <div className="grid grid-cols-12 gap-6 pb-7 border-b border-white/10 mb-10 md:mb-12">
-          <div className="col-span-12 md:col-span-7">
-            <h3 className="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] text-balance">
-              {p.title}
-              <br />
-              <em className="italic text-white/70">{p.subtitle}</em>
+    <article 
+      className="relative mb-32 group" 
+      data-testid={testId}
+    >
+      <div 
+        onClick={() => handleProjectClick(p.link)}
+        onMouseEnter={() => setCursorState("project")}
+        onMouseLeave={() => setCursorState("default")}
+        className="block project-card-elem"
+      >
+        {/* Subtle Number Frame Row */}
+        <div className="flex items-center gap-3 text-mono text-[10px] tracking-[0.2em] text-white/30 uppercase mb-4">
+          <span>PROJECT // 0{idx + 1}</span>
+          <div className="h-px flex-1 bg-white/[0.06]" />
+        </div>
+
+        {/* High-Contrast Typographic Header Container */}
+        <div className="grid grid-cols-12 gap-6 items-end mb-8">
+          <div className="col-span-12 md:col-span-8">
+            <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              {p.title} <span className="text-white/40 font-normal">— {p.subtitle}</span>
             </h3>
           </div>
-          <div className="col-span-6 md:col-span-2 md:col-start-9">
-            <div className="text-[10px] tracking-[0.28em] uppercase text-white/40">
-              Year
+          <div className="col-span-12 md:col-span-4 flex md:justify-end gap-10 text-[11px] font-mono tracking-[0.15em] uppercase text-white/50">
+            <div>
+              <span className="text-white/20 block mb-1">Role:</span>
+              <span className="text-white/80">{p.role || "Engineer"}</span>
             </div>
-            <div className="mt-2 text-white/85 font-mono">{p.year}</div>
-          </div>
-          <div className="col-span-6 md:col-span-3">
-            <div className="text-[10px] tracking-[0.28em] uppercase text-white/40">
-              Role
+            <div>
+              <span className="text-white/20 block mb-1">Year:</span>
+              <span className="text-white/80">{p.year}</span>
             </div>
-            <div className="mt-2 text-white/85">{p.role}</div>
           </div>
         </div>
-      </Reveal>
 
-      <Reveal>
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 aspect-[16/9] mb-14 md:mb-16">
-          <motion.img
+        {/* Immersive Structural Image Visual Area */}
+        <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.02] aspect-[16/9] overflow-hidden mb-10 group-hover:border-white/20 transition-colors duration-500">
+          <img
             src={p.cover}
             alt={p.title}
-            style={{ y: imgY }}
-            className="w-full h-[120%] object-cover"
+            className="w-full h-full object-cover opacity-60 group-hover:opacity-90 scale-100 group-hover:scale-[1.02] transition-all duration-700 ease-out will-change-transform grayscale group-hover:grayscale-0"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent" />
-          <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between text-[10px] tracking-[0.28em] uppercase text-white/70">
-            <span>FIG · 0{idx + 2} — {p.subtitle}</span>
-            <span className="font-mono">{p.year}</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-transparent to-transparent opacity-80" />
+          
+          {/* Internal Magnetic Badge Trigger */}
+          <div className="absolute bottom-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+            <ArrowUpRight size={18} />
           </div>
         </div>
-      </Reveal>
+      </div>
 
-      <div className="grid grid-cols-12 gap-8 md:gap-14">
-        {p.problem && (
-          <>
-            <div className="col-span-12 md:col-span-3">
-              <Reveal>
-                <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
-                  01 / Problem
-                </div>
-              </Reveal>
-            </div>
-            <Reveal delay={0.05} className="col-span-12 md:col-span-8 md:col-start-5">
-              <p className="font-serif text-2xl md:text-3xl leading-[1.35] text-white/90 text-balance">
-                {p.problem}
-              </p>
-            </Reveal>
-            <div className="col-span-12 hairline my-6" />
-          </>
-        )}
-
-        {p.solution && (
-          <>
-            <div className="col-span-12 md:col-span-3">
-              <Reveal>
-                <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
-                  02 / Solution
-                </div>
-              </Reveal>
-            </div>
-            <Reveal delay={0.05} className="col-span-12 md:col-span-8 md:col-start-5">
-              <p className="text-lg md:text-xl leading-[1.7] text-white/75 text-pretty">
-                {p.solution}
-              </p>
-            </Reveal>
-            <div className="col-span-12 hairline my-6" />
-          </>
-        )}
+      {/* Structural Metadata Spec Grid */}
+      <div className="grid grid-cols-12 gap-y-6 md:gap-x-12 border-b border-white/[0.06] pb-12">
+        <div className="col-span-12 md:col-span-4">
+          <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-2">
+            Brief Overview
+          </div>
+          <p className="text-sm leading-relaxed text-white/60">
+            {p.problem || p.solution}
+          </p>
+        </div>
 
         {p.architecture && (
-          <>
-            <div className="col-span-12 md:col-span-3">
-              <Reveal>
-                <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
-                  03 / Architecture
-                </div>
-              </Reveal>
+          <div className="col-span-12 md:col-span-4">
+            <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
+              Core Framework
             </div>
-            <Reveal delay={0.05} className="col-span-12 md:col-span-8 md:col-start-5">
-              <ol className="space-y-3.5">
-                {p.architecture.map((line, i) => (
-                  <li
-                    key={i}
-                    className="grid grid-cols-[auto_1fr] gap-5 text-white/80"
-                  >
-                    <span className="font-mono text-[11px] text-white/35 mt-1.5">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="text-[17px] leading-relaxed">{line}</span>
-                  </li>
-                ))}
-              </ol>
-            </Reveal>
-            <div className="col-span-12 hairline my-6" />
-          </>
+            <ul className="space-y-2 text-xs text-white/50">
+              {p.architecture.slice(0, 4).map((line, i) => (
+                <li key={i} className="flex gap-2 items-start">
+                  <span className="text-white/30 font-mono">{String(i + 1).padStart(2, "0")}.</span>
+                  <span className="leading-normal">{line}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
-        <div className="col-span-12 md:col-span-3">
-          <Reveal>
-            <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
-              04 / Technologies
-            </div>
-          </Reveal>
-        </div>
-        <Reveal delay={0.05} className="col-span-12 md:col-span-8 md:col-start-5">
-          <div className="flex flex-wrap gap-2">
-            {p.technologies.map((t) => (
+        <div className="col-span-12 md:col-span-4">
+          <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
+            Technology Stack
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {p.technologies.map((tech) => (
               <span
-                key={t}
-                className="px-4 py-1.5 text-[12px] tracking-wide rounded-full border border-white/15 text-white/80 hover:border-[#e8ff47]/40 hover:text-[#e8ff47] transition-colors"
+                key={tech}
+                className="px-3 py-1 text-[11px] font-mono rounded-full bg-white/[0.03] border border-white/[0.06] text-white/70"
               >
-                {t}
+                {tech}
               </span>
             ))}
           </div>
-        </Reveal>
-
-        <div className="col-span-12 hairline my-6" />
-
-        <div className="col-span-12 md:col-span-3">
-          <Reveal>
-            <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
-              05 / Outcome
-            </div>
-          </Reveal>
         </div>
-        <Reveal delay={0.05} className="col-span-12 md:col-span-8 md:col-start-5">
-          <p className="font-serif text-2xl md:text-3xl leading-snug text-white">
-            {p.outcome}
-          </p>
-        </Reveal>
       </div>
     </article>
   );
 };
 
 export const Projects = () => {
+  const cursorRef = useRef(null);
+  const mousePos = useRef({ x: -100, y: -100 });
+  const [cursorState, setCursorState] = useState("default");
+
+  // Lag-free Hardware-Accelerated Animation Loop
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    let animFrameId;
+    const updateCursorPosition = () => {
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
+      }
+      animFrameId = requestAnimationFrame(updateCursorPosition);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    animFrameId = requestAnimationFrame(updateCursorPosition);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animFrameId);
+    };
+  }, []);
+
   return (
-    <section
-      id="projects"
-      data-testid="projects-section"
-      className="relative py-14 md:py-20 px-6 md:px-12"
-    >
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-10 md:mb-14">
-          <Reveal>
-            <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5">
-              (Selected Work)
-            </div>
-            <h2 className="font-serif text-4xl md:text-6xl font-light text-white text-balance leading-[1]">
-              Case studies, not <em className="italic">cards</em>.
-            </h2>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              Two projects I&rsquo;m proud to talk about. A few more in motion.
-            </p>
-          </Reveal>
-        </div>
+    <>
+      <style>{`
+        /* Suppress fallback systems for fully customized experience */
+        .project-card-elem, .project-card-elem * {
+          cursor: none !important;
+        }
+      `}</style>
 
-        <CaseStudy p={FEATURED_PROJECT} idx={0} testId="featured-project" />
-        <CaseStudy p={SECOND_PROJECT} idx={1} testId="second-project" />
-
-        {/* Coming soon list */}
-        <div className="mt-16 md:mt-20">
-          <Reveal>
-            <div className="flex items-end justify-between flex-wrap gap-6 mb-10">
-              <h3 className="font-serif text-3xl md:text-5xl font-light text-white">
-                In <em className="italic">motion</em>
-              </h3>
-              <p className="text-sm text-white/50 max-w-xs">
-                A few things forming. Documented when they&rsquo;re ready, not
-                before.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="divide-y divide-white/10 border-t border-b border-white/10">
-            {COMING_PROJECTS.map((p, i) => (
-              <motion.div
-                key={p.title}
-                data-testid={`coming-${i}`}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: i * 0.06 }}
-                className="group grid grid-cols-12 gap-4 py-7 md:py-9 items-center"
-              >
-                <div className="col-span-1 font-mono text-[11px] text-white/35">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <div className="col-span-7 md:col-span-6 font-serif text-2xl md:text-4xl text-white/85 group-hover:text-white transition-colors">
-                  {p.title}
-                </div>
-                <div className="col-span-3 md:col-span-3 text-[12px] tracking-[0.18em] uppercase text-white/45">
-                  {p.discipline}
-                </div>
-                <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-2 text-[11px] tracking-[0.28em] uppercase text-white/50">
-                  <Asterisk size={12} className="opacity-60" />
-                  {p.year}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+      {/* Dynamic Cursor Target Layer */}
+      <div
+        ref={cursorRef}
+        className="fixed pointer-events-none z-[99999] left-0 top-0 will-change-transform flex items-center justify-center transition-all duration-300 ease-out"
+      >
+        {cursorState !== "default" && (
+          <motion.div 
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="px-4 py-2 bg-white text-black text-[9px] font-bold font-mono tracking-[0.2em] uppercase rounded-full shadow-2xl border border-black/10 whitespace-nowrap"
+          >
+            UX Case Study ↗
+          </motion.div>
+        )}
       </div>
-    </section>
+
+      <section
+        id="projects"
+        data-testid="projects-section"
+        className="relative py-24 md:py-32 px-6 md:px-12 bg-[#070708]"
+      >
+        <div className="max-w-6xl mx-auto">
+          
+          {/* Main Visual Header Row Block */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 md:mb-24 pb-8 border-b border-white/[0.06]">
+            <Reveal>
+              <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-[#e8ff47] block mb-3">
+                // Selected Architecture Work
+              </span>
+              <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white">
+                Case studies, <span className="text-white/40 font-normal">not cards.</span>
+              </h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <p className="max-w-xs text-xs md:text-sm leading-relaxed text-white/45 font-light">
+                Two infrastructure environments deployed to global production. Documented thoroughly.
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Active Work Grid Rows */}
+          <CaseStudy p={FEATURED_PROJECT} idx={0} testId="featured-project" setCursorState={setCursorState} />
+          <CaseStudy p={SECOND_PROJECT} idx={1} testId="second-project" setCursorState={setCursorState} />
+
+          {/* Backlogged/Pipeline In Motion Section */}
+          <div className="mt-28">
+            <Reveal>
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+                <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+                  In <span className="text-white/40 font-normal">motion</span>
+                </h3>
+                <p className="text-xs text-white/45 max-w-xs font-light">
+                  Pipelines currently building. Documented and analyzed when completed.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="divide-y divide-white/[0.06] border-t border-b border-white/[0.06]">
+              {COMING_PROJECTS.map((p, i) => (
+                <motion.div
+                  key={p.title}
+                  data-testid={`coming-${i}`}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: i * 0.05, ease: easeOut }}
+                  className="group grid grid-cols-12 gap-4 py-6 md:py-8 items-center hover:bg-white/[0.01] transition-colors px-2 rounded-lg"
+                >
+                  <div className="col-span-1 font-mono text-[11px] text-white/25">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <div className="col-span-7 md:col-span-6 text-lg md:text-xl font-bold text-white/70 group-hover:text-white transition-colors">
+                    {p.title}
+                  </div>
+                  <div className="col-span-3 md:col-span-3 text-[10px] font-mono tracking-[0.15em] uppercase text-white/45">
+                    {p.discipline}
+                  </div>
+                  <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-2 text-[10px] font-mono text-white/30">
+                    <Asterisk size={10} className="text-[#e8ff47]/50 animate-spin-slow" />
+                    {p.year}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </>
   );
 };
