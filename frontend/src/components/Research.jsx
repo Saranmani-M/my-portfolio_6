@@ -24,23 +24,22 @@ export const Research = () => {
     >
       <div className="max-w-7xl mx-auto">
         <Reveal>
-          <div className="text-[13px] tracking-[0.28em] uppercase text-white/45 mb-5 flex items-center gap-3">
-            <BookOpen size={15} className="text-[#e8ff47]" />
+          <div className="text-[11px] tracking-[0.28em] uppercase text-white/45 mb-5 flex items-center gap-3">
+            <BookOpen size={13} className="text-[#e8ff47]" />
             (Research · IEEE)
           </div>
-          <h2 className="font-serif text-5xl md:text-8xl font-light text-white text-balance leading-[1]">
+          <h2 className="font-serif text-4xl md:text-6xl font-light text-white text-balance leading-[1]">
             On <em className="italic">cryptography</em>, in print.
           </h2>
         </Reveal>
 
         <div className="mt-14 grid grid-cols-12 gap-8 md:gap-14">
-
           {/* Meta */}
           <div className="col-span-12 md:col-span-4">
             <Reveal>
               <div className="md:sticky md:top-28 space-y-6">
                 <div>
-                  <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
+                  <div className="text-[10px] tracking-[0.28em] uppercase text-white/40">
                     Venue
                   </div>
                   <div className="mt-2 font-serif text-2xl text-white">
@@ -48,7 +47,7 @@ export const Research = () => {
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
+                  <div className="text-[10px] tracking-[0.28em] uppercase text-white/40">
                     Date
                   </div>
                   <div className="mt-2 font-mono text-white/85">
@@ -56,7 +55,7 @@ export const Research = () => {
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] tracking-[0.28em] uppercase text-white/40">
+                  <div className="text-[10px] tracking-[0.28em] uppercase text-white/40">
                     Status
                   </div>
                   <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#e8ff47]/30 bg-[#e8ff47]/[0.04] text-[#e8ff47] text-[11px] tracking-[0.18em] uppercase">
@@ -72,7 +71,7 @@ export const Research = () => {
             <Reveal>
               <h3
                 data-testid="research-title"
-                className="font-serif text-4xl md:text-6xl font-light text-white leading-[1.05] text-balance"
+                className="font-serif text-3xl md:text-5xl font-light text-white leading-[1.05] text-balance"
               >
                 {RESEARCH.title}
               </h3>
@@ -110,7 +109,6 @@ export const Research = () => {
             <Reveal delay={0.1}>
               <div className="mt-10 flex flex-wrap items-center gap-3">
                 <a
-                
                   href="https://customer-assets.emergentagent.com/job_saranmani-portfolio/artifacts/4loeugtd_publised%20certificate.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -130,7 +128,6 @@ export const Research = () => {
               </div>
             </Reveal>
           </div>
-
         </div>
       </div>
     </section>
