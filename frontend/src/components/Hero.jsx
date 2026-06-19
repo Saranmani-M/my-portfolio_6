@@ -13,23 +13,23 @@ const SOCIAL_ICONS = [
 ];
 
 const MARQUEE_SKILLS = [
-  { label: "Python"  },
-  { label: "AWS"     },
-  { label: "Linux"   },
-  { label: "Bash"    },
-  { label: "Docker"  },
-  { label: "Git"     },
+  { label: "Python",  icon: "python/python-original.svg" },
+  { label: "AWS",     icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg" },
+  { label: "Linux",   icon: "linux/linux-original.svg" },
+  { label: "Bash",    icon: "bash/bash-original.svg" },
+  { label: "Docker",  icon: "docker/docker-original.svg" },
+  { label: "Git",     icon: "git/git-original.svg" },
 ];
 
 const RUNNING_LOGOS = [
-  { name: "AWS", color: "text-[#FF9900]" },
-  { name: "Microsoft", color: "text-[#F25022]" },
-  { name: "Google", color: "text-[#4285F4]" },
-  { name: "Red Hat", color: "text-[#EE0000]" },
-  { name: "Cisco", color: "text-[#1BA0D7]" },
-  { name: "VMware", color: "text-[#607078]" },
-  { name: "Dell EMC", color: "text-[#007DB8]" },
-  { name: "NetApp", color: "text-[#0067C5]" },
+  { name: "AWS",      color: "#FF9900" },
+  { name: "Microsoft",color: "#F25022" },
+  { name: "Google",   color: "#4285F4" },
+  { name: "Red Hat",  color: "#EE0000" },
+  { name: "Cisco",    color: "#1BA0D7" },
+  { name: "VMware",   color: "#607078" },
+  { name: "Dell EMC", color: "#007DB8" },
+  { name: "NetApp",   color: "#0067C5" },
 ];
 
 const WaveformIcon = ({ playing, size = 16 }) => {
@@ -81,7 +81,6 @@ const GlassBubbleBackground = () => {
       const y     = (frac - 0.5) * HH;
       const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
       const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
-
       bubbles.push({ x: x1, y, z: z1, r: 0.62 + (i % 3) * 0.07, seed: i });
       bubbles.push({ x: x2, y, z: z2, r: 0.58 + ((i + 1) % 3) * 0.07, seed: i + 50 });
     }
@@ -114,13 +113,7 @@ const GlassBubbleBackground = () => {
         const rx = b.x * cosY - b.z * sinY, rz = b.x * sinY + b.z * cosY;
         const ry = b.y * cosX - rz * sinX, rz2 = b.y * sinX + rz * cosX;
         const psp = 2.6 / (2.6 + rz2);
-        return {
-          sx: cx + rx * scale * psp,
-          sy: cy + ry * scale * psp,
-          z: rz2,
-          r: b.r * scale * 0.34 * psp,
-          seed: b.seed,
-        };
+        return { sx: cx + rx * scale * psp, sy: cy + ry * scale * psp, z: rz2, r: b.r * scale * 0.34 * psp, seed: b.seed };
       });
       proj.sort((a, b) => a.z - b.z);
 
@@ -167,34 +160,54 @@ const GlassBubbleBackground = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
 };
 
+const BASE_ICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
+
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-5 mt-auto">
-      <div className="overflow-hidden">
-        <div className="flex items-center shrink-0 gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
-          {items.map(({ label }, i) => (
-            <span key={i} className="inline-flex items-center gap-2 text-white/35 hover:text-white/70 transition-colors text-[11px] tracking-[0.2em] uppercase font-mono">
-              {label}
-            </span>
-          ))}
-        </div>
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-4 mt-auto overflow-hidden">
+      <div
+        className="flex items-center gap-8 whitespace-nowrap will-change-transform"
+        style={{ animation: "marquee-scroll 34s linear infinite", width: "max-content" }}
+      >
+        {items.map(({ label, icon }, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-2 text-white/55 hover:text-white transition-colors text-[11px] tracking-[0.12em] uppercase font-mono shrink-0"
+          >
+            <img
+              src={`${BASE_ICON}${icon}`}
+              alt={label}
+              className="w-4 h-4 opacity-70"
+              style={{ filter: "brightness(1.4)" }}
+            />
+            {label}
+            <span className="text-white/15 ml-1">·</span>
+          </span>
+        ))}
       </div>
     </div>
   );
 };
+
+// Detect touch/mobile device
+const isTouchDevice = () =>
+  typeof window !== "undefined" &&
+  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
 export const Hero = () => {
   const audioRef = useRef(null);
   const cursorRef = useRef(null);
   const mousePos = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
+  const [isTouch] = useState(() => isTouchDevice());
 
+  // Custom cursor — desktop only
   useEffect(() => {
+    if (isTouch) return;
     const handleMouseMove = (e) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
     };
-
     let animFrameId;
     const updateCursorPosition = () => {
       if (cursorRef.current) {
@@ -202,18 +215,16 @@ export const Hero = () => {
       }
       animFrameId = requestAnimationFrame(updateCursorPosition);
     };
-
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     animFrameId = requestAnimationFrame(updateCursorPosition);
-
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animFrameId);
     };
-  }, []);
+  }, [isTouch]);
 
   useEffect(() => {
-    const audio = new Audio(encodeURI("/1.mp3"));
+    const audio = new Audio("/1.mp3");
     audio.loop = true;
     audio.volume = 0.5;
     audioRef.current = audio;
@@ -232,20 +243,44 @@ export const Hero = () => {
   return (
     <>
       <style>{`
-        html, body, #root, a, button, img, svg, [role="button"] {
-          cursor: none !important;
-        }
+        /* Custom cursor only on non-touch devices */
+        ${!isTouch ? `
+          html, body, #root, a, button, img, svg, [role="button"] { cursor: none !important; }
+        ` : ""}
         @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
+
+        /* Mobile touch target sizing */
+        @media (max-width: 640px) {
+          .social-icon-link {
+            padding: 6px;
+            min-width: 36px;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .music-btn {
+            padding: 6px;
+            min-width: 36px;
+            min-height: 36px;
+          }
+          .cta-btn {
+            padding: 10px 20px;
+            font-size: 10px;
+          }
+        }
       `}</style>
 
-      {/* Custom Interaction Pointer */}
-      <div
-        ref={cursorRef}
-        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
-        style={{ left: 0, top: 0 }}
-      />
+      {/* Custom cursor — hidden on touch */}
+      {!isTouch && (
+        <div
+          ref={cursorRef}
+          className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
+          style={{ left: 0, top: 0 }}
+        />
+      )}
 
       <section
         id="home"
@@ -261,63 +296,69 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        {/* --- FIXED HEADLINE NAVIGATION CONTAINER (TOP CENTERED LINE) --- */}
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-row items-center gap-4 select-none bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/[0.06] shadow-xl whitespace-nowrap">
-          {/* Waveform Music Trigger */}
+        {/* Navbar — tighter on mobile, no overflow */}
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-row items-center gap-3 select-none bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.06] shadow-xl whitespace-nowrap max-w-[calc(100vw-2rem)]">
           <button
             onClick={toggleMusic}
             aria-label={playing ? "Pause music" : "Play music"}
-            className={`transition-colors flex items-center justify-center p-0.5 rounded ${playing ? "text-white" : "text-white/40 hover:text-white"}`}
+            className={`music-btn transition-colors flex items-center justify-center rounded-full ${playing ? "text-white" : "text-white/40 hover:text-white active:text-white"}`}
           >
             <WaveformIcon playing={playing} size={15} />
           </button>
-
           <span className="text-white/20 font-light text-sm">|</span>
-
-          {/* Connected Socials */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 sm:gap-3">
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a
-                key={k} href={url} target="_blank" rel="noopener noreferrer"
-                className="text-white/40 hover:text-white transition-colors"
+                key={k}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-icon-link text-white/40 hover:text-white active:text-white transition-colors"
               >
-                <Icon size={16} strokeWidth={1.8} />
+                <Icon size={15} strokeWidth={1.8} />
               </a>
             ))}
           </div>
         </div>
 
-        {/* Top Spacer for perfect viewport balancing */}
-        <div className="w-full pt-16 md:pt-20 invisible" aria-hidden="true" />
+        {/* Spacer for fixed navbar */}
+        <div className="w-full pt-20 invisible" aria-hidden="true" />
 
-        {/* Central Core Content Container */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto w-full">
-          
-          {/* Glowing Open To Work Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-6 backdrop-blur-sm select-none">
+        {/* Main content */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-10 max-w-5xl mx-auto w-full">
+
+          {/* Status badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-5 backdrop-blur-sm select-none">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
-            <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-green-400/90 font-medium">
+            <span className="text-[10px] uppercase tracking-[0.18em] font-mono text-green-400/90 font-medium">
               Live // Open to Work
             </span>
           </div>
 
-          {/* Centered Main Header Text */}
-          <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
-            <span className="flex items-center gap-3 flex-wrap justify-center">
+          {/* Heading — scales down properly on mobile */}
+          <h1 className="font-extrabold tracking-tight leading-[1.2] text-white w-full">
+            {/* Line 1 */}
+            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1">
               <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
-              <span className="inline-block w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle">
+              <span className="inline-block w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
                 <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
               </span>
               <span>Saranmani M</span>
             </span>
-            <span className="flex items-center gap-3 flex-wrap justify-center">
+            {/* Line 2 */}
+            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1">
               <span className="text-white/40 font-normal">Aspiring</span>
-              <span>Cloud & Storage Engineer</span>
+              <span>Cloud &amp; Storage</span>
             </span>
-            <span className="flex items-center gap-3 flex-wrap justify-center">
+            {/* "Engineer" on its own line on mobile to avoid overflow */}
+            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem] mb-1">
+              <span>Engineer</span>
+            </span>
+            {/* Line 3 */}
+            <span className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.4rem]">
               <span className="text-white/40 font-normal">Building</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
                 Secure Infrastructure
@@ -325,37 +366,47 @@ export const Hero = () => {
             </span>
           </h1>
 
-          <p className="mt-6 text-sm md:text-base text-white/45 max-w-[560px] leading-relaxed">
+          {/* Bio */}
+          <p className="mt-5 text-sm md:text-base text-white/45 max-w-[520px] leading-relaxed px-2">
             I enjoy working with Linux systems, cloud infrastructure, and storage technologies, building reliable,
             secure, and scalable environments while continuously learning and improving my skills.
           </p>
 
-          {/* Interactive Call to Action Footer Area */}
-          <div className="mt-8 flex items-center justify-center gap-5">
+          {/* CTAs */}
+          <div className="mt-7 flex items-center justify-center gap-4 sm:gap-5 flex-wrap">
             <a
-              href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
+              href={PROFILE.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cta-btn text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white active:text-white transition-colors py-2 px-1"
             >
               Résumé →
             </a>
             <span className="w-px h-5 bg-white/20" />
             <a
               href={`mailto:${PROFILE.email}`}
-              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
+              className="cta-btn inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full hover:opacity-90 active:opacity-80 transition-opacity"
             >
               Say hi ↗
             </a>
           </div>
 
-          {/* Target Ambitions & Dream Teams Section */}
-          <div className="w-full max-w-[500px] mt-16 flex flex-col items-center gap-3">
-            <span className="text-[10px] tracking-[0.25em] uppercase font-mono text-white/25 select-none">
-              Dream Stacks & Engineering Ambitions
+          {/* Dream Stacks marquee */}
+          <div className="w-full max-w-[500px] mt-12 flex flex-col items-center gap-3">
+            <span className="text-[10px] tracking-[0.22em] uppercase font-mono text-white/25 select-none">
+              Dream Stacks &amp; Engineering Ambitions
             </span>
-            <div className="w-full overflow-hidden masked-marquee py-1">
-              <div className="flex gap-14 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
+            <div className="w-full overflow-hidden py-1">
+              <div
+                className="flex gap-10 whitespace-nowrap will-change-transform items-center"
+                style={{ animation: "marquee-scroll 25s linear infinite", width: "max-content" }}
+              >
                 {loopLogos.map((logo, i) => (
-                  <span key={i} className={`text-xs font-bold tracking-widest ${logo.color} select-none font-sans uppercase`}>
+                  <span
+                    key={i}
+                    className="text-[11px] font-bold tracking-widest select-none font-sans uppercase shrink-0"
+                    style={{ color: logo.color }}
+                  >
                     {logo.name}
                   </span>
                 ))}
@@ -364,11 +415,11 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Bottom Interactive Navigation Block */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6 mt-auto">
+        {/* Scroll hint — hidden on very small screens to save space */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto hidden sm:flex flex-col items-center mb-6 px-6 mt-auto">
           <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase">
             <span>Scroll down</span>
-            <div className="h-px flex-1 max-w-[160px] bg-white/15" />
+            <div className="h-px flex-1 max-w-[120px] bg-white/15" />
             <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
               <motion.div
                 className="w-1 h-1.5 bg-white/60 rounded-full"
@@ -376,8 +427,19 @@ export const Hero = () => {
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
-            <div className="h-px flex-1 max-w-[160px] bg-white/15" />
+            <div className="h-px flex-1 max-w-[120px] bg-white/15" />
             <span>to see projects</span>
+          </div>
+        </div>
+
+        {/* Scroll hint for mobile — compact version */}
+        <div className="relative z-10 flex sm:hidden justify-center mb-5 mt-2">
+          <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
+            <motion.div
+              className="w-1 h-1.5 bg-white/60 rounded-full"
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
           </div>
         </div>
 
