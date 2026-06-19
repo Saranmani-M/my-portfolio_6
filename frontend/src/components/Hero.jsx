@@ -49,124 +49,129 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── UPDATED CYLINDER BEAD BACKGROUND ──
+// ── CYLINDER BEAD BACKGROUND — matches reference image ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     let frame;
     let t = 0;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
+      canvas.width  = window.innerWidth  * dpr;
       canvas.height = window.innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-
     resize();
     window.addEventListener("resize", resize);
 
-    const drawStructure = (centerX, centerY, rotationDirection, tilt) => {
+    // Draw one twisted bead-tube structure
+    // rotDir: +1 = rotates right, -1 = rotates left
+    const drawStructure = (cx, cy, rotDir, tilt) => {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // Scale based on screen size so spheres fill the view
+      const scale      = Math.min(W, H) / 900;
+      const RINGS      = 52;          // sphere rows around tube cross-section
+      const STRANDS    = 320;         // sphere columns along the helix
+      const MAIN_R     = 310 * scale; // helix radius
+      const TUBE_R     = 105 * scale; // tube thickness
+      const SPHERE_R   = 26  * scale; // base sphere size
+      const PERSP      = 1600;        // perspective depth
+
       const particles = [];
 
-      const rings = 32;
-      const strands = 260;
+      for (let ring = 0; ring < RINGS; ring++) {
+        for (let i = 0; i < STRANDS; i++) {
+          const p = i / STRANDS;
 
-      for (let ring = 0; ring < rings; ring++) {
-        for (let i = 0; i < strands; i++) {
-          const p = i / strands;
+          // Vertical travel — tall enough to bleed off top & bottom
+          const yWorld = (p - 0.5) * H * 1.7;
 
-          const y = (p - 0.5) * window.innerHeight * 1.5;
+          // Helix spiral along the Y axis, with twist animation
+          const helixAngle = p * Math.PI * 10 + t * rotDir;
 
-          const angle =
-            p * Math.PI * 14 +
-            t * rotationDirection +
-            ring * 0.22;
+          // Waist pinch in the middle (like an hourglass / X cross)
+          const pinch    = 1 - 0.38 * Math.exp(-Math.pow((p - 0.5) * 3.5, 2));
+          const curR     = MAIN_R * pinch;
 
-          const mainRadius = 220 + Math.sin(p * Math.PI * 4) * 40;
+          const hx = Math.cos(helixAngle) * curR;
+          const hz = Math.sin(helixAngle) * curR;
 
-          const x = Math.cos(angle) * mainRadius;
-          const z = Math.sin(angle) * mainRadius;
+          // Cross-section circle (tube) — packed sphere ring
+          const tubeAngle = (ring / RINGS) * Math.PI * 2;
+          const tx = Math.cos(tubeAngle) * TUBE_R;
+          const tz = Math.sin(tubeAngle) * TUBE_R;
 
-          const tubeAngle = (ring / rings) * Math.PI * 2;
-          const tubeRadius = 80;
+          const px = hx + tx;
+          const pz = hz + tz;
 
-          const tx = Math.cos(tubeAngle) * tubeRadius;
-          const tz = Math.sin(tubeAngle) * tubeRadius;
+          // Tilt the whole structure
+          const rx = px * Math.cos(tilt) - yWorld * Math.sin(tilt);
+          const ry = px * Math.sin(tilt) + yWorld * Math.cos(tilt);
 
-          const px = x + tx;
-          const pz = z + tz;
-
-          const rx = px * Math.cos(tilt) - y * Math.sin(tilt);
-          const ry = px * Math.sin(tilt) + y * Math.cos(tilt);
-
-          const perspective = 1800 / (1800 + pz);
+          const persp = PERSP / (PERSP + pz);
 
           particles.push({
-            x: centerX + rx * perspective,
-            y: centerY + ry * perspective,
-            z: pz,
-            r: 12 * perspective,
+            sx: cx + rx * persp,
+            sy: cy + ry * persp,
+            sz: pz,
+            r:  SPHERE_R * persp,
           });
         }
       }
 
-      particles.sort((a, b) => a.z - b.z);
+      // Painter's algorithm — back to front
+      particles.sort((a, b) => a.sz - b.sz);
 
-      particles.forEach((p) => {
+      particles.forEach(({ sx, sy, sz, r }) => {
+        // Depth-based lighting: spheres further back are darker
+        const depth   = Math.max(0, Math.min(1, (sz + PERSP * 0.6) / (PERSP * 1.2)));
+        const hiAlpha = 0.18 + depth * 0.22; // subtle highlight, stays dark overall
+
+        // Main sphere — dark matte with soft rim highlight from top-left
         const g = ctx.createRadialGradient(
-          p.x - p.r * 0.4,
-          p.y - p.r * 0.4,
-          0,
-          p.x,
-          p.y,
-          p.r
+          sx - r * 0.38, sy - r * 0.42, r * 0.02,
+          sx,            sy,            r
         );
-
-        g.addColorStop(0,    "rgba(255,255,255,0.25)");
-        g.addColorStop(0.2,  "rgba(120,120,120,0.15)");
-        g.addColorStop(0.65, "rgba(18,18,18,1)");
-        g.addColorStop(1,    "rgba(0,0,0,1)");
+        g.addColorStop(0,    `rgba(90, 88, 85, ${hiAlpha})`);   // dim grey highlight
+        g.addColorStop(0.25, `rgba(38, 36, 34, 0.95)`);         // dark body
+        g.addColorStop(0.65, `rgba(14, 13, 12, 1)`);            // deep shadow
+        g.addColorStop(1,    `rgba(4,  4,  4,  1)`);            // edge black
 
         ctx.beginPath();
         ctx.fillStyle = g;
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
         ctx.fill();
 
+        // Tiny specular dot — upper-left
         ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.15)";
-        ctx.arc(
-          p.x - p.r * 0.3,
-          p.y - p.r * 0.3,
-          p.r * 0.12,
-          0,
-          Math.PI * 2
-        );
+        ctx.fillStyle = `rgba(180, 175, 168, ${hiAlpha * 0.7})`;
+        ctx.arc(sx - r * 0.34, sy - r * 0.36, r * 0.13, 0, Math.PI * 2);
         ctx.fill();
       });
     };
 
     const animate = () => {
       frame = requestAnimationFrame(animate);
-
-      t += 0.0008;
+      // Faster rotation speed — 0.004 feels alive without being distracting
+      t += 0.004;
 
       const W = window.innerWidth;
       const H = window.innerHeight;
-
       ctx.clearRect(0, 0, W, H);
 
-      drawStructure(W * 0.38, H * 0.55,  1,  0.6);
-      drawStructure(W * 0.62, H * 0.45, -1, -0.6);
+      // Left structure rotates RIGHT (+1), right structure rotates LEFT (-1)
+      drawStructure(W * 0.28, H * 0.52,  1,  0.52);
+      drawStructure(W * 0.72, H * 0.48, -1, -0.52);
     };
 
     animate();
-
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
@@ -268,7 +273,7 @@ export const Hero = () => {
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%)"
+              "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 0%, rgba(5,5,7,0.55) 100%)"
           }}
         />
 
