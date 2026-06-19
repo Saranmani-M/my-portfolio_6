@@ -10,7 +10,6 @@ import { Research } from "@/components/Research";
 import { Articles } from "@/components/Articles";
 import { CodingProfiles } from "@/components/CodingProfiles";
 import { Testimonials } from "@/components/Testimonials";
-import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 
 function App() {
@@ -34,7 +33,7 @@ function App() {
           <Articles />
           <CodingProfiles />
           <Testimonials />
-          <Contact />
+          
         </main>
 
         <Footer />
