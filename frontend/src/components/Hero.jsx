@@ -49,7 +49,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── CYLINDER BEAD BACKGROUND — pre-baked, lag-free ──
+// ── CYLINDER BEAD BACKGROUND — static, drawn once ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
@@ -57,10 +57,7 @@ const CylinderBeadBackground = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    let frame;
-    let t = 0;
 
-    // ── sizing ──────────────────────────────────────────────────
     const W = window.innerWidth;
     const H = window.innerHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -72,29 +69,18 @@ const CylinderBeadBackground = () => {
     const cy = H * 0.5;
     const scale = Math.min(W, H) / 800;
 
-    // ── geometry constants ───────────────────────────────────────
     const RINGS    = 56;
     const STRANDS  = 360;
     const MAIN_R   = 230 * scale;
     const TUBE_R   = 82  * scale;
     const SPHERE_R = 18  * scale;
     const PERSP    = 2000;
-    const TILT_A   =  0.52;   // arm1 tilt
-    const TILT_B   = -0.52;   // arm2 tilt
     const WRAPS    = Math.PI * 9;
     const Y_SPAN   = H * 1.35;
 
-    // ── pre-bake: store base helix angle + tube offset per particle ──
-    // For each particle we store:
-    //   baseAngle  — helix angle at t=0 (just p * WRAPS)
-    //   rotDir     — +1 or -1
-    //   tubeCosX, tubeSinZ — tube cross-section offsets (never change)
-    //   yWorld     — vertical position (never changes)
-    //   tiltCos, tiltSin — tilt matrix values (never change)
-    //   r0         — base sphere radius before perspective
     const particles = [];
 
-    const addArm = (rotDir, tiltAngle) => {
+    const addArm = (tiltAngle) => {
       const cosT = Math.cos(tiltAngle);
       const sinT = Math.sin(tiltAngle);
 
@@ -109,89 +95,59 @@ const CylinderBeadBackground = () => {
           const pinch  = 1 - 0.50 * Math.exp(-Math.pow((p - 0.5) * 3.0, 2));
           const curR   = MAIN_R * pinch;
 
+          // Fixed angle — t = 0, no rotation ever
+          const angle = p * WRAPS;
+          const hx    = Math.cos(angle) * curR;
+          const hz    = Math.sin(angle) * curR;
+
+          const px = hx + tubeCosX;
+          const pz = hz + tubeSinZ;
+
+          const rx = px * cosT - yWorld * sinT;
+          const ry = px * sinT + yWorld * cosT;
+
+          const persp = PERSP / (PERSP + pz);
+
           particles.push({
-            baseAngle: p * WRAPS,
-            rotDir,
-            curR,
-            tubeCosX,
-            tubeSinZ,
-            yWorld,
-            cosT,
-            sinT,
+            sx: cx + rx * persp,
+            sy: cy + ry * persp,
+            pz,
+            r:  SPHERE_R * persp,
           });
         }
       }
     };
 
-    addArm(+1,  TILT_A);
-    addArm(-1,  TILT_B);
+    addArm( 0.52);   // arm tilting /
+    addArm(-0.52);   // arm tilting \
 
-    // ── pre-sort order: we sort ONCE at t=0 by approximate depth ──
-    // At runtime we just draw in this pre-sorted order.
-    // Works perfectly because depth ordering barely changes during rotation.
-    particles.forEach(p => {
-      const a  = p.baseAngle; // t=0
-      const hx = Math.cos(a) * p.curR;
-      const hz = Math.sin(a) * p.curR;
-      p.approxZ = hz + p.tubeSinZ;
+    // Sort once by depth, draw once — completely static
+    particles.sort((a, b) => a.pz - b.pz);
+
+    particles.forEach(({ sx, sy, pz, r }) => {
+      const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
+      const hi    = 0.10 + depth * 0.22;
+
+      const g = ctx.createRadialGradient(
+        sx - r * 0.36, sy - r * 0.40, r * 0.01,
+        sx,            sy,            r
+      );
+      g.addColorStop(0,    `rgba(85,82,78,${hi})`);
+      g.addColorStop(0.18, `rgba(34,32,30,0.97)`);
+      g.addColorStop(0.58, `rgba(12,11,10,1)`);
+      g.addColorStop(1,    `rgba(2,2,2,1)`);
+
+      ctx.beginPath();
+      ctx.fillStyle = g;
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(155,150,143,${hi * 0.65})`;
+      ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.115, 0, Math.PI * 2);
+      ctx.fill();
     });
-    particles.sort((a, b) => a.approxZ - b.approxZ);
 
-    // ── draw ─────────────────────────────────────────────────────
-    const animate = () => {
-      frame = requestAnimationFrame(animate);
-      t += 0.003;
-
-      ctx.clearRect(0, 0, W, H);
-
-      for (let k = 0; k < particles.length; k++) {
-        const { baseAngle, rotDir, curR, tubeCosX, tubeSinZ,
-                yWorld, cosT, sinT } = particles[k];
-
-        const angle = baseAngle + t * rotDir;
-        const hx    = Math.cos(angle) * curR;
-        const hz    = Math.sin(angle) * curR;
-
-        const px = hx + tubeCosX;
-        const pz = hz + tubeSinZ;
-
-        const rx = px * cosT - yWorld * sinT;
-        const ry = px * sinT + yWorld * cosT;
-
-        const persp = PERSP / (PERSP + pz);
-        const sx    = cx + rx * persp;
-        const sy    = cy + ry * persp;
-        const r     = SPHERE_R * persp;
-
-        // depth-based lighting
-        const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
-        const hi    = 0.10 + depth * 0.22;
-
-        // dark matte sphere
-        const g = ctx.createRadialGradient(
-          sx - r * 0.36, sy - r * 0.40, r * 0.01,
-          sx,            sy,            r
-        );
-        g.addColorStop(0,    `rgba(85,82,78,${hi})`);
-        g.addColorStop(0.18, `rgba(34,32,30,0.97)`);
-        g.addColorStop(0.58, `rgba(12,11,10,1)`);
-        g.addColorStop(1,    `rgba(2,2,2,1)`);
-
-        ctx.beginPath();
-        ctx.fillStyle = g;
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // specular dot
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(155,150,143,${hi * 0.65})`;
-        ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.115, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    };
-
-    animate();
-    return () => cancelAnimationFrame(frame);
   }, []);
 
   return (
