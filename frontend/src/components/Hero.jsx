@@ -23,6 +23,7 @@ const RUNNING_LOGOS = [
   { name: "Rahi",   color: "text-blue-400/50"  },
   { name: "idp",    color: "text-green-400/50" },
   { name: "Google", color: "text-red-400/50"   },
+  { name: "amazon", color: "text-orange-400/50"},
   { name: "Gears",  color: "text-white/40"     },
 ];
 
@@ -50,7 +51,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── ROTATING CYLINDER BEAD BACKGROUND (INTERACTIVE LOOP) ──
+// ── 3D SPINNING CROSS-BEAD MESH BACKDROP ──
 const CylinderBeadBackground = () => {
   const canvasRef = useRef(null);
 
@@ -79,16 +80,16 @@ const CylinderBeadBackground = () => {
       const cy = H * 0.5;
       const scale = Math.min(W, H) / 800;
 
-      const RINGS    = 58;       
-      const STRANDS  = 380;      
-      const MAIN_R   = 210 * scale; 
-      const TUBE_R   = 86  * scale; 
-      const SPHERE_R = 16  * scale; 
+      const RINGS    = 64;       
+      const STRANDS  = 390;      
+      const MAIN_R   = 200 * scale; 
+      const TUBE_R   = 90  * scale; 
+      const SPHERE_R = 15  * scale; 
       const PERSP    = 2000;
       const WRAPS    = Math.PI * 10;
       const Y_SPAN   = H * 1.4;
 
-      // Slowly increment rotation clock ticks over execution frames
+      // Constant spinning velocity update calculation
       time += 0.0035; 
 
       const particles = [];
@@ -105,10 +106,10 @@ const CylinderBeadBackground = () => {
           for (let i = 0; i < STRANDS; i++) {
             const p      = i / STRANDS;
             const yWorld = (p - 0.5) * Y_SPAN;
-            const pinch  = 1 - 0.48 * Math.exp(-Math.pow((p - 0.5) * 2.9, 2));
+            const pinch  = 1 - 0.45 * Math.exp(-Math.pow((p - 0.5) * 2.9, 2));
             const curR   = MAIN_R * pinch;
 
-            // Calculates animated rotational offset geometry based on system trajectory clocks
+            // Compute rotational offset parameters relative to current clock state
             const angle = p * WRAPS + (directionClock * time);
             const hx    = Math.cos(angle) * curR;
             const hz    = Math.sin(angle) * curR;
@@ -131,24 +132,24 @@ const CylinderBeadBackground = () => {
         }
       };
 
-      // Add arms rotating in opposing balanced sequences
+      // Two interlocking structures balancing each other out
       addArm(0.54, 1);  
       addArm(-0.54, -1); 
 
-      // Deep layout layering depth sorter
+      // Sort coordinates linearly for a precise deep rendering sequence matching the image style
       particles.sort((a, b) => a.pz - b.pz);
 
       particles.forEach(({ sx, sy, pz, r }) => {
         const depth = Math.max(0, Math.min(1, (pz + PERSP * 0.5) / PERSP));
-        const hi = 0.06 + depth * 0.18; 
+        const hi = 0.05 + depth * 0.16; 
 
         const g = ctx.createRadialGradient(
           sx - r * 0.36, sy - r * 0.40, r * 0.01,
           sx,            sy,            r
         );
-        g.addColorStop(0,    `rgba(80,76,72,${hi * 1.15})`);
-        g.addColorStop(0.20, `rgba(28,26,24,0.98)`);
-        g.addColorStop(0.60, `rgba(10,9,8,1)`);
+        g.addColorStop(0,    `rgba(75,72,68,${hi * 1.2})`);
+        g.addColorStop(0.22, `rgba(24,22,20,0.98)`);
+        g.addColorStop(0.65, `rgba(8,7,6,1)`);
         g.addColorStop(1,    `rgba(3,3,4,1)`);
 
         ctx.beginPath();
@@ -157,7 +158,7 @@ const CylinderBeadBackground = () => {
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = `rgba(145,140,132,${hi * 0.6})`;
+        ctx.fillStyle = `rgba(135,130,123,${hi * 0.55})`;
         ctx.arc(sx - r * 0.31, sy - r * 0.33, r * 0.11, 0, Math.PI * 2);
         ctx.fill();
       });
@@ -250,13 +251,14 @@ export const Hero = () => {
         style={{ left: 0, top: 0 }}
       />
 
-      {/* FIXED FLOATING NAVBAR (Logo-Only left side block, zero buttons on right side) */}
+      {/* NAVBAR CONTAINER (Left logo token, completely cleared right container) */}
       <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-5 pointer-events-none">
-        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 pointer-events-auto">
-          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+        <div className="flex items-center gap-2.5 bg-black/20 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 pointer-events-auto">
+          {/* Custom Multi-Loop Dynamic Token Graphics */}
+          <svg className="w-5 h-5 text-white" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 6c5.523 0 10 4.477 10 10s-4.477 10-10 10S6 23.523 6 10s4.477-10 10-10z" fill="currentColor" fillOpacity="0.15"/>
+            <path d="M10 14c0-3.314 2.686-6 6-6s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6z" fill="currentColor"/>
           </svg>
-          <span className="text-xs font-bold tracking-[0.18em] uppercase text-white font-sans">Cloud Canvas</span>
         </div>
         <div className="hidden md:block" />
       </nav>
@@ -267,19 +269,19 @@ export const Hero = () => {
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#030304" }}
       >
-        {/* Animated Spin Dynamic Matrix Background Layer */}
+        {/* Continuous Active Spinning 3D Canvas Context Layer */}
         <CylinderBeadBackground />
 
-        {/* Ambient Dark Exposure overlay mask */}
+        {/* Ambient Overlay Mask */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.1) 0%, rgba(3,3,4,0.75) 100%)"
+              "radial-gradient(ellipse at 50% 50%, rgba(3,3,4,0.05) 0%, rgba(3,3,4,0.72) 100%)"
           }}
         />
 
-        {/* ── HERO CENTER BLOCK ── */}
+        {/* ── HERO TEXT WRAPPER BLOCK ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full pt-16">
 
           <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
@@ -293,18 +295,11 @@ export const Hero = () => {
               <span className="text-white">Saranmani</span>
             </span>
 
-            <span className="block mb-2">
+            <span className="block">
               <span className="text-white/60 font-medium">An </span>
               <span className="text-white">Infrastructure Engineer </span>
               <span className="inline-flex items-center justify-center bg-white/5 px-2 py-1 h-7 sm:h-9 md:h-11 rounded-lg border border-white/10 mx-1 align-middle transform translate-y-[-4px]">
                 <span className="text-xs sm:text-sm font-mono text-white/40">⚡</span>
-              </span>
-            </span>
-
-            <span className="block">
-              <span className="text-white/60 font-medium">At </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 font-extrabold">
-                Cloud Canvas
               </span>
             </span>
           </h1>
@@ -349,10 +344,10 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── BOTTOM STACK WITH INTERESTED COMPANIES HEADLINE ── */}
+        {/* ── FOOTER LAYER WITH INTERESTED COMPANIES ROW ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
           
-          {/* STATIC CATEGORY ANCHOR */}
+          {/* STATIC OVERHEAD ANCHOR LABEL */}
           <div className="mb-4">
             <span className="text-[10px] sm:text-[11px] tracking-[0.3em] font-bold text-white/30 uppercase font-sans">
               Interested Companies
