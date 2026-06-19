@@ -46,7 +46,9 @@ const MARQUEE_SKILLS = [
 ];
 
 /* ── Music file in /public ───────────────────────────────────────────── */
-const MUSIC_SRC = "/Running_Up_That_Hill_A_Deal_With_God.mp3";
+/* Drop "Paul_C__Schmidt_-_Interstellar_Main_Theme.mp3" into your /public
+   folder (rename without spaces is safest) and point MUSIC_SRC at it. */
+const MUSIC_SRC = "/Paul_C_Schmidt_Interstellar_Main_Theme.mp3";
 
 /* ── Waveform bars icon ──────────────────────────────────────────────── */
 const WaveformIcon = ({ playing, size = 18 }) => {
@@ -72,21 +74,24 @@ const WaveformIcon = ({ playing, size = 18 }) => {
   );
 };
 
-/* ── Dark monochrome bubble background (image 1 style) ───────────────── */
+/* ── DNA-helix color background (image 2 style) ──────────────────────── */
 const VIRTUAL_W = 1600;
 const VIRTUAL_H = 1000;
 
-const DARK_PALETTE = [
-  [24, 24, 24],
-  [38, 38, 38],
-  [50, 50, 50],
-  [20, 20, 20],
-  [44, 44, 44],
-  [32, 32, 32],
-  [58, 58, 58],
+/* Exact palette pulled from the DNA reference image:
+   white/grey backbone atoms, red phosphate spheres, blue base spheres,
+   green linking atoms, and warm yellow/orange accents. */
+const DNA_PALETTE = [
+  [235, 235, 232],  // white/grey backbone
+  [201, 38, 32],    // red phosphate
+  [46, 64, 156],    // deep blue base
+  [70, 168, 88],    // green linker
+  [223, 168, 38],   // warm yellow/orange accent
+  [180, 180, 178],  // mid grey
+  [150, 36, 30],    // darker red
 ];
 
-const DarkSphereBackground = () => {
+const DnaSphereBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -110,28 +115,39 @@ const DarkSphereBackground = () => {
       const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
       const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
 
-      atoms.push({ x: x1, y, z: z1, r: 1.05, color: DARK_PALETTE[i % 3] });
-      atoms.push({ x: x2, y, z: z2, r: 1.05, color: DARK_PALETTE[(i+2)%3] });
+      // backbone strands → white/grey
+      atoms.push({ x: x1, y, z: z1, r: 1.05, color: DNA_PALETTE[0] });
+      atoms.push({ x: x2, y, z: z2, r: 1.05, color: DNA_PALETTE[5] });
 
+      // base-pair rungs → alternating red/blue/green/yellow
       if (i % 2 === 0) {
         for (let j = 1; j < 5; j++) {
-          const t = j/5;
-          atoms.push({ x: x1+(x2-x1)*t, y, z: z1+(z2-z1)*t, r: 0.7, color: DARK_PALETTE[3+(j%4)] });
+          const t = j / 5;
+          const rungColors = [1, 2, 3, 4]; // red, blue, green, yellow
+          atoms.push({
+            x: x1 + (x2 - x1) * t, y, z: z1 + (z2 - z1) * t,
+            r: 0.7, color: DNA_PALETTE[rungColors[j % rungColors.length]],
+          });
         }
       }
+
+      // outer phosphate/sugar accents → red + green clusters
       for (let k = 0; k < 3; k++) {
-        const n = ((k*137.5)%1)*0.18-0.09, ao = angle+n*Math.PI, ro = HR+0.14+n*0.1;
-        atoms.push({ x: Math.cos(ao)*ro,          y: y+n*0.15, z: Math.sin(ao)*ro,          r: 0.48, color: DARK_PALETTE[(i+k+4)%7] });
-        atoms.push({ x: Math.cos(ao+Math.PI)*ro,  y: y+n*0.15, z: Math.sin(ao+Math.PI)*ro,  r: 0.48, color: DARK_PALETTE[(i+k+1)%7] });
+        const n = ((k * 137.5) % 1) * 0.18 - 0.09;
+        const ao = angle + n * Math.PI, ro = HR + 0.14 + n * 0.1;
+        atoms.push({ x: Math.cos(ao) * ro, y: y + n * 0.15, z: Math.sin(ao) * ro, r: 0.48, color: DNA_PALETTE[1] });
+        atoms.push({ x: Math.cos(ao + Math.PI) * ro, y: y + n * 0.15, z: Math.sin(ao + Math.PI) * ro, r: 0.48, color: DNA_PALETTE[3] });
       }
     }
+
+    // scattered ambient atoms in the same palette
     for (let i = 0; i < 260; i++) {
       atoms.push({
-        x: (((i*73.137+17)%100)/100-0.5)*4.4,
-        y: (((i*41.293+5) %100)/100-0.5)*3.2,
-        z: (((i*29.817+31)%100)/100-0.5)*2.4,
-        r: 0.25+((i*17.391)%100)/100*0.85,
-        color: DARK_PALETTE[i%7],
+        x: (((i * 73.137 + 17) % 100) / 100 - 0.5) * 4.4,
+        y: (((i * 41.293 + 5)  % 100) / 100 - 0.5) * 3.2,
+        z: (((i * 29.817 + 31) % 100) / 100 - 0.5) * 2.4,
+        r: 0.25 + ((i * 17.391) % 100) / 100 * 0.85,
+        color: DNA_PALETTE[i % DNA_PALETTE.length],
       });
     }
 
@@ -145,42 +161,42 @@ const DarkSphereBackground = () => {
       if (isScrolling) return;
       ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
       t += 0.006;
-      const cx = VIRTUAL_W*0.5, cy = VIRTUAL_H*0.5, scale = Math.min(VIRTUAL_W,VIRTUAL_H)*0.60;
-      const cosY = Math.cos(t*0.4), sinY = Math.sin(t*0.4), cosX = Math.cos(0.18), sinX = Math.sin(0.18);
+      const cx = VIRTUAL_W * 0.5, cy = VIRTUAL_H * 0.5, scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.60;
+      const cosY = Math.cos(t * 0.4), sinY = Math.sin(t * 0.4), cosX = Math.cos(0.18), sinX = Math.sin(0.18);
 
       const proj = atoms.map(a => {
-        const rx = a.x*cosY-a.z*sinY, rz = a.x*sinY+a.z*cosY;
-        const ry = a.y*cosX-rz*sinX, rz2 = a.y*sinX+rz*cosX;
-        const psp = 2.5/(2.5+rz2);
-        return { sx: cx+rx*scale*psp, sy: cy+ry*scale*psp, z: rz2, r: a.r*scale*0.065*psp, color: a.color };
+        const rx = a.x * cosY - a.z * sinY, rz = a.x * sinY + a.z * cosY;
+        const ry = a.y * cosX - rz * sinX, rz2 = a.y * sinX + rz * cosX;
+        const psp = 2.5 / (2.5 + rz2);
+        return { sx: cx + rx * scale * psp, sy: cy + ry * scale * psp, z: rz2, r: a.r * scale * 0.065 * psp, color: a.color };
       });
-      proj.sort((a,b) => a.z-b.z);
+      proj.sort((a, b) => a.z - b.z);
 
       proj.forEach(p => {
-        const dep = Math.max(0,Math.min(1,(p.z+1.5)/3.0));
-        const [cr,cg,cb] = p.color;
-        const dr = Math.round(cr*(0.4+0.6*dep)), dg = Math.round(cg*(0.4+0.6*dep)), db = Math.round(cb*(0.4+0.6*dep));
+        const dep = Math.max(0, Math.min(1, (p.z + 1.5) / 3.0));
+        const [cr, cg, cb] = p.color;
+        const dr = Math.round(cr * (0.4 + 0.6 * dep)), dg = Math.round(cg * (0.4 + 0.6 * dep)), db = Math.round(cb * (0.4 + 0.6 * dep));
 
-        const glow = ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,p.r*1.8);
-        glow.addColorStop(0,`rgba(${dr},${dg},${db},0.13)`); glow.addColorStop(1,"rgba(0,0,0,0)");
-        ctx.beginPath(); ctx.fillStyle=glow; ctx.arc(p.sx,p.sy,p.r*1.8,0,Math.PI*2); ctx.fill();
+        const glow = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, p.r * 1.8);
+        glow.addColorStop(0, `rgba(${dr},${dg},${db},0.22)`); glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.fillStyle = glow; ctx.arc(p.sx, p.sy, p.r * 1.8, 0, Math.PI * 2); ctx.fill();
 
-        const body = ctx.createRadialGradient(p.sx-p.r*.35,p.sy-p.r*.4,p.r*.05,p.sx,p.sy,p.r);
-        body.addColorStop(0,`rgba(${Math.min(255,dr+55)},${Math.min(255,dg+55)},${Math.min(255,db+55)},1)`);
-        body.addColorStop(0.5,`rgba(${dr},${dg},${db},1)`);
-        body.addColorStop(1,`rgba(${Math.round(dr*.2)},${Math.round(dg*.2)},${Math.round(db*.2)},1)`);
-        ctx.beginPath(); ctx.fillStyle=body; ctx.arc(p.sx,p.sy,p.r,0,Math.PI*2); ctx.fill();
+        const body = ctx.createRadialGradient(p.sx - p.r * .35, p.sy - p.r * .4, p.r * .05, p.sx, p.sy, p.r);
+        body.addColorStop(0, `rgba(${Math.min(255, dr + 55)},${Math.min(255, dg + 55)},${Math.min(255, db + 55)},1)`);
+        body.addColorStop(0.5, `rgba(${dr},${dg},${db},1)`);
+        body.addColorStop(1, `rgba(${Math.round(dr * .2)},${Math.round(dg * .2)},${Math.round(db * .2)},1)`);
+        ctx.beginPath(); ctx.fillStyle = body; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
 
-        const spec = ctx.createRadialGradient(p.sx-p.r*.28,p.sy-p.r*.32,0,p.sx-p.r*.28,p.sy-p.r*.32,p.r*.38);
-        spec.addColorStop(0,`rgba(255,255,255,${0.22*dep})`); spec.addColorStop(1,"rgba(255,255,255,0)");
-        ctx.beginPath(); ctx.fillStyle=spec; ctx.arc(p.sx,p.sy,p.r,0,Math.PI*2); ctx.fill();
+        const spec = ctx.createRadialGradient(p.sx - p.r * .28, p.sy - p.r * .32, 0, p.sx - p.r * .28, p.sy - p.r * .32, p.r * .38);
+        spec.addColorStop(0, `rgba(255,255,255,${0.3 * dep})`); spec.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.beginPath(); ctx.fillStyle = spec; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
       });
     };
     draw();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("scroll",onScroll); clearTimeout(scrollTimer); };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("scroll", onScroll); clearTimeout(scrollTimer); };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ opacity:1, width:"100%", height:"100%" }} />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ opacity: 1, width: "100%", height: "100%" }} />;
 };
 
 /* ── Skills marquee ──────────────────────────────────────────────────── */
@@ -190,7 +206,7 @@ const SkillsMarquee = () => {
     <div data-testid="skills-marquee" className="relative z-10 w-full border-t border-b border-white/10 py-5">
       <div className="max-w-6xl mx-auto px-6 md:px-10 overflow-hidden">
         <div className="marquee-track flex items-center whitespace-nowrap will-change-transform">
-          {[0,1].map(copy => (
+          {[0, 1].map(copy => (
             <div key={copy} className="flex items-center shrink-0">
               {items.map(({ label, Icon }, i) => (
                 <React.Fragment key={`${copy}-${label}-${i}`}>
@@ -220,7 +236,7 @@ const SkillsMarquee = () => {
 
 /* ═══════════════════════════════════════════════════════════════════════
    HERO — main export
-   Contains: cursor + music toggle (top-left inline) + dark sphere bg
+   Contains: cursor + music toggle (inline, beside logo) + DNA-color bg
 ═══════════════════════════════════════════════════════════════════════ */
 export const Hero = () => {
   /* ── Custom cursor state ── */
@@ -235,7 +251,7 @@ export const Hero = () => {
 
   /* ── Init cursor ── */
   useEffect(() => {
-    // Force hide native cursor everywhere
+    // Force-hide the native cursor everywhere, once, at the document level.
     const style = document.createElement("style");
     style.id = "no-cursor-style";
     style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
@@ -285,19 +301,19 @@ export const Hero = () => {
       <div
         ref={dotRef}
         style={{
-          position:"fixed", top:0, left:0, width:8, height:8,
-          borderRadius:"50%", background:"#fff",
-          pointerEvents:"none", zIndex:999999,
-          willChange:"transform",
+          position: "fixed", top: 0, left: 0, width: 8, height: 8,
+          borderRadius: "50%", background: "#fff",
+          pointerEvents: "none", zIndex: 999999,
+          willChange: "transform",
         }}
       />
       <div
         ref={outerRef}
         style={{
-          position:"fixed", top:0, left:0, width:36, height:36,
-          borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.4)",
-          pointerEvents:"none", zIndex:999998,
-          willChange:"transform",
+          position: "fixed", top: 0, left: 0, width: 36, height: 36,
+          borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.4)",
+          pointerEvents: "none", zIndex: 999998,
+          willChange: "transform",
         }}
       />
 
@@ -305,32 +321,27 @@ export const Hero = () => {
         id="home"
         data-testid="hero-section"
         className="relative min-h-[100svh] overflow-hidden flex flex-col"
-        style={{ background:"#080808" }}
+        style={{ background: "#080808" }}
       >
-        <DarkSphereBackground />
+        <DnaSphereBackground />
 
         {/* Overlay */}
         <div className="absolute inset-0 z-[1]" style={{
           background:
             "radial-gradient(ellipse at 50% 45%, transparent 18%, rgba(0,0,0,0.68) 65%)," +
             "linear-gradient(180deg,rgba(0,0,0,0.60) 0%,rgba(0,0,0,0.12) 40%,rgba(0,0,0,0.80) 100%)",
-        }}/>
+        }} />
 
-        {/* ── Music toggle — top left, sits over the canvas ── */}
-        <div className="absolute top-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
-             style={{ left: "auto", right: "auto" }}>
-          {/* We pin it just below/beside where your existing Navbar logo sits.
-              Position: fixed top-left so it always shows regardless of Navbar */}
-        </div>
-
-        {/* Music button — fixed top-left corner, always visible */}
+        {/* ── Top bar row: logo/name (from Navbar) + music button live in the
+             same row. This Hero only renders the music button — it sits
+             inline right after wherever your Navbar logo/name ends, matching
+             image 3. Adjust NAV_OFFSET if your logo block changes width. ── */}
         <button
           onClick={toggleMusic}
           aria-label={playing ? "Pause music" : "Play music"}
           title={playing ? "Pause music" : "Play music"}
-          style={{ cursor:"none" }}
           className={`
-            fixed top-4 z-[9999]
+            fixed z-[9999]
             inline-flex items-center gap-2
             px-3 py-2 rounded-lg
             border transition-all duration-200
@@ -341,10 +352,10 @@ export const Hero = () => {
           `}
           style={{
             cursor: "none",
-            /* Sits right after your logo in the top bar — adjust left value to
-               match your logo width. Your logo block is ~140px wide typically. */
-            left: "168px",
             top: "16px",
+            /* Sits right beside the logo/name in the top bar (see image 3).
+               Tune this single value to match your logo block's width. */
+            left: "168px",
           }}
         >
           <WaveformIcon playing={playing} size={16} />
@@ -354,14 +365,14 @@ export const Hero = () => {
         {/* ── Main content ── */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-10 md:pb-12 flex-1 flex flex-col items-center text-center">
           <motion.div
-            initial={{ opacity:0, y:24, filter:"blur(8px)" }}
-            animate={{ opacity:1, y:0,  filter:"blur(0px)" }}
-            transition={{ duration:1.2, ease:easeOut, delay:0.3 }}
+            initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0,  filter: "blur(0px)" }}
+            transition={{ duration: 1.2, ease: easeOut, delay: 0.3 }}
             className="max-w-[920px] mt-4 md:mt-8 flex flex-col items-center"
           >
             <motion.div
-              initial={{ opacity:0 }} animate={{ opacity:1 }}
-              transition={{ duration:0.8, delay:0.7 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
               data-testid="badge-open-to-work"
               className="inline-flex items-center gap-2.5 mb-6 md:mb-8 px-3 py-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300 text-[11px] tracking-[0.18em] uppercase"
             >
@@ -374,15 +385,15 @@ export const Hero = () => {
               className="font-sans font-extrabold tracking-[-0.02em] leading-[0.95] text-white text-[2.75rem] sm:text-[3.5rem] md:text-[4.25rem] lg:text-[5.25rem] flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
             >
               <span>Hey, I&rsquo;m</span>
-              <span className="inline-block w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/20 align-middle mx-1" style={{ verticalAlign:"middle" }}>
-                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover" style={{ filter:"grayscale(0.3)" }} />
+              <span className="inline-block w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/20 align-middle mx-1" style={{ verticalAlign: "middle" }}>
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover" style={{ filter: "grayscale(0.3)" }} />
               </span>
               <span>Saranmani M</span>
             </h1>
 
             <motion.p
-              initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
-              transition={{ duration:1, delay:0.9, ease:easeOut }}
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.9, ease: easeOut }}
               className="mt-6 text-[16px] md:text-[18px] text-white/60 max-w-[600px] leading-relaxed"
             >
               IT Graduate — Cloud Security &amp; Linux Engineer. Building reliable
@@ -393,40 +404,40 @@ export const Hero = () => {
           <div className="flex-1 min-h-[24px] md:min-h-[32px]" />
 
           <motion.div
-            initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
-            transition={{ duration:1, delay:1.2, ease:easeOut }}
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.2, ease: easeOut }}
             className="flex items-center justify-center gap-6 mb-10"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a key={k} href={url} target="_blank" rel="noopener noreferrer"
-                data-testid={`hero-social-${k}`} style={{ cursor:"none" }}
+                data-testid={`hero-social-${k}`} style={{ cursor: "none" }}
                 className="text-white/50 hover:text-white transition-colors">
                 <Icon size={22} strokeWidth={1.5} />
               </a>
             ))}
             <span className="w-px h-5 bg-white/20" />
             <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              data-testid="cta-resume" style={{ cursor:"none" }}
+              data-testid="cta-resume" style={{ cursor: "none" }}
               className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors">
               Résumé →
             </a>
-            <a href={`mailto:${PROFILE.email}`} style={{ cursor:"none" }}
+            <a href={`mailto:${PROFILE.email}`} style={{ cursor: "none" }}
               className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
               Say hi ↗
             </a>
           </motion.div>
 
           <motion.div
-            initial={{ opacity:0 }} animate={{ opacity:1 }}
-            transition={{ duration:1, delay:1.6 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 1.6 }}
             className="flex items-center gap-4 text-white/30 text-[11px] tracking-[0.2em] uppercase mb-6"
           >
             <div className="h-px w-24 bg-white/20" />
             <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
               <motion.div
                 className="w-1 h-1.5 bg-white/60 rounded-full"
-                animate={{ y:[0,8,0] }}
-                transition={{ duration:1.5, repeat:Infinity, ease:"easeInOut" }}
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
             <div className="h-px w-24 bg-white/20" />
