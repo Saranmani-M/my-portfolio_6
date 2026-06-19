@@ -21,7 +21,6 @@ const MARQUEE_SKILLS = [
   { label: "Git"     },
 ];
 
-// Logos tracking row exactly like Omkar's layout (Replace text strings with <img> tags if you have the asset links)
 const RUNNING_LOGOS = [
   { name: "Gears", color: "text-white/40" },
   { name: "Rahi", color: "text-blue-400/50" },
@@ -51,6 +50,9 @@ const WaveformIcon = ({ playing, size = 16 }) => {
     </svg>
   );
 };
+
+const VIRTUAL_W = 1600;
+const VIRTUAL_H = 1000;
 
 const GlassBubbleBackground = () => {
   const canvasRef = useRef(null);
@@ -161,9 +163,6 @@ const GlassBubbleBackground = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
 };
 
-const VIRTUAL_W = 1600;
-const VIRTUAL_H = 1000;
-
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
@@ -184,21 +183,34 @@ const SkillsMarquee = () => {
 export const Hero = () => {
   const audioRef = useRef(null);
   const cursorRef = useRef(null);
+  const mousePos = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
 
+  // Butter-Smooth GPU-Accelerated Cursor Tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (cursorRef.current) {
-        cursorRef.current.style.left = `${e.clientX}px`;
-        cursorRef.current.style.top = `${e.clientY}px`;
-      }
+      mousePos.current = { x: e.clientX, y: e.clientY };
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+
+    let animFrameId;
+    const updateCursorPosition = () => {
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
+      }
+      animFrameId = requestAnimationFrame(updateCursorPosition);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    animFrameId = requestAnimationFrame(updateCursorPosition);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animFrameId);
+    };
   }, []);
 
   useEffect(() => {
-    const audio = new Audio(encodeURI("Hans_Zimmer_Patrik_Pietschmann_-_Interstaller__mp3_pm_.mp3"));
+    const audio = new Audio("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller_(mp3.pm).mp3");
     audio.loop = true;
     audio.volume = 0.5;
     audioRef.current = audio;
@@ -212,7 +224,6 @@ export const Hero = () => {
     else         { audio.play().catch(() => {}); setPlaying(true); }
   }, [playing]);
 
-  // Double up logos array for smooth looping track
   const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
 
   return (
@@ -226,10 +237,11 @@ export const Hero = () => {
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
+      {/* Lag-free Custom Interaction Pointer Overlay */}
       <div
         ref={cursorRef}
-        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] -translate-x-1/2 -translate-y-1/2 mix-blend-difference will-change-transform transition-transform duration-75 ease-out"
-        style={{ left: "-100px", top: "-100px" }}
+        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
+        style={{ left: 0, top: 0 }}
       />
 
       <section
@@ -307,11 +319,11 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Bottom Interactive Blocks Frame Container */}
+        {/* Bottom Navigation Frame Layout Block */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6">
           
-          {/* Running Brand Logo Marquee exactly above the mouse layout line */}
-          <div className="w-full max-w-[650px] overflow-hidden mb-6 masked-marquee">
+          {/* Running Brand Images (Moved up by expanding spacing underneath) */}
+          <div className="w-full max-w-[650px] overflow-hidden mb-12 masked-marquee">
             <div className="flex gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
               {loopLogos.map((logo, i) => (
                 <span key={i} className={`text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
@@ -321,8 +333,8 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Mouse Line Tracker Element */}
-          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase">
+          {/* Scroll Down Section (Moved down by adding padding top) */}
+          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase pt-8">
             <span>Scroll down</span>
             <div className="h-px flex-1 max-w-[160px] bg-white/15" />
             <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
