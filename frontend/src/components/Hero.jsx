@@ -261,13 +261,9 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        {/* --- STICKY / FIXED BRAND HEADER AT TOP-LEFT --- */}
-        <div className="fixed top-8 left-8 md:top-10 md:left-10 z-50 flex flex-row items-center gap-3.5 select-none bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/[0.06]">
-          <a href="#home" className="flex flex-row items-center gap-1.5 font-bold text-white text-[13px] tracking-wider whitespace-nowrap hover:opacity-80 transition-opacity">
-            <span>Saranmani</span>
-            <span className="text-white/60">M</span>
-          </a>
-          <span className="text-white/20 font-light text-sm select-none">|</span>
+        {/* --- FIXED HEADLINE NAVIGATION CONTAINER (TOP CENTERED LINE) --- */}
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-row items-center gap-4 select-none bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/[0.06] shadow-xl whitespace-nowrap">
+          {/* Waveform Music Trigger */}
           <button
             onClick={toggleMusic}
             aria-label={playing ? "Pause music" : "Play music"}
@@ -275,10 +271,24 @@ export const Hero = () => {
           >
             <WaveformIcon playing={playing} size={15} />
           </button>
+
+          <span className="text-white/20 font-light text-sm">|</span>
+
+          {/* Connected Socials */}
+          <div className="flex items-center gap-4">
+            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
+              <a
+                key={k} href={url} target="_blank" rel="noopener noreferrer"
+                className="text-white/40 hover:text-white transition-colors"
+              >
+                <Icon size={16} strokeWidth={1.8} />
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* Top Spacer for perfect viewport balancing */}
-        <div className="w-full pt-12 md:pt-16 invisible" aria-hidden="true" />
+        <div className="w-full pt-16 md:pt-20 invisible" aria-hidden="true" />
 
         {/* Central Core Content Container */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto w-full">
@@ -320,32 +330,15 @@ export const Hero = () => {
             secure, and scalable environments while continuously learning and improving my skills.
           </p>
 
-          {/* Social and Action Buttons */}
+          {/* Interactive Call to Action Footer Area */}
           <div className="mt-8 flex items-center justify-center gap-5">
-            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              <a
-                key={k} href={url} target="_blank" rel="noopener noreferrer"
-                className="text-white/50 hover:text-white transition-colors"
-              >
-                <Icon size={20} strokeWidth={1.5} />
-              </a>
-            ))}
-            <span className="w-px h-5 bg-white/20" />
-            <button
-              onClick={toggleMusic}
-              aria-label={playing ? "Pause music" : "Play music"}
-              title={playing ? "Pause music" : "Play music"}
-              className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
-            >
-              <WaveformIcon playing={playing} size={18} />
-            </button>
-            <span className="w-px h-5 bg-white/20" />
             <a
               href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
               className="text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors"
             >
               Résumé →
             </a>
+            <span className="w-px h-5 bg-white/20" />
             <a
               href={`mailto:${PROFILE.email}`}
               className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
