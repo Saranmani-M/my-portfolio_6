@@ -49,8 +49,8 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ── OMKAR'S SIGNATURE ROTATING PARAMETRIC BACKGROUND ──
-const ParametricMeshBackground = () => {
+// ── ROTATING DNA DOUBLE HELIX BACKGROUND ──
+const DNAHelixBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -61,100 +61,149 @@ const ParametricMeshBackground = () => {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
+      canvas.width  = window.innerWidth  * dpr;
       canvas.height = window.innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
 
+    // ── helix parameters ──
+    const STRANDS     = 2;          // double helix
+    const BEADS_PER   = 120;        // beads per strand
+    const BRIDGE_STEP = 6;          // every Nth bead gets a cross-bridge
+    const HELIX_R     = 0.28;       // helix radius as fraction of min(W,H)
+    const HELIX_H     = 2.6;        // helix vertical span (world units)
+    const TURNS       = 3.2;        // number of full turns
+
     let t = 0;
+
     const draw = () => {
       animId = requestAnimationFrame(draw);
-      t += 0.006;
+      t += 0.004;
 
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      ctx.clearRect(0, 0, W, H);
 
-      // Center the grid calculation to align cleanly behind the main text
-      const cx = w * 0.5;
-      const cy = h * 0.44;
+      const cx   = W * 0.5;
+      const cy   = H * 0.48;
+      const R    = Math.min(W, H) * HELIX_R;
+      const scaleY = H * 0.44;
 
-      // Adjust density and dimensions of the mesh
-      const rows = 38;
-      const cols = 38;
-      const spacing = Math.min(w, h) * 0.038;
+      // Global rotation around Y axis (makes it spin slowly)
+      const rotY = t * 0.35;
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
 
-      // Camera orientation angles matching the original portfolio frame
-      const rotY = t * 0.15; 
-      const rotX = 1.1;
+      // Tilt around X axis (lean it so it looks 3-D)
+      const tiltX = 0.38;
+      const cosTX = Math.cos(tiltX);
+      const sinTX = Math.sin(tiltX);
 
-      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      // ── collect all beads from both strands ──
+      const allBeads = [];
 
-      // Pre-calculate 3D spatial points matrix coordinates
-      const points = [];
-      for (let r = 0; r < rows; r++) {
-        points[r] = [];
-        for (let c = 0; c < cols; c++) {
-          // Normalize coordinates centered at the zero point axis
-          const nx = (c - cols * 0.5) * spacing;
-          const nz = (r - rows * 0.5) * spacing;
+      for (let s = 0; s < STRANDS; s++) {
+        const phaseOffset = (s / STRANDS) * Math.PI * 2; // 0 and π for double helix
 
-          // Trigonometric wave ripples moving across deep space coordinates
-          const dist = Math.sqrt(nx * nx + nz * nz) * 0.007;
-          const ny = Math.sin(dist * 4.5 - t * 2.0) * Math.cos(nx * 0.003) * 65;
+        for (let i = 0; i < BEADS_PER; i++) {
+          const frac  = i / (BEADS_PER - 1);              // 0 → 1
+          const angle = frac * Math.PI * 2 * TURNS + phaseOffset + t * 0.5;
+          const yWorld = (frac - 0.5) * HELIX_H;
 
-          // Apply 3D matrix coordinate axis rotations
-          const x1 = nx * cosY - nz * sinY;
-          const z1 = nx * sinY + nz * cosY;
+          // 3-D position in helix local frame
+          const xLocal = Math.cos(angle) * R;
+          const zLocal = Math.sin(angle) * R;
 
-          const y2 = ny * cosX - z1 * sinX;
-          const z2 = ny * sinX + z1 * cosX;
+          // Rotate around Y (spin)
+          const xR = xLocal * cosY - zLocal * sinY;
+          const zR = xLocal * sinY + zLocal * cosY;
 
-          // Standard 3D perspective projection formula scaling
-          const psp = 700 / (700 + z2);
-          points[r][c] = {
-            sx: cx + x1 * psp,
-            sy: cy + y2 * psp,
-            depth: z2
-          };
+          // Tilt around X
+          const yR  = yWorld * cosTX - zR * sinTX;
+          const zR2 = yWorld * sinTX + zR * cosTX;
+
+          // Perspective
+          const psp = 900 / (900 + zR2 * 180);
+          const sx  = cx + xR * psp * (W * 0.38);
+          const sy  = cy + yR * psp * scaleY;
+
+          // Depth-based size & brightness
+          const depth  = (zR2 + 2) / 4;   // 0 → 1
+          const radius = psp * (3.5 + depth * 4);
+          const bright = Math.floor(80 + depth * 130);
+          const alpha  = 0.18 + depth * 0.65;
+
+          allBeads.push({ sx, sy, radius, bright, alpha, zR2, strand: s, idx: i, angle });
         }
       }
 
-      // Draw horizontal line segments across columns
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols - 1; c++) {
-          const p1 = points[r][c];
-          const p2 = points[r][c + 1];
+      // Sort back-to-front for correct painter's algorithm
+      allBeads.sort((a, b) => a.zR2 - b.zR2);
 
-          // Compute dynamic line transparency values based on point tracking depth values
-          const opacity = Math.max(0, Math.min(0.09, (400 - p1.depth) * 0.0002));
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-          ctx.lineWidth = 0.75;
-          ctx.moveTo(p1.sx, p1.sy);
-          ctx.lineTo(p2.sx, p2.sy);
-          ctx.stroke();
-        }
+      // ── draw cross-bridges (rungs of the ladder) ──
+      // group beads by index for quick lookup
+      const byIdx = {};
+      allBeads.forEach(b => {
+        if (!byIdx[b.idx]) byIdx[b.idx] = [];
+        byIdx[b.idx].push(b);
+      });
+
+      for (let i = 0; i < BEADS_PER; i += BRIDGE_STEP) {
+        const pair = byIdx[i];
+        if (!pair || pair.length < 2) continue;
+        const [a, b] = pair;
+
+        const midZ  = (a.zR2 + b.zR2) / 2;
+        const depth  = (midZ + 2) / 4;
+        const alpha  = (0.06 + depth * 0.18);
+
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(160,180,255,${alpha})`;
+        ctx.lineWidth   = 0.9 + depth * 1.2;
+        ctx.moveTo(a.sx, a.sy);
+        ctx.lineTo(b.sx, b.sy);
+        ctx.stroke();
       }
 
-      // Draw vertical line segments across rows
-      for (let c = 0; c < cols; c++) {
-        for (let r = 0; r < rows - 1; r++) {
-          const p1 = points[r][c];
-          const p2 = points[r + 1][c];
+      // ── draw beads ──
+      allBeads.forEach(({ sx, sy, radius, bright, alpha, strand, zR2 }) => {
+        const depth = (zR2 + 2) / 4;
 
-          const opacity = Math.max(0, Math.min(0.09, (400 - p1.depth) * 0.0002));
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-          ctx.lineWidth = 0.75;
-          ctx.moveTo(p1.sx, p1.sy);
-          ctx.lineTo(p2.sx, p2.sy);
-          ctx.stroke();
-        }
-      }
+        // Outer glow
+        const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, radius * 2.8);
+        glow.addColorStop(0,   `rgba(${bright},${bright},${bright + 20},${alpha * 0.25})`);
+        glow.addColorStop(1,   `rgba(0,0,0,0)`);
+        ctx.beginPath();
+        ctx.fillStyle = glow;
+        ctx.arc(sx, sy, radius * 2.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sphere body gradient
+        const gx = sx - radius * 0.3;
+        const gy = sy - radius * 0.35;
+        const body = ctx.createRadialGradient(gx, gy, 0, sx, sy, radius);
+        const hi   = Math.min(255, bright + 90);
+        const lo   = Math.floor(bright * 0.12);
+        body.addColorStop(0,   `rgba(${hi},${hi},${hi},${alpha})`);
+        body.addColorStop(0.45,`rgba(${bright},${bright},${bright},${alpha * 0.85})`);
+        body.addColorStop(1,   `rgba(${lo},${lo},${lo + 12},${alpha * 0.9})`);
+
+        ctx.beginPath();
+        ctx.fillStyle = body;
+        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Specular highlight
+        const spec = ctx.createRadialGradient(gx, gy, 0, gx, gy, radius * 0.55);
+        spec.addColorStop(0, `rgba(255,255,255,${0.45 * depth})`);
+        spec.addColorStop(1, `rgba(255,255,255,0)`);
+        ctx.beginPath();
+        ctx.fillStyle = spec;
+        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
     };
 
     draw();
@@ -164,7 +213,13 @@ const ParametricMeshBackground = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" style={{ width: "100%", height: "100%" }} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 z-0 pointer-events-none"
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
 };
 
 const SkillsMarquee = () => {
@@ -185,28 +240,24 @@ const SkillsMarquee = () => {
 };
 
 export const Hero = () => {
-  const audioRef = useRef(null);
-  const cursorRef = useRef(null);
-  const mousePos = useRef({ x: -100, y: -100 });
+  const audioRef   = useRef(null);
+  const cursorRef  = useRef(null);
+  const mousePos   = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
+    const handleMouseMove = (e) => { mousePos.current = { x: e.clientX, y: e.clientY }; };
     let animFrameId;
-    const updateCursorPosition = () => {
+    const update = () => {
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
+        cursorRef.current.style.transform =
+          `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
       }
-      animFrameId = requestAnimationFrame(updateCursorPosition);
+      animFrameId = requestAnimationFrame(update);
     };
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    animFrameId = requestAnimationFrame(updateCursorPosition);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animFrameId);
-    };
+    animFrameId = requestAnimationFrame(update);
+    return () => { window.removeEventListener("mousemove", handleMouseMove); cancelAnimationFrame(animFrameId); };
   }, []);
 
   useEffect(() => {
@@ -230,9 +281,7 @@ export const Hero = () => {
     <>
       <style>{`
         @media (hover: hover) and (pointer: fine) {
-          html, body, #root, a, button, img, svg, [role="button"] {
-            cursor: none !important;
-          }
+          html, body, #root, a, button, img, svg, [role="button"] { cursor: none !important; }
         }
         @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
@@ -249,24 +298,27 @@ export const Hero = () => {
         id="home"
         data-testid="hero-section"
         className="relative min-h-screen overflow-hidden flex flex-col"
-        style={{ background: "#070708" }}
+        style={{ background: "#060608" }}
       >
-        <ParametricMeshBackground />
+        {/* DNA Helix rotating background */}
+        <DNAHelixBackground />
 
+        {/* Overlay: darken edges, keep center readable */}
         <div className="absolute inset-0 z-[1]" style={{
           background:
-            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 75%)," +
-            "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.9) 100%)",
+            "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.72) 70%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.08) 35%, rgba(0,0,0,0.90) 100%)",
         }} />
 
+        {/* ── HERO CENTER BLOCK ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
 
           <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
             text-4xl sm:text-5xl md:text-[4.2rem]">
-            
+
             <span className="block mb-2">
               <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
-              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 vertical-middle align-middle transform translate-y-[-2px]">
+              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 align-middle transform translate-y-[-2px]">
                 <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
               </span>
               <span className="text-white">Saranmani</span>
@@ -288,7 +340,7 @@ export const Hero = () => {
             </span>
           </h1>
 
-          <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed font-normal">
+          <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed">
             I enjoy taking messy, complicated infrastructure architectures and
             making them feel automated, secure, and effortless for global
             engineering teams.
@@ -309,7 +361,6 @@ export const Hero = () => {
             <button
               onClick={toggleMusic}
               aria-label={playing ? "Pause music" : "Play music"}
-              title={playing ? "Pause music" : "Play music"}
               className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
             >
               <WaveformIcon playing={playing} size={18} />
@@ -329,7 +380,9 @@ export const Hero = () => {
           </div>
         </div>
 
+        {/* ── BOTTOM BLOCK ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
+
           <div className="w-full overflow-hidden mb-4 sm:mb-6">
             <div className="flex gap-8 sm:gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform items-center h-8">
               {loopLogos.map((logo, i) => (
