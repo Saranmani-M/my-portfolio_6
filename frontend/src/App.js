@@ -6,7 +6,6 @@ import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Skills } from "@/components/Skills";
 import { Projects } from "@/components/Projects";
-import { Process } from "@/components/Process";
 import { Research } from "@/components/Research";
 import { Achievements } from "@/components/Achievements";
 import { Certificates } from "@/components/Certificates";
@@ -33,7 +32,6 @@ function App() {
           <About />
           <Skills />
           <Projects />
-          <Process />
           <Research />
           <Achievements />
           <Certificates />
