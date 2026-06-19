@@ -12,21 +12,36 @@ const SOCIAL_ICONS = [
   { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
 ];
 
-const WaveformIcon = ({ playing, size = 12 }) => {
-  const bars = [0.4, 0.9, 0.5, 0.8, 0.4];
+const NAV_LINKS = [
+  { label: "Home",     href: "#home"     },
+  { label: "About Me", href: "#about"    },
+  { label: "Resume",   href: PROFILE.resumeUrl },
+];
+
+const MARQUEE_SKILLS = [
+  { label: "Python"  },
+  { label: "AWS"     },
+  { label: "Linux"   },
+  { label: "Bash"    },
+  { label: "Docker"  },
+  { label: "Git"     },
+];
+
+const WaveformIcon = ({ playing, size = 16 }) => {
+  const bars = [0.45, 1, 0.6, 0.88, 0.5];
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 20 16" fill="none" aria-hidden="true">
       {bars.map((h, i) => (
         <rect
           key={i}
-          x={i * 2.5 + 2}
+          x={i * 3.2 + 1}
           y={8 - h * 6}
-          width={1.5}
+          width={2}
           height={h * 12}
-          rx={0.5}
+          rx={1}
           fill="currentColor"
           style={playing ? {
-            animation: `waveBar ${0.4 + i * 0.08}s ease-in-out ${i * 0.04}s infinite alternate`,
+            animation: `waveBar ${0.45 + i * 0.08}s ease-in-out ${i * 0.04}s infinite alternate`,
             transformOrigin: "50% 100%",
           } : {}}
         />
@@ -35,20 +50,135 @@ const WaveformIcon = ({ playing, size = 12 }) => {
   );
 };
 
+/* ═══════════════════════════════════════════════════════════════════════
+   Glassy chrome bubble-helix background (reference: image 3)
+   Monochrome, glossy, high-contrast specular spheres — not flat colored
+   dots. Each "bubble" is rendered with multiple nested gradients to fake
+   glass refraction + chrome reflection, all in greyscale.
+═══════════════════════════════════════════════════════════════════════ */
+const VIRTUAL_W = 1600;
+const VIRTUAL_H = 1000;
+
+const GlassBubbleBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = VIRTUAL_W * dpr;
+    canvas.height = VIRTUAL_H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const bubbles = [];
+    const STEPS = 18, TURNS = 2.4, HR = 1.55, HH = 4.4;
+
+    for (let i = 0; i < STEPS; i++) {
+      const frac  = i / STEPS;
+      const angle = frac * Math.PI * 2 * TURNS;
+      const y     = (frac - 0.5) * HH;
+      const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
+      const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
+
+      bubbles.push({ x: x1, y, z: z1, r: 0.62 + (i % 3) * 0.07, seed: i });
+      bubbles.push({ x: x2, y, z: z2, r: 0.58 + ((i + 1) % 3) * 0.07, seed: i + 50 });
+    }
+    for (let i = 0; i < 10; i++) {
+      bubbles.push({
+        x: (((i * 73.13) % 100) / 100 - 0.5) * 3.6,
+        y: (((i * 41.29) % 100) / 100 - 0.5) * 4.0,
+        z: (((i * 29.81) % 100) / 100 - 0.5) * 2.0,
+        r: 0.22 + ((i * 17.3) % 100) / 100 * 0.3,
+        seed: i + 100,
+      });
+    }
+
+    let isScrolling = false, scrollTimer;
+    const onScroll = () => { isScrolling = true; clearTimeout(scrollTimer); scrollTimer = setTimeout(() => { isScrolling = false; }, 150); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let t = 0;
+    const draw = () => {
+      animId = requestAnimationFrame(draw);
+      ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
+      if (!isScrolling) t += 0.0035;
+
+      const cx = VIRTUAL_W * 0.5, cy = VIRTUAL_H * 0.46;
+      const scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.62;
+      const cosY = Math.cos(t * 0.5), sinY = Math.sin(t * 0.5);
+      const cosX = Math.cos(0.35), sinX = Math.sin(0.35);
+
+      const proj = bubbles.map(b => {
+        const rx = b.x * cosY - b.z * sinY, rz = b.x * sinY + b.z * cosY;
+        const ry = b.y * cosX - rz * sinX, rz2 = b.y * sinX + rz * cosX;
+        const psp = 2.6 / (2.6 + rz2);
+        return {
+          sx: cx + rx * scale * psp,
+          sy: cy + ry * scale * psp,
+          z: rz2,
+          r: b.r * scale * 0.34 * psp,
+          seed: b.seed,
+        };
+      });
+      proj.sort((a, b) => a.z - b.z);
+
+      proj.forEach(p => {
+        const dep = Math.max(0, Math.min(1, (p.z + 1.8) / 3.4));
+        const base = 60 + dep * 70;
+
+        const glow = ctx.createRadialGradient(p.sx, p.sy, p.r * 0.4, p.sx, p.sy, p.r * 1.5);
+        glow.addColorStop(0, `rgba(${base},${base},${base},0.10)`);
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.fillStyle = glow; ctx.arc(p.sx, p.sy, p.r * 1.5, 0, Math.PI * 2); ctx.fill();
+
+        const body = ctx.createLinearGradient(p.sx - p.r, p.sy - p.r, p.sx + p.r, p.sy + p.r);
+        body.addColorStop(0,   `rgba(${base * 0.18},${base * 0.18},${base * 0.18},1)`);
+        body.addColorStop(0.35,`rgba(${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},1)`);
+        body.addColorStop(0.5, `rgba(${base * 0.35},${base * 0.35},${base * 0.35},1)`);
+        body.addColorStop(0.7, `rgba(${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},1)`);
+        body.addColorStop(1,   `rgba(${base * 0.12},${base * 0.12},${base * 0.12},1)`);
+        ctx.beginPath(); ctx.fillStyle = body; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+
+        ctx.save();
+        ctx.beginPath(); ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.clip();
+        for (let k = 0; k < 4; k++) {
+          const ringR = p.r * (0.3 + k * 0.22);
+          const ringOpacity = 0.10 + 0.05 * Math.sin(t * 3 + p.seed + k);
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, ringOpacity)})`;
+          ctx.lineWidth = p.r * 0.05;
+          ctx.ellipse(p.sx, p.sy - p.r * 0.1, ringR, ringR * 0.5, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        const spec = ctx.createRadialGradient(p.sx - p.r * 0.3, p.sy - p.r * 0.35, 0, p.sx - p.r * 0.3, p.sy - p.r * 0.35, p.r * 0.35);
+        spec.addColorStop(0, `rgba(255,255,255,${0.55 * dep})`);
+        spec.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.beginPath(); ctx.fillStyle = spec; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
+      });
+    };
+    draw();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("scroll", onScroll); clearTimeout(scrollTimer); };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
+};
+
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-[#09090b] py-5 mt-auto">
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-5">
       <div className="overflow-hidden">
-        <div className="marquee-track flex items-center whitespace-nowrap">
-          <div className="flex items-center shrink-0 gap-10 animate-[marquee-scroll_40s_linear_infinite]">
-            {items.map(({ label, Icon }, i) => (
-              <span key={i} className="inline-flex items-center gap-2.5 text-white/30 hover:text-white/60 transition-colors">
-                <Icon size={14} /> 
-                <span className="text-[10px] tracking-[0.2em] uppercase font-mono">{label}</span>
-              </span>
-            ))}
-          </div>
+        <div className="flex items-center shrink-0 gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
+          {items.map(({ label }, i) => (
+            <span key={i} className="inline-flex items-center gap-2 text-white/35 hover:text-white/70 transition-colors text-[11px] tracking-[0.2em] uppercase font-mono">
+              {label}
+            </span>
+          ))}
         </div>
       </div>
     </div>
@@ -56,149 +186,184 @@ const SkillsMarquee = () => {
 };
 
 export const Hero = () => {
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef(null);
-  const cursorRef = useRef(null);
+  const dotRef = useRef(null);
+  const pos    = useRef({ x: -200, y: -200 });
 
-  // Bulletproof custom tracking cursor logic
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (cursorRef.current) {
-        cursorRef.current.style.left = `${e.clientX}px`;
-        cursorRef.current.style.top = `${e.clientY}px`;
-      }
+    const style = document.createElement("style");
+    style.id = "no-cursor-style";
+    style.textContent = "html, body, *, *::before, *::after { cursor: none !important; }";
+    document.head.appendChild(style);
+
+    const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener("mousemove", onMove);
+
+    let raf;
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      const dot = dotRef.current;
+      if (dot) dot.style.transform = `translate(${pos.current.x - 6}px,${pos.current.y - 6}px)`;
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    tick();
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(raf);
+      const el = document.getElementById("no-cursor-style");
+      if (el) el.remove();
+    };
   }, []);
 
   useEffect(() => {
-    const audio = new Audio("/Paul_C_Schmidt_Interstellar_Main_Theme.mp3");
+    const audio = new Audio(encodeURI("/Paul_C__Schmidt_-_Interstellar_Main_Theme__mp3_pm_.mp3"));
     audio.loop = true;
-    audio.volume = 0.4;
+    audio.volume = 0.5;
     audioRef.current = audio;
     return () => { audio.pause(); audio.src = ""; };
   }, []);
 
   const toggleMusic = useCallback(() => {
-    if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); setPlaying(false); }
-    else { audioRef.current.play().catch(() => {}); setPlaying(true); }
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else         { audio.play().catch(() => {}); setPlaying(true); }
   }, [playing]);
 
   return (
     <>
       <style>{`
-        /* Complete Global Reset to Force-Kill the Default Browser Cursor */
-        html, body, #root, a, button, img, svg, [role="button"] {
-          cursor: none !important;
-        }
-        @keyframes marquee-scroll { 
-          from { transform: translateX(0); } 
-          to { transform: translateX(-50%); } 
-        }
-        @keyframes waveBar { 
-          from { transform: scaleY(0.3); } 
-          to { transform: scaleY(1); } 
-        }
+        @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
+        @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
-      {/* Fluid hardware-accelerated invert crosshair point */}
       <div
-        ref={cursorRef}
-        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] -translate-x-1/2 -translate-y-1/2 mix-blend-difference will-change-transform transition-transform duration-75 ease-out"
-        style={{ left: "-100px", top: "-100px" }}
+        ref={dotRef}
+        style={{
+          position: "fixed", top: 0, left: 0, width: 12, height: 12,
+          borderRadius: "50%", background: "#fff",
+          pointerEvents: "none", zIndex: 999999,
+          willChange: "transform",
+          boxShadow: "0 0 8px 2px rgba(255,255,255,0.5)",
+        }}
       />
 
-      {/* The Omkar Layout System Matrix */}
-      <div className="bg-[#09090b] text-white min-h-screen flex flex-col md:flex-row font-sans relative overflow-hidden selection:bg-white/10">
-        
-        {/* LEFT COMPONENT: Fixed structural dark dashboard profile line */}
-        <aside className="w-full md:w-[340px] shrink-0 border-b md:border-b-0 md:border-r border-white/[0.06] p-8 md:p-10 flex flex-col justify-between z-10 bg-[#121214]">
-          <div className="flex flex-col items-start gap-6">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/10 bg-[#09090b] p-1">
-              <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover rounded-xl grayscale" />
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] tracking-widest font-mono uppercase mb-3">
-                <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" /> Available for work
-              </div>
-              <h2 className="text-2xl font-black tracking-tight text-white">Saranmani M</h2>
-              <p className="text-xs text-white/40 font-mono mt-1">@saranmani · Chennai, IN</p>
-            </div>
-          </div>
+      <section
+        id="home"
+        data-testid="hero-section"
+        className="relative min-h-screen overflow-hidden flex flex-col"
+        style={{ background: "#070708" }}
+      >
+        <GlassBubbleBackground />
 
-          <div className="my-10 space-y-3.5">
-            <p className="text-xs text-white/60 leading-relaxed font-normal">
-              Cloud Security &amp; Linux Engineer specializing in building secure, zero-trust infrastructure environments.
-            </p>
-            <a href={`mailto:${PROFILE.email}`} className="w-full py-3 px-4 rounded-xl bg-white text-black text-xs font-bold tracking-wider uppercase inline-flex items-center justify-center hover:bg-white/90 transition-all active:scale-[0.98]">
-              Get In Touch
-            </a>
-            <div className="flex gap-2.5 pt-1">
-              {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-                <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl border border-white/[0.08] bg-[#09090b] text-white/40 hover:text-white hover:border-white/20 transition-all flex-1 flex justify-center">
-                  <Icon size={15} />
-                </a>
-              ))}
-            </div>
-          </div>
+        <div className="absolute inset-0 z-[1]" style={{
+          background:
+            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
+        }} />
 
-          <div className="space-y-2 border-t border-white/[0.06] pt-5 text-[10px] font-mono text-white/30 tracking-wide">
-            <p className="flex items-center gap-2"><span>🛡️</span> DevSecOps Principles</p>
-            <p className="flex items-center gap-2"><span>💻</span> Systems Automation Expert</p>
-          </div>
-        </aside>
-
-        {/* RIGHT COMPONENT: Clean, minimalist flat typography layer */}
-        <main className="flex-1 flex flex-col relative min-h-[100vh] md:h-screen overflow-y-auto bg-[#09090b]">
-          
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 md:px-20 pt-28 pb-16 max-w-[900px] mx-auto text-center">
-            
-            {/* Audio Toggle Pill Button exactly aligned above the text row blocks */}
+        <header className="relative z-20 flex items-center justify-between px-6 md:px-10 pt-6 pb-2">
+          <div className="flex items-center gap-3">
+            <span className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white font-black text-sm">
+              {PROFILE.initials || "S"}
+            </span>
             <button
               onClick={toggleMusic}
-              className={`mb-10 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[9px] tracking-[0.25em] font-mono uppercase transition-all duration-200 ${
-                playing 
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" 
-                  : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:text-white hover:border-white/20"
+              aria-label={playing ? "Pause music" : "Play music"}
+              title={playing ? "Pause music" : "Play music"}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-xl border transition-all duration-200 ${
+                playing
+                  ? "border-white/30 bg-white/10 text-white"
+                  : "border-white/10 bg-white/[0.03] text-white/40 hover:text-white hover:border-white/25"
               }`}
             >
-              <WaveformIcon playing={playing} />
-              <span>{playing ? "Theme Active" : "Ambient Audio"}</span>
+              <WaveformIcon playing={playing} size={16} />
             </button>
-
-            {/* Flat Modern Display Typography Engine */}
-            <h1 className="text-4xl sm:text-5xl md:text-[4.75rem] font-black tracking-tight leading-[1.05] text-white select-none">
-              Hey, I'm <span className="text-white/30 font-light font-sans">Saranmani</span> <br />
-              An Infrastructure <span className="underline decoration-white/20 underline-offset-8 font-serif italic font-normal tracking-normal text-white/90">Engineer</span> <br />
-              At <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30">Cloud Canvas</span>
-            </h1>
-
-            <p className="mt-8 text-sm md:text-base text-white/40 max-w-[560px] leading-relaxed font-normal">
-              I enjoy taking messy, complicated infrastructure architectures and making them feel automated, secure, and effortless for global engineering teams!
-            </p>
-
-            <div className="mt-10 flex items-center justify-center gap-4">
-              <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-full border border-white/10 bg-white/[0.02] text-[10px] tracking-[0.2em] font-mono uppercase text-white/70 hover:text-black hover:bg-white hover:border-white transition-all duration-200">
-                View Résumé →
-              </a>
-            </div>
           </div>
 
-          <SkillsMarquee />
-        </main>
+          <nav className="hidden md:flex items-center gap-8 text-[13px] text-white/70">
+            {NAV_LINKS.map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                target={label === "Resume" ? "_blank" : undefined}
+                rel={label === "Resume" ? "noopener noreferrer" : undefined}
+                className="hover:text-white transition-colors"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        </header>
 
-      </div>
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
+          <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
+            <span className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
+              <span className="inline-block w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle">
+                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
+              </span>
+              <span>Saranmani</span>
+            </span>
+            <span className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-white/40 font-normal">An</span>
+              <span>Infrastructure Engineer</span>
+            </span>
+            <span className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-white/40 font-normal">At</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
+                Cloud Canvas
+              </span>
+            </span>
+          </h1>
+
+          <p className="mt-6 text-sm md:text-base text-white/45 max-w-[560px] leading-relaxed">
+            I enjoy taking messy, complicated infrastructure architectures and
+            making them feel automated, secure, and effortless for global
+            engineering teams.
+          </p>
+
+          <div className="mt-8 flex items-center justify-center gap-4 text-white/50">
+            {SOCIAL_ICONS.slice(0, 1).map(({ Icon, url, k }) => (
+              <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <Icon size={18} />
+              </a>
+            ))}
+            <span className="w-px h-4 bg-white/15" />
+            <a href={`tel:${PROFILE.phone || ""}`} className="hover:text-white transition-colors" aria-label="Call">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </a>
+            <span className="w-px h-4 bg-white/15" />
+            <a href={`mailto:${PROFILE.email}`} className="hover:text-white transition-colors" aria-label="Email">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M22 6l-10 7L2 6" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase mb-8 px-6">
+          <span>Scroll down</span>
+          <div className="h-px w-28 md:w-40 bg-white/15" />
+          <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
+            <motion.div
+              className="w-1 h-1.5 bg-white/60 rounded-full"
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+          <div className="h-px w-28 md:w-40 bg-white/15" />
+          <span>to see projects</span>
+        </div>
+
+        <SkillsMarquee />
+      </section>
     </>
   );
 };
-
-const MARQUEE_SKILLS = [
-  { label: "Python",  Icon: () => <span className="font-mono text-[10px]">PY</span> },
-  { label: "AWS",     Icon: () => <span className="font-mono text-[10px]">WS</span> },
-  { label: "Linux",   Icon: () => <span className="font-mono text-[10px]">LX</span> },
-  { label: "Bash",    Icon: () => <span className="font-mono text-[10px]">SH</span> },
-  { label: "Docker",  Icon: () => <span className="font-mono text-[10px]">DK</span> },
-  { label: "Git",     Icon: () => <span className="font-mono text-[10px]">GT</span> },
-];
