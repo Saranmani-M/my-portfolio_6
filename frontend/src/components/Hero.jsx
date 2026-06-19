@@ -315,7 +315,7 @@ export const Hero = () => {
           >
             Résumé →
           </a>
-          
+          <a
             href={`mailto:${PROFILE.email}`}
             className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
           >
