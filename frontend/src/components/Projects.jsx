@@ -1,383 +1,223 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Linkedin, Github, Instagram, Twitter } from "lucide-react";
-import { PROFILE, SOCIALS } from "../lib/data";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 
-const SOCIAL_ICONS = [
-  { Icon: Linkedin,  url: SOCIALS.linkedin,  k: "linkedin"  },
-  { Icon: Github,    url: SOCIALS.github,    k: "github"    },
-  { Icon: Instagram, url: SOCIALS.instagram, k: "instagram" },
-  { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
-];
+const easeOut = [0.16, 1, 0.3, 1];
 
-const MARQUEE_SKILLS = [
-  { label: "Python"  },
-  { label: "AWS"     },
-  { label: "Linux"   },
-  { label: "Bash"    },
-  { label: "Docker"  },
-  { label: "Git"     },
-];
+const Reveal = ({ children, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+    viewport={{ once: true, margin: "-80px" }}
+    transition={{ duration: 0.8, ease: easeOut, delay }}
+  >
+    {children}
+  </motion.div>
+);
 
-const RUNNING_LOGOS = [
-  { name: "Gears",  color: "text-white/40"     },
-  { name: "Rahi",   color: "text-blue-400/50"  },
-  { name: "idp",    color: "text-green-400/50" },
-  { name: "Google", color: "text-red-400/50"   },
-];
-
-const WaveformIcon = ({ playing, size = 16 }) => {
-  const bars = [0.45, 1, 0.6, 0.88, 0.5];
-  return (
-    <svg width={size} height={size} viewBox="0 0 20 16" fill="none" aria-hidden="true">
-      {bars.map((h, i) => (
-        <rect
-          key={i}
-          x={i * 3.2 + 1}
-          y={8 - h * 6}
-          width={2}
-          height={h * 12}
-          rx={1}
-          fill="currentColor"
-          style={playing ? {
-            animation: `waveBar ${0.45 + i * 0.08}s ease-in-out ${i * 0.04}s infinite alternate`,
-            transformOrigin: "50% 100%",
-          } : {}}
-        />
-      ))}
-    </svg>
-  );
+const PROJECT = {
+  id: "project-1",
+  label: "IEEE ICIRCA 2026",
+  title: "Homomorphic Encryption",
+  subtitle: "Hybrid Paillier & ElGamal Approach",
+  role: "Lead Researcher",
+  year: "2026",
+  venue: "ICIRCA 2026 · RVS College, Coimbatore",
+  link: "https://github.com/Saranmani-M",
+  cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=80",
+  overview:
+    "Designed a secure hybrid framework combining Paillier (additive) and ElGamal (multiplicative) homomorphic encryption schemes, enabling computations on encrypted cloud data without ever decrypting it. Evaluated on 385 stratified random samples across structured, semi-structured, and unstructured data types in a simulated cloud environment.",
+  stack: ["Python", "Paillier Encryption", "ElGamal Encryption", "Cloud Security", "Cryptography", "IEEE"],
+  metrics: [
+    { value: "0.085s", label: "Paillier Encrypt" },
+    { value: "99%",   label: "Data Integrity"  },
+    { value: "385",   label: "Data Samples"    },
+  ],
 };
 
-const VIRTUAL_W = 1600;
-const VIRTUAL_H = 1000;
+export const Projects = () => {
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
-const GlassBubbleBackground = () => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let animId;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width  = VIRTUAL_W * dpr;
-    canvas.height = VIRTUAL_H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const bubbles = [];
-    const STEPS = 18, TURNS = 2.4, HR = 1.55, HH = 4.4;
-
-    for (let i = 0; i < STEPS; i++) {
-      const frac  = i / STEPS;
-      const angle = frac * Math.PI * 2 * TURNS;
-      const y     = (frac - 0.5) * HH;
-      const x1 = Math.cos(angle) * HR, z1 = Math.sin(angle) * HR;
-      const x2 = Math.cos(angle + Math.PI) * HR, z2 = Math.sin(angle + Math.PI) * HR;
-      bubbles.push({ x: x1, y, z: z1, r: 0.62 + (i % 3) * 0.07, seed: i });
-      bubbles.push({ x: x2, y, z: z2, r: 0.58 + ((i + 1) % 3) * 0.07, seed: i + 50 });
-    }
-    for (let i = 0; i < 10; i++) {
-      bubbles.push({
-        x: (((i * 73.13) % 100) / 100 - 0.5) * 3.6,
-        y: (((i * 41.29) % 100) / 100 - 0.5) * 4.0,
-        z: (((i * 29.81) % 100) / 100 - 0.5) * 2.0,
-        r: 0.22 + ((i * 17.3) % 100) / 100 * 0.3,
-        seed: i + 100,
-      });
-    }
-
-    let isScrolling = false, scrollTimer;
-    const onScroll = () => {
-      isScrolling = true;
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    let t = 0;
-    const draw = () => {
-      animId = requestAnimationFrame(draw);
-      ctx.clearRect(0, 0, VIRTUAL_W, VIRTUAL_H);
-      if (!isScrolling) t += 0.0035;
-
-      const cx = VIRTUAL_W * 0.5, cy = VIRTUAL_H * 0.46;
-      const scale = Math.min(VIRTUAL_W, VIRTUAL_H) * 0.62;
-      const cosY = Math.cos(t * 0.5), sinY = Math.sin(t * 0.5);
-      const cosX = Math.cos(0.35), sinX = Math.sin(0.35);
-
-      const proj = bubbles.map(b => {
-        const rx = b.x * cosY - b.z * sinY, rz = b.x * sinY + b.z * cosY;
-        const ry = b.y * cosX - rz * sinX, rz2 = b.y * sinX + rz * cosX;
-        const psp = 2.6 / (2.6 + rz2);
-        return {
-          sx: cx + rx * scale * psp,
-          sy: cy + ry * scale * psp,
-          z: rz2,
-          r: b.r * scale * 0.34 * psp,
-          seed: b.seed,
-        };
-      });
-      proj.sort((a, b) => a.z - b.z);
-
-      proj.forEach(p => {
-        const dep = Math.max(0, Math.min(1, (p.z + 1.8) / 3.4));
-        const base = 60 + dep * 70;
-
-        const glow = ctx.createRadialGradient(p.sx, p.sy, p.r * 0.4, p.sx, p.sy, p.r * 1.5);
-        glow.addColorStop(0, `rgba(${base},${base},${base},0.10)`);
-        glow.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.beginPath(); ctx.fillStyle = glow; ctx.arc(p.sx, p.sy, p.r * 1.5, 0, Math.PI * 2); ctx.fill();
-
-        const body = ctx.createLinearGradient(p.sx - p.r, p.sy - p.r, p.sx + p.r, p.sy + p.r);
-        body.addColorStop(0,   `rgba(${base * 0.18},${base * 0.18},${base * 0.18},1)`);
-        body.addColorStop(0.35,`rgba(${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},${Math.min(255, base * 1.5)},1)`);
-        body.addColorStop(0.5, `rgba(${base * 0.35},${base * 0.35},${base * 0.35},1)`);
-        body.addColorStop(0.7, `rgba(${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},${Math.min(255, base * 2.1)},1)`);
-        body.addColorStop(1,   `rgba(${base * 0.12},${base * 0.12},${base * 0.12},1)`);
-        ctx.beginPath(); ctx.fillStyle = body; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
-
-        ctx.save();
-        ctx.beginPath(); ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.clip();
-        for (let k = 0; k < 4; k++) {
-          const ringR = p.r * (0.3 + k * 0.22);
-          const ringOpacity = 0.10 + 0.05 * Math.sin(t * 3 + p.seed + k);
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, ringOpacity)})`;
-          ctx.lineWidth = p.r * 0.05;
-          ctx.ellipse(p.sx, p.sy - p.r * 0.1, ringR, ringR * 0.5, 0, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        const spec = ctx.createRadialGradient(p.sx - p.r * 0.3, p.sy - p.r * 0.35, 0, p.sx - p.r * 0.3, p.sy - p.r * 0.35, p.r * 0.35);
-        spec.addColorStop(0, `rgba(255,255,255,${0.55 * dep})`);
-        spec.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.beginPath(); ctx.fillStyle = spec; ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2); ctx.fill();
-      });
-    };
-    draw();
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(scrollTimer);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
-};
-
-const SkillsMarquee = () => {
-  const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
-  return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-4">
-      <div className="overflow-hidden">
-        <div className="flex items-center shrink-0 gap-8 sm:gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
-          {items.map(({ label }, i) => (
-            <span key={i} className="inline-flex items-center gap-2 text-white/35 hover:text-white/70 transition-colors text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-mono">
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const Hero = () => {
-  const audioRef = useRef(null);
-  const cursorRef = useRef(null);
-  const mousePos = useRef({ x: -100, y: -100 });
-  const [playing, setPlaying] = useState(false);
-
-  // Smooth GPU cursor — desktop only
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-    let animFrameId;
-    const updateCursorPosition = () => {
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(calc(${mousePos.current.x}px - 50%), calc(${mousePos.current.y}px - 50%), 0)`;
-      }
-      animFrameId = requestAnimationFrame(updateCursorPosition);
-    };
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    animFrameId = requestAnimationFrame(updateCursorPosition);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animFrameId);
-    };
-  }, []);
-
-  // FIX: exact filename, no encodeURI
-  useEffect(() => {
-    const audio = new Audio("/Hans_Zimmer_Patrik_Pietschmann_-_Interstaller_(mp3.pm).mp3");
-    audio.loop = true;
-    audio.volume = 0.5;
-    audioRef.current = audio;
-    return () => { audio.pause(); audio.src = ""; };
-  }, []);
-
-  const toggleMusic = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) { audio.pause(); setPlaying(false); }
-    else         { audio.play().catch(() => {}); setPlaying(true); }
-  }, [playing]);
-
-  const loopLogos = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
+  const handleClick = () => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+    setTimeout(() => {
+      window.open(PROJECT.link, "_blank", "noopener,noreferrer");
+      setIsNavigating(false);
+    }, 350);
+  };
 
   return (
     <>
       <style>{`
-        /* Custom cursor only on devices with a real pointer */
-        @media (hover: hover) and (pointer: fine) {
-          html, body, #root, a, button, img, svg, [role="button"] {
-            cursor: none !important;
-          }
-        }
-        @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-        @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
-        @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
+        @keyframes subtle-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .spin-slow { animation: subtle-spin 12s linear infinite; }
       `}</style>
 
-      {/* Custom cursor dot — hidden on touch/mobile */}
-      <div
-        ref={cursorRef}
-        className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform hidden md:block"
-        style={{ left: 0, top: 0 }}
-      />
+      {/* Page-fade overlay on click */}
+      <AnimatePresence>
+        {isNavigating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            className="fixed inset-0 bg-[#070708] z-[999999] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
 
       <section
-        id="home"
-        data-testid="hero-section"
-        className="relative min-h-screen overflow-hidden flex flex-col"
-        style={{ background: "#070708" }}
+        id="projects"
+        data-testid="projects-section"
+        className="relative py-20 md:py-32 px-6 md:px-12 bg-[#070708] overflow-hidden"
       >
-        <GlassBubbleBackground />
+        <div className="max-w-5xl mx-auto">
 
-        <div className="absolute inset-0 z-[1]" style={{
-          background:
-            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
-            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
-        }} />
-
-        {/* ── HERO CENTER BLOCK — Omkar's Immersive Inline Design Layout ── */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8 md:px-10 max-w-5xl mx-auto w-full">
-
-          <h1 className="font-sans font-bold tracking-tight text-white max-w-4xl text-center leading-[1.2]
-            text-4xl sm:text-5xl md:text-[4.2rem]">
-            
-            {/* Line 1: Hey, I'm [Avatar] Saranmani */}
-            <span className="block mb-2">
-              <span className="text-white/60 font-medium">Hey, I&rsquo;m </span>
-              <span className="inline-flex items-center justify-center bg-white/10 w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full overflow-hidden border border-white/20 mx-2 vertical-middle align-middle transform translate-y-[-2px]">
-                <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover scale-110" />
-              </span>
-              <span className="text-white">Saranmani</span>
-            </span>
-
-            {/* Line 2: An Infrastructure Engineer [Graphics Badge] */}
-            <span className="block mb-2">
-              <span className="text-white/60 font-medium">An </span>
-              <span className="text-white">Infrastructure Engineer </span>
-              <span className="inline-flex items-center justify-center bg-white/5 px-2 py-1 h-7 sm:h-9 md:h-11 rounded-lg border border-white/10 mx-1 align-middle transform translate-y-[-4px]">
-                <span className="text-xs sm:text-sm font-mono text-white/40">⚡</span>
-              </span>
-            </span>
-
-            {/* Line 3: At Cloud Canvas */}
-            <span className="block">
-              <span className="text-white/60 font-medium">At </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 font-extrabold">
-                Cloud Canvas
-              </span>
-            </span>
-          </h1>
-
-          {/* Tagline */}
-          <p className="mt-6 sm:mt-8 text-xs sm:text-sm md:text-base text-white/45 max-w-[88vw] sm:max-w-[480px] md:max-w-[560px] leading-relaxed font-normal">
-            I enjoy taking messy, complicated infrastructure architectures and
-            making them feel automated, secure, and effortless for global
-            engineering teams.
-          </p>
-
-          {/* Action bar */}
-          <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
-
-            {/* Socials */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-                <a key={k} href={url} target="_blank" rel="noopener noreferrer"
-                  className="text-white/50 hover:text-white transition-colors">
-                  <Icon size={18} strokeWidth={1.5} />
-                </a>
-              ))}
+          {/* ── Centered header (same style as About) ── */}
+          <Reveal>
+            <div className="text-center mb-16 md:mb-24">
+              <div className="text-[10px] font-mono tracking-[0.3em] uppercase text-white/35 mb-4">
+                (Projects)
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+                Featured{" "}
+                <span className="text-white/40 font-normal italic">Projects</span>
+              </h2>
             </div>
+          </Reveal>
 
-            {/* Divider */}
-            <span className="w-px h-5 bg-white/20" />
-
-            {/* Music */}
-            <button
-              onClick={toggleMusic}
-              aria-label={playing ? "Pause music" : "Play music"}
-              title={playing ? "Pause music" : "Play music"}
-              className={`transition-colors ${playing ? "text-white" : "text-white/50 hover:text-white"}`}
+          {/* ── Single large project card ── */}
+          <Reveal delay={0.1}>
+            <div
+              onClick={handleClick}
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+              className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden cursor-pointer hover:border-white/20 transition-all duration-500"
+              style={{ cursor: "none" }}
             >
-              <WaveformIcon playing={playing} size={18} />
-            </button>
+              {/* Cover image — full width, tall */}
+              <div className="relative w-full overflow-hidden" style={{ height: "clamp(260px, 45vw, 540px)" }}>
+                <img
+                  src={PROJECT.cover}
+                  alt={PROJECT.title}
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 opacity-55 group-hover:opacity-90 scale-100 group-hover:scale-[1.02] transition-all duration-700 ease-out will-change-transform"
+                />
+                {/* Bottom fade */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-[#070708]/40 to-transparent" />
 
-            {/* Divider */}
-            <span className="w-px h-5 bg-white/20" />
+                {/* IEEE badge — top left */}
+                <div className="absolute top-5 left-5 sm:top-6 sm:left-6">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-mono tracking-[0.18em] uppercase text-white/70 backdrop-blur-sm">
+                    ◆ {PROJECT.label}
+                  </span>
+                </div>
 
-            {/* Résumé */}
-            <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-white/60 hover:text-white transition-colors">
-              Résumé →
-            </a>
+                {/* Hover CTA pill — center */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={hovered ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.25 }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-white/90 backdrop-blur-md text-black text-[11px] font-bold tracking-[0.18em] uppercase shadow-2xl">
+                    View on GitHub <ArrowUpRight size={14} />
+                  </div>
+                </motion.div>
 
-            {/* Say hi */}
-            <a href={`mailto:${PROFILE.email}`}
-              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase px-3 sm:px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
-              Say hi ↗
-            </a>
-          </div>
-        </div>
+                {/* Arrow button — bottom right */}
+                <div className="absolute bottom-5 right-5 w-11 h-11 rounded-full bg-white text-black flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300 shadow-xl">
+                  <ArrowUpRight size={18} />
+                </div>
+              </div>
 
-        {/* ── BOTTOM BLOCK ── */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-5 sm:mb-8 px-4 sm:px-6">
+              {/* ── Card body ── */}
+              <div className="p-6 sm:p-8 md:p-10">
 
-          {/* Logo marquee — stable height, no jumping */}
-          <div className="w-full overflow-hidden mb-4 sm:mb-6">
-            <div className="flex gap-8 sm:gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform items-center h-8">
-              {loopLogos.map((logo, i) => (
-                <span key={i} className={`text-sm sm:text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
-                  {logo.name}
-                </span>
-              ))}
+                {/* Index + divider */}
+                <div className="flex items-center gap-3 text-[10px] font-mono tracking-[0.2em] text-white/25 uppercase mb-6">
+                  <span>PROJECT // 01</span>
+                  <div className="h-px flex-1 bg-white/[0.06]" />
+                  <span>{PROJECT.year}</span>
+                </div>
+
+                {/* Title row */}
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                      {PROJECT.title}
+                    </h3>
+                    <p className="text-white/40 font-normal text-base sm:text-lg mt-1">
+                      — {PROJECT.subtitle}
+                    </p>
+                  </div>
+                  <div className="flex gap-8 text-[11px] font-mono tracking-[0.15em] uppercase shrink-0">
+                    <div>
+                      <span className="text-white/20 block mb-1">Role</span>
+                      <span className="text-white/75">{PROJECT.role}</span>
+                    </div>
+                    <div>
+                      <span className="text-white/20 block mb-1">Venue</span>
+                      <span className="text-white/75 text-[10px]">{PROJECT.venue}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px w-full bg-white/[0.06] mb-6" />
+
+                {/* 3-col bottom: overview · stack · metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+
+                  {/* Overview */}
+                  <div className="sm:col-span-1">
+                    <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
+                      Overview
+                    </div>
+                    <p className="text-sm leading-relaxed text-white/55 font-light">
+                      {PROJECT.overview}
+                    </p>
+                  </div>
+
+                  {/* Stack */}
+                  <div>
+                    <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
+                      Stack & Keywords
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PROJECT.stack.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-2.5 py-1 text-[10px] font-mono rounded-full bg-white/[0.04] border border-white/[0.08] text-white/65"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Metrics */}
+                  <div>
+                    <div className="text-[10px] font-mono tracking-[0.2em] text-white/30 uppercase mb-3">
+                      Key Results
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {PROJECT.metrics.map((m) => (
+                        <div key={m.label} className="flex items-baseline gap-2">
+                          <span className="text-xl font-bold text-white">{m.value}</span>
+                          <span className="text-[10px] uppercase font-mono text-white/35">{m.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
-          </div>
+          </Reveal>
 
-          {/* Scroll indicator */}
-          <div className="w-full flex items-center justify-center gap-3 sm:gap-4 text-white/35 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
-            <span className="hidden sm:inline">Scroll down</span>
-            <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
-            <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
-              <motion.div
-                className="w-1 h-1.5 bg-white/60 rounded-full"
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </div>
-            <div className="h-px flex-1 max-w-[80px] sm:max-w-[160px] bg-white/15" />
-            <span className="hidden sm:inline">to see projects</span>
-          </div>
         </div>
-
-        <SkillsMarquee />
       </section>
     </>
   );
