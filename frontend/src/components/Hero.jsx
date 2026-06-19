@@ -166,7 +166,7 @@ const GlassBubbleBackground = () => {
 const SkillsMarquee = () => {
   const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-5">
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/40 py-5 mt-auto">
       <div className="overflow-hidden">
         <div className="flex items-center shrink-0 gap-12 whitespace-nowrap animate-[marquee-scroll_34s_linear_infinite] will-change-transform">
           {items.map(({ label }, i) => (
@@ -186,7 +186,6 @@ export const Hero = () => {
   const mousePos = useRef({ x: -100, y: -100 });
   const [playing, setPlaying] = useState(false);
 
-  // Butter-Smooth GPU-Accelerated Cursor Tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
@@ -234,10 +233,11 @@ export const Hero = () => {
         }
         @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes waveBar { from{transform:scaleY(0.3)} to{transform:scaleY(1)} }
+        @keyframes subtle-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
         @media(prefers-reduced-motion:reduce){ [class*="animate-"]{animation:none !important} }
       `}</style>
 
-      {/* Lag-free Custom Interaction Pointer Overlay */}
+      {/* Custom Interaction Pointer */}
       <div
         ref={cursorRef}
         className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
@@ -247,18 +247,35 @@ export const Hero = () => {
       <section
         id="home"
         data-testid="hero-section"
-        className="relative min-h-screen overflow-hidden flex flex-col"
+        className="relative min-h-screen overflow-hidden flex flex-col justify-between"
         style={{ background: "#070708" }}
       >
         <GlassBubbleBackground />
 
         <div className="absolute inset-0 z-[1]" style={{
           background:
-            "radial-gradient(ellipse at 50% 38%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 70%)," +
-            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 100%)",
+            "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.82) 75%)," +
+            "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.9) 100%)",
         }} />
 
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto">
+        {/* Outer container spacing helpers for true full screen centering balance */}
+        <div className="w-full pt-12 md:pt-16 invisible" aria-hidden="true" />
+
+        {/* Central Core Content Container */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-5xl mx-auto w-full">
+          
+          {/* Animated Active / Open To Work Status Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-6 backdrop-blur-sm select-none">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-green-400/90 font-medium">
+              Live // Open to Work
+            </span>
+          </div>
+
+          {/* Core Introduction Typography */}
           <h1 className="font-extrabold tracking-tight leading-[1.15] text-white text-3xl sm:text-4xl md:text-[3.4rem] flex flex-col items-center gap-1">
             <span className="flex items-center gap-3 flex-wrap justify-center">
               <span className="text-white/40 font-normal">Hey, I&rsquo;m</span>
@@ -285,6 +302,7 @@ export const Hero = () => {
             engineering teams.
           </p>
 
+          {/* Action Links & Utility Actions Block */}
           <div className="mt-8 flex items-center justify-center gap-5">
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a
@@ -317,24 +335,27 @@ export const Hero = () => {
               Say hi ↗
             </a>
           </div>
-        </div>
 
-        {/* Bottom Navigation Frame Layout Block */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6">
-          
-          {/* Running Brand Images (Moved up by expanding spacing underneath) */}
-          <div className="w-full max-w-[650px] overflow-hidden mb-12 masked-marquee">
-            <div className="flex gap-16 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
-              {loopLogos.map((logo, i) => (
-                <span key={i} className={`text-base font-extrabold tracking-wider ${logo.color} select-none font-sans`}>
-                  {logo.name}
-                </span>
-              ))}
+          {/* Target Dream Companies Target Brand Stream */}
+          <div className="w-full max-w-[500px] mt-16 flex flex-col items-center gap-3">
+            <span className="text-[10px] tracking-[0.25em] uppercase font-mono text-white/25 select-none">
+              Engineering Ambitions & Core Target Spaces
+            </span>
+            <div className="w-full overflow-hidden masked-marquee py-1">
+              <div className="flex gap-14 whitespace-nowrap animate-[marquee-scroll_25s_linear_infinite] will-change-transform justify-center items-center">
+                {loopLogos.map((logo, i) => (
+                  <span key={i} className={`text-xs font-bold tracking-widest ${logo.color} select-none font-sans uppercase`}>
+                    {logo.name}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Scroll Down Section (Moved down by adding padding top) */}
-          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase pt-8">
+        {/* Bottom Interactive Navigation Block Context */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center mb-8 px-6 mt-auto">
+          <div className="w-full flex items-center justify-center gap-4 text-white/35 text-[11px] tracking-[0.15em] uppercase">
             <span>Scroll down</span>
             <div className="h-px flex-1 max-w-[160px] bg-white/15" />
             <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5 shrink-0">
