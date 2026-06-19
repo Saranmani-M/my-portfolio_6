@@ -18,7 +18,6 @@ const IDCard = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  // --- 3D mouse-tilt, added on top of the existing card ---
   const cardRef = useRef(null);
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
@@ -37,7 +36,6 @@ const IDCard = () => {
     mx.set(0.5);
     my.set(0.5);
   };
-  // --- end tilt setup ---
 
   return (
     <div ref={ref} className="hidden md:flex flex-col items-center flex-shrink-0">
@@ -48,17 +46,13 @@ const IDCard = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <svg width="64" height="150" viewBox="0 0 64 150" fill="none">
-          {/* Flat ribbon body */}
           <rect x="22" y="0" width="20" height="118" rx="2" fill="url(#ribbonGrad)" />
-          {/* Ribbon center seam */}
           <line x1="32" y1="0" x2="32" y2="118" stroke="black" strokeOpacity="0.35" strokeWidth="1" />
-          {/* Small logo glyph near the top */}
           <path
             d="M28 14 L32 8 L36 14 L33 14 L33 20 L31 20 L31 14 Z"
             fill="white"
             fillOpacity="0.85"
           />
-          {/* Name printed on the ribbon, reading top-to-bottom */}
           <text
             x="38"
             y="0"
@@ -72,11 +66,8 @@ const IDCard = () => {
           >
             SARANMANI M
           </text>
-
-          {/* Plunger clasp body */}
           <rect x="20" y="116" width="24" height="22" rx="11" fill="url(#claspGrad)" />
           <circle cx="32" cy="123" r="6" fill="#0a0a0a" stroke="#444" strokeWidth="1" />
-          {/* Short cord loop from clasp to card */}
           <path
             d="M32 138 C 32 142, 28 144, 28 148 C 28 152, 36 152, 36 148 C 36 144, 32 142, 32 138"
             stroke="#222"
@@ -84,7 +75,6 @@ const IDCard = () => {
             fill="none"
             strokeLinecap="round"
           />
-
           <defs>
             <linearGradient id="ribbonGrad" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#0a0a0a" />
@@ -127,8 +117,25 @@ const IDCard = () => {
               }}
             />
 
-            {/* Continuous diagonal zigzag pattern — like the reference image */}
-            <div className="absolute inset-0 overflow-hidden">
+            {/* ── PHOTO ADDED HERE ── fills the top ~60% of card, grayscale + fade at bottom */}
+            <div className="absolute inset-0 z-[1]" style={{ height: "62%" }}>
+              <img
+                src={PROFILE.photoUrl}
+                alt="Saranmani M"
+                className="w-full h-full object-cover object-top"
+                style={{ filter: "grayscale(100%) contrast(1.05)" }}
+              />
+              {/* Fade photo into card bottom */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-1/2"
+                style={{
+                  background: "linear-gradient(to top, #0a0a0a 0%, transparent 100%)",
+                }}
+              />
+            </div>
+
+            {/* Diagonal zigzag pattern — overlaid on photo with low opacity */}
+            <div className="absolute inset-0 overflow-hidden z-[2]">
               <svg width="100%" height="100%" viewBox="0 0 300 420" preserveAspectRatio="none">
                 {Array.from({ length: 9 }).map((_, row) =>
                   Array.from({ length: 4 }).map((_, col) => {
@@ -140,7 +147,7 @@ const IDCard = () => {
                         d={`M ${x} ${y} L ${x + 22} ${y + 30} L ${x + 44} ${y} L ${x + 22} ${y - 30} Z`}
                         fill="none"
                         stroke="white"
-                        strokeOpacity="0.14"
+                        strokeOpacity="0.07"
                         strokeWidth="2.2"
                       />
                     );
@@ -151,38 +158,38 @@ const IDCard = () => {
 
             {/* Diagonal light streak / glare */}
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 z-[3]"
               style={{
                 background:
-                  "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.16) 47%, rgba(255,255,255,0.04) 56%, transparent 70%)",
+                  "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.08) 47%, rgba(255,255,255,0.02) 56%, transparent 70%)",
               }}
             />
 
             {/* Radial glow center */}
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 z-[3]"
               style={{
-                background: "radial-gradient(ellipse at 35% 40%, rgba(255,255,255,0.1) 0%, transparent 60%)",
+                background: "radial-gradient(ellipse at 35% 40%, rgba(255,255,255,0.06) 0%, transparent 60%)",
               }}
             />
 
             {/* Top gradient fade for text readability */}
             <div
-              className="absolute bottom-0 left-0 right-0 h-[55%]"
+              className="absolute bottom-0 left-0 right-0 h-[55%] z-[4]"
               style={{
                 background: "linear-gradient(to top, rgba(5,5,5,0.98) 0%, rgba(5,5,5,0.7) 60%, transparent 100%)",
               }}
             />
 
             {/* Year — top right */}
-            <div className="absolute top-5 right-5 z-10">
+            <div className="absolute top-5 right-5 z-[5]">
               <span className="text-[10px] tracking-[0.2em] text-white/25 uppercase font-light">
                 2026
               </span>
             </div>
 
             {/* Bottom content */}
-            <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
+            <div className="absolute bottom-0 left-0 right-0 z-[5] p-6">
               {/* Name */}
               <div
                 className="font-sans font-bold text-white leading-[1.05] mb-2"
@@ -208,7 +215,7 @@ const IDCard = () => {
 
             {/* Border loading animation */}
             <svg
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 w-full h-full z-[6]"
               style={{ borderRadius: "1rem" }}
             >
               <rect
