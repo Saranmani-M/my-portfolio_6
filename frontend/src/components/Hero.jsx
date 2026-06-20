@@ -147,20 +147,36 @@ const GlassBubbleBackground = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />;
 };
 
-// ─── Bottom skills strip ──────────────────────────────────────────────────────
+// ─── Bottom running strip — company logos ────────────────────────────────────
 const SkillsStrip = () => {
-  const items = [...MARQUEE_SKILLS, ...MARQUEE_SKILLS];
+  // Triple for seamless loop
+  const items = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
   return (
     <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/50 py-3 overflow-hidden">
+      {/* fade edges */}
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-10"
+        style={{ background: "linear-gradient(to right, rgba(7,7,8,1), transparent)" }} />
+      <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-10"
+        style={{ background: "linear-gradient(to left, rgba(7,7,8,1), transparent)" }} />
       <div
         className="flex items-center gap-10 whitespace-nowrap will-change-transform"
-        style={{ animation: "marquee-ltr 30s linear infinite", width: "max-content" }}
+        style={{ animation: "marquee-ltr 28s linear infinite", width: "max-content" }}
       >
-        {items.map(({ label, icon }, i) => (
-          <span key={i} className="inline-flex items-center gap-2 text-white/40 text-[11px] tracking-[0.14em] uppercase font-mono shrink-0">
-            <img src={`${BASE_ICON}${icon}`} alt={label} className="w-4 h-4 opacity-60" style={{ filter: "brightness(1.3) grayscale(0.2)" }} />
-            {label}
-            <span className="text-white/12 ml-2">·</span>
+        {items.map((logo, i) => (
+          <span key={i} className="inline-flex items-center gap-2 shrink-0">
+            <img
+              src={`${BASE_ICON}${logo.icon}`}
+              alt={logo.name}
+              className="w-4 h-4 opacity-70"
+              style={{ filter: "brightness(1.4)" }}
+            />
+            <span
+              className="text-[11px] tracking-[0.16em] uppercase font-mono opacity-60"
+              style={{ color: logo.color }}
+            >
+              {logo.name}
+            </span>
+            <span className="text-white/10 ml-1">·</span>
           </span>
         ))}
       </div>
@@ -320,29 +336,29 @@ export const Hero = () => {
 
           {/* Heading line 1 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={2}
-            className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.25rem] font-extrabold tracking-tight leading-[1.18] text-white mb-1"
+            className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.25rem] font-light tracking-[-0.01em] leading-[1.18] text-white mb-1"
           >
-            <span className="text-white/38 font-normal">Hey, I&rsquo;m</span>
+            <span className="text-white/45 font-light">Hey, I&rsquo;m</span>
             <span className="inline-block w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
               <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
             </span>
-            <span>Saranmani M</span>
+            <span className="font-bold">Saranmani M</span>
           </motion.div>
 
           {/* Heading line 2 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={3}
-            className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.25rem] font-extrabold tracking-tight leading-[1.18] text-white mb-1"
+            className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.25rem] font-light tracking-[-0.01em] leading-[1.18] text-white mb-1"
           >
-            <span className="text-white/38 font-normal">Aspiring</span>
-            <span>Cloud &amp; Storage Engineer</span>
+            <span className="text-white/45 font-light">Aspiring</span>
+            <span className="font-bold">Cloud &amp; Storage Engineer</span>
           </motion.div>
 
           {/* Heading line 3 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={4}
-            className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.25rem] font-extrabold tracking-tight leading-[1.18] text-white"
+            className="flex items-center gap-2 flex-wrap justify-center text-2xl sm:text-3xl md:text-[3.25rem] font-light tracking-[-0.01em] leading-[1.18] text-white"
           >
-            <span className="text-white/38 font-normal">Building</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/35">
+            <span className="text-white/45 font-light">Building</span>
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
               Secure Infrastructure
             </span>
           </motion.div>
