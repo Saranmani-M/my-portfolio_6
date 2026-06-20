@@ -23,13 +23,13 @@ const MARQUEE_SKILLS = [
 // Dream stack logos shown in the middle logo row
 const RUNNING_LOGOS = [
   { name: "AWS",       color: "#FF9900", icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg" },
-  { name: "Microsoft", color: "#F25022", icon: "google/google-original.svg" },
+  { name: "Microsoft", color: "#F25022", icon: "azure/azure-original.svg" },
   { name: "Google",    color: "#4285F4", icon: "google/google-original.svg" },
   { name: "Red Hat",   color: "#EE0000", icon: "redhat/redhat-original.svg" },
-  { name: "Cisco",     color: "#1BA0D7", icon: "docker/docker-original.svg" },
-  { name: "VMware",    color: "#607078", icon: "linux/linux-original.svg" },
-  { name: "Dell EMC",  color: "#007DB8", icon: "bash/bash-original.svg" },
-  { name: "NetApp",    color: "#0067C5", icon: "git/git-original.svg" },
+  { name: "Cisco",     color: "#1BA0D7", icon: "linux/linux-original.svg" },
+  { name: "VMware",    color: "#607078" , icon: "debian/debian-original.svg" },
+  { name: "Dell EMC",  color: "#007DB8", icon: "docker/docker-original.svg" },
+  { name: "NetApp",    color: "#0067C5", icon: "kubernetes/kubernetes-plain.svg" },
 ];
 
 const BASE_ICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
@@ -168,46 +168,37 @@ const SkillsStrip = () => {
   );
 };
 
-// ─── Logo row — like image 2's bottom logo strip ──────────────────────────────
-// Shows logos with icons, scrolling, filling the right-side gap
-const LogoRow = () => {
-  // 4x repeat for seamless infinite scroll
-  const items = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
-  return (
-    <div className="relative z-10 w-full overflow-hidden py-5 border-t border-white/[0.04]">
-      {/* Fade masks on left & right */}
-      <div className="pointer-events-none absolute left-0 top-0 h-full w-20 z-10"
-        style={{ background: "linear-gradient(to right, #070708 0%, transparent 100%)" }} />
-      <div className="pointer-events-none absolute right-0 top-0 h-full w-20 z-10"
-        style={{ background: "linear-gradient(to left, #070708 0%, transparent 100%)" }} />
-
-      <div
-        className="flex items-center gap-14 whitespace-nowrap will-change-transform"
-        style={{ animation: "marquee-ltr 35s linear infinite", width: "max-content" }}
-      >
-        {items.map((logo, i) => (
+// ─── Static logo grid — evenly spaced across full width, like reference image ──
+const LogoGrid = () => (
+  <div className="relative z-10 w-full px-6 sm:px-10 md:px-16 py-6">
+    {/* Label */}
+    <p className="text-center text-[9px] tracking-[0.28em] uppercase font-mono text-white/18 mb-5 select-none">
+      Dream Stacks &amp; Engineering Ambitions
+    </p>
+    {/* Logo row — evenly distributed, no scrolling */}
+    <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+      {RUNNING_LOGOS.map((logo, i) => (
+        <div
+          key={i}
+          className="flex flex-col items-center gap-1.5 group opacity-45 hover:opacity-90 transition-opacity duration-400 flex-1 min-w-0"
+        >
+          <img
+            src={`${BASE_ICON}${logo.icon}`}
+            alt={logo.name}
+            className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+            style={{ filter: "brightness(1.4) grayscale(0.15)" }}
+          />
           <span
-            key={i}
-            className="inline-flex items-center gap-2.5 shrink-0 opacity-70 hover:opacity-100 transition-opacity duration-300"
+            className="text-[9px] sm:text-[10px] font-bold tracking-[0.16em] uppercase font-sans text-center leading-tight"
+            style={{ color: logo.color }}
           >
-            <img
-              src={`${BASE_ICON}${logo.icon}`}
-              alt={logo.name}
-              className="w-5 h-5"
-              style={{ filter: "brightness(1.5) grayscale(0.1)" }}
-            />
-            <span
-              className="text-[12px] font-semibold tracking-[0.18em] uppercase font-sans"
-              style={{ color: logo.color }}
-            >
-              {logo.name}
-            </span>
+            {logo.name}
           </span>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
-  );
-};
+  </div>
+);
 
 // ─── Touch detection ──────────────────────────────────────────────────────────
 const isTouchDevice = () =>
@@ -379,24 +370,26 @@ export const Hero = () => {
           </motion.div>
         </div>
 
-        {/* ── Scroll indicator ── */}
+        {/* ── Scroll indicator — "Scroll down ——[mouse]—— to see projects" ── */}
         <motion.div variants={drop} initial="hidden" animate="visible" custom={7}
-          className="relative z-10 flex items-center justify-center gap-5 mb-4 text-white/25 text-[10px] tracking-[0.2em] uppercase"
+          className="relative z-10 flex items-center justify-center gap-4 mb-2 px-10 text-white/22 text-[10px] tracking-[0.2em] uppercase"
         >
-          <div className="h-px w-20 bg-white/10" />
+          <span className="hidden sm:inline">Scroll down</span>
+          <div className="h-px flex-1 max-w-[140px] bg-white/10" />
           <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center pt-1.5 shrink-0">
             <motion.div
-              className="w-1 h-1.5 bg-white/40 rounded-full"
+              className="w-1 h-1.5 bg-white/35 rounded-full"
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             />
           </div>
-          <div className="h-px w-20 bg-white/10" />
+          <div className="h-px flex-1 max-w-[140px] bg-white/10" />
+          <span className="hidden sm:inline">to see projects</span>
         </motion.div>
 
-        {/* ── Logo row — fills the empty space, like image 2 ── */}
+        {/* ── Static logo grid — evenly spaced like reference ── */}
         <motion.div variants={drop} initial="hidden" animate="visible" custom={8}>
-          <LogoRow />
+          <LogoGrid />
         </motion.div>
 
         {/* ── Skills strip — very bottom ── */}
