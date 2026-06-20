@@ -275,26 +275,29 @@ export const Hero = () => {
             "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.92) 100%)",
         }} />
 
-        {/* ── Navbar pill ── */}
-        <motion.div variants={drop} initial="hidden" animate="visible" custom={0}
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 select-none bg-black/45 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.07] shadow-lg whitespace-nowrap max-w-[calc(100vw-2rem)]"
-        >
-          <button onClick={toggleMusic} aria-label={playing ? "Pause" : "Play"}
-            className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${playing ? "text-white" : "text-white/35 hover:text-white"}`}
+        {/* ── Navbar pill — outer div holds position, inner motion div handles animation ── */}
+        <div className="fixed top-4 left-0 right-0 z-50 flex justify-center pointer-events-none">
+          <motion.div
+            variants={drop} initial="hidden" animate="visible" custom={0}
+            className="pointer-events-auto flex items-center gap-3 select-none bg-black/45 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.07] shadow-lg whitespace-nowrap max-w-[calc(100vw-2rem)]"
           >
-            <WaveformIcon playing={playing} size={14} />
-          </button>
-          <span className="text-white/15 text-sm">|</span>
-          <div className="flex items-center gap-0.5 sm:gap-1.5">
-            {SOCIAL_ICONS.map(({ Icon, url, k }) => (
-              <a key={k} href={url} target="_blank" rel="noopener noreferrer"
-                className="soc text-white/35 hover:text-white transition-colors"
-              >
-                <Icon size={14} strokeWidth={1.7} />
-              </a>
-            ))}
-          </div>
-        </motion.div>
+            <button onClick={toggleMusic} aria-label={playing ? "Pause" : "Play"}
+              className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${playing ? "text-white" : "text-white/35 hover:text-white"}`}
+            >
+              <WaveformIcon playing={playing} size={14} />
+            </button>
+            <span className="text-white/15 text-sm">|</span>
+            <div className="flex items-center gap-0.5 sm:gap-2">
+              {SOCIAL_ICONS.map(({ Icon, url, k }) => (
+                <a key={k} href={url} target="_blank" rel="noopener noreferrer"
+                  className="soc text-white/35 hover:text-white transition-colors"
+                >
+                  <Icon size={14} strokeWidth={1.7} />
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
         {/* Spacer */}
         <div className="pt-20" aria-hidden="true" />
