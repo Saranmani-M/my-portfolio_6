@@ -87,47 +87,45 @@ const PortraitBackground = () => (
   </motion.div>
 );
 
-// ─── Bottom running strip ─────────────────────────────────────────────────────
+// ─── Dream stack slow marquee (icon + name, like LogoGrid but scrolling) ──────
 const SkillsStrip = () => {
   const items = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/50 py-3 overflow-hidden">
-      <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-10"
-        style={{ background: "linear-gradient(to right, rgba(7,7,8,1), transparent)" }} />
-      <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-10"
-        style={{ background: "linear-gradient(to left, rgba(7,7,8,1), transparent)" }} />
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/30 py-5 overflow-hidden">
+      {/* Label */}
+      <p className="text-center text-[9px] tracking-[0.28em] uppercase font-mono text-white/20 mb-4 select-none">
+        Dream Stacks &amp; Engineering Ambitions
+      </p>
+      {/* Fade edges */}
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10"
+        style={{ background: "linear-gradient(to right, rgba(5,5,5,1), transparent)" }} />
+      <div className="pointer-events-none absolute right-0 top-0 h-full w-24 z-10"
+        style={{ background: "linear-gradient(to left, rgba(5,5,5,1), transparent)" }} />
+      {/* Scrolling row */}
       <div
-        className="flex items-center gap-10 whitespace-nowrap will-change-transform"
-        style={{ animation: "marquee-ltr 28s linear infinite", width: "max-content" }}
+        className="flex items-center gap-16 whitespace-nowrap will-change-transform"
+        style={{ animation: "marquee-ltr 60s linear infinite", width: "max-content" }}
       >
         {items.map((logo, i) => (
-          <span key={i} className="inline-flex items-center gap-2 shrink-0">
-            <img src={`${BASE_ICON}${logo.icon}`} alt={logo.name} className="w-4 h-4 opacity-70" style={{ filter: "brightness(1.4)" }} />
-            <span className="text-[11px] tracking-[0.16em] uppercase font-mono opacity-60" style={{ color: logo.color }}>{logo.name}</span>
-            <span className="text-white/10 ml-1">·</span>
+          <span key={i} className="inline-flex flex-col items-center gap-2 shrink-0 opacity-50 hover:opacity-95 transition-opacity duration-300">
+            <img
+              src={`${BASE_ICON}${logo.icon}`}
+              alt={logo.name}
+              className="w-8 h-8 object-contain"
+              style={{ filter: "brightness(1.5) grayscale(0.1)" }}
+            />
+            <span
+              className="text-[10px] tracking-[0.18em] uppercase font-mono font-bold"
+              style={{ color: logo.color }}
+            >
+              {logo.name}
+            </span>
           </span>
         ))}
       </div>
     </div>
   );
 };
-
-// ─── Static logo grid ─────────────────────────────────────────────────────────
-const LogoGrid = () => (
-  <div className="relative z-10 w-full px-6 sm:px-10 md:px-16 py-6">
-    <p className="text-center text-[9px] tracking-[0.28em] uppercase font-mono text-white/[0.18] mb-5 select-none">
-      Dream Stacks &amp; Engineering Ambitions
-    </p>
-    <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
-      {RUNNING_LOGOS.map((logo, i) => (
-        <div key={i} className="flex flex-col items-center gap-1.5 group opacity-45 hover:opacity-90 transition-opacity duration-400 flex-1 min-w-0">
-          <img src={`${BASE_ICON}${logo.icon}`} alt={logo.name} className="w-6 h-6 sm:w-7 sm:h-7 object-contain" style={{ filter: "brightness(1.4) grayscale(0.15)" }} />
-          <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.16em] uppercase font-sans text-center leading-tight" style={{ color: logo.color }}>{logo.name}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 // ─── Touch detection ──────────────────────────────────────────────────────────
 const isTouchDevice = () =>
@@ -198,19 +196,19 @@ export const Hero = () => {
         {/* ── Portrait background ── */}
         <PortraitBackground />
 
-        {/* ── Music toggle — TOP RIGHT ── */}
-        <motion.div
-          variants={drop} initial="hidden" animate="visible" custom={0}
-          className="fixed top-4 right-4 z-50"
-        >
-          <button
-            onClick={toggleMusic}
-            aria-label={playing ? "Pause" : "Play"}
-            className={`flex items-center justify-center w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/[0.07] shadow-lg transition-colors ${playing ? "text-white" : "text-white/35 hover:text-white"}`}
+        {/* ── Music toggle — centered top pill ── */}
+        <div className="fixed top-4 left-0 right-0 z-50 flex justify-center pointer-events-none">
+          <motion.div
+            variants={drop} initial="hidden" animate="visible" custom={0}
+            className="pointer-events-auto flex items-center select-none bg-black/45 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.07] shadow-lg"
           >
-            <WaveformIcon playing={playing} size={14} />
-          </button>
-        </motion.div>
+            <button onClick={toggleMusic} aria-label={playing ? "Pause" : "Play"}
+              className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${playing ? "text-white" : "text-white/35 hover:text-white"}`}
+            >
+              <WaveformIcon playing={playing} size={14} />
+            </button>
+          </motion.div>
+        </div>
 
         {/* Spacer for navbar */}
         <div className="pt-20" aria-hidden="true" />
@@ -293,11 +291,6 @@ export const Hero = () => {
             </a>
           </motion.div>
         </div>
-
-        {/* ── Static logo grid ── */}
-        <motion.div variants={drop} initial="hidden" animate="visible" custom={7}>
-          <LogoGrid />
-        </motion.div>
 
         {/* ── Skills strip ── */}
         <SkillsStrip />
