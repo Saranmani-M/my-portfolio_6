@@ -10,27 +10,24 @@ const SOCIAL_ICONS = [
   { Icon: Twitter,   url: SOCIALS.twitter,   k: "x"         },
 ];
 
-// Dream stack logos shown in the middle logo row
 const RUNNING_LOGOS = [
   { name: "AWS",       color: "#FF9900", icon: "amazonwebservices/amazonwebservices-plain-wordmark.svg" },
   { name: "Microsoft", color: "#F25022", icon: "azure/azure-original.svg" },
   { name: "Google",    color: "#4285F4", icon: "google/google-original.svg" },
   { name: "Red Hat",   color: "#EE0000", icon: "redhat/redhat-original.svg" },
   { name: "Cisco",     color: "#1BA0D7", icon: "linux/linux-original.svg" },
-  { name: "VMware",    color: "#607078",  icon: "debian/debian-original.svg" },
+  { name: "VMware",    color: "#607078", icon: "debian/debian-original.svg" },
   { name: "Dell EMC",  color: "#007DB8", icon: "docker/docker-original.svg" },
   { name: "NetApp",    color: "#0067C5", icon: "kubernetes/kubernetes-plain.svg" },
 ];
 
 const BASE_ICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
 
-// ─── Drop animation variants ──────────────────────────────────────────────────
 const drop = {
-  hidden: { opacity: 0, y: -36 },
+  hidden: { opacity: 0, y: -24 },
   visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.11, duration: 0.62, ease: [0.16, 1, 0.3, 1] },
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] },
   }),
 };
 
@@ -48,78 +45,158 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-const easeOut = [0.16, 1, 0.3, 1];
+// ─── 3D Vertical Panels Background (like image 1) ────────────────────────────
+const PanelsBackground = () => {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId, t = 0;
 
-// ─── Portrait background ──────────────────────────────────────────────────────
-const PortraitBackground = () => (
-  <motion.div
-    initial={{ opacity: 0, scale: 1.05 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 1.6, ease: easeOut }}
-    className="absolute inset-y-0 right-0 w-full md:w-[60%] lg:w-[58%] z-0"
-    data-testid="hero-portrait"
-  >
-    <div className="absolute inset-0 bg-[#050505]" />
-    <img
-      src={PROFILE.photoUrl}
-      alt="Saranmani M"
-      className="w-full h-full object-cover object-[center_15%] md:object-[center_30%] opacity-95"
-      style={{ filter: "grayscale(1) contrast(1.18) brightness(0.72)" }}
-    />
-    {/* Left edge gradient */}
-    <div
-      aria-hidden
-      className="absolute inset-0"
-      style={{
-        background:
-          "linear-gradient(90deg, #050505 0%, #050505 18%, rgba(5,5,5,0.7) 32%, rgba(5,5,5,0.2) 50%, transparent 70%)",
-      }}
-    />
-    {/* Soft vignette */}
-    <div
-      aria-hidden
-      className="absolute inset-0"
-      style={{
-        background:
-          "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)",
-      }}
-    />
-  </motion.div>
-);
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth  * (window.devicePixelRatio || 1);
+      canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    };
+    resize();
+    window.addEventListener("resize", resize);
 
-// ─── Dream stack slow marquee (icon + name, like LogoGrid but scrolling) ──────
+    const PANELS = 11;
+
+    const draw = () => {
+      animId = requestAnimationFrame(draw);
+      t += 0.004;
+      const W = canvas.offsetWidth, H = canvas.offsetHeight;
+      ctx.clearRect(0, 0, W, H);
+
+      // Pure black background
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, W, H);
+
+      const totalW = W * 0.82;
+      const startX = (W - totalW) / 2;
+      const panelW = totalW / PANELS;
+      const gapW   = panelW * 0.18;
+      const slotW  = panelW - gapW;
+
+      for (let i = 0; i < PANELS; i++) {
+        const x = startX + i * panelW + gapW / 2;
+
+        // Each panel has a slightly different brightness driven by sine wave → 3D depth feel
+        const phase = (i / PANELS) * Math.PI * 2;
+        const wave  = Math.sin(t + phase);
+        // Center panels brightest, edges darker — plus slow pulse
+        const centerFactor = 1 - Math.abs((i - (PANELS - 1) / 2) / ((PANELS - 1) / 2)) * 0.55;
+        const brightness = Math.max(0.08, centerFactor * (0.55 + wave * 0.12));
+
+        // Panel top and bottom with perspective taper
+        const topY    = H * 0.08;
+        const bottomY = H * 0.88;
+        const panelH  = bottomY - topY;
+
+        // Vertical gradient — bright white-grey in middle, fade top/bottom
+        const grad = ctx.createLinearGradient(x, topY, x, bottomY);
+        grad.addColorStop(0,    `rgba(255,255,255,0)`);
+        grad.addColorStop(0.15, `rgba(220,220,220,${brightness * 0.6})`);
+        grad.addColorStop(0.45, `rgba(255,255,255,${brightness})`);
+        grad.addColorStop(0.55, `rgba(240,240,240,${brightness * 0.95})`);
+        grad.addColorStop(0.85, `rgba(200,200,200,${brightness * 0.5})`);
+        grad.addColorStop(1,    `rgba(255,255,255,0)`);
+
+        // Draw panel with slight perspective (narrow at top, wider at bottom)
+        const taperTop    = slotW * 0.82;
+        const taperBottom = slotW;
+        const cx = x + slotW / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(cx - taperTop / 2,    topY);
+        ctx.lineTo(cx + taperTop / 2,    topY);
+        ctx.lineTo(cx + taperBottom / 2, bottomY);
+        ctx.lineTo(cx - taperBottom / 2, bottomY);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Subtle inner glow / specular on left edge
+        const specGrad = ctx.createLinearGradient(cx - taperBottom / 2, 0, cx, 0);
+        specGrad.addColorStop(0, `rgba(255,255,255,${brightness * 0.3})`);
+        specGrad.addColorStop(0.3, `rgba(255,255,255,0)`);
+        ctx.beginPath();
+        ctx.moveTo(cx - taperTop / 2,    topY);
+        ctx.lineTo(cx + taperTop / 2,    topY);
+        ctx.lineTo(cx + taperBottom / 2, bottomY);
+        ctx.lineTo(cx - taperBottom / 2, bottomY);
+        ctx.closePath();
+        ctx.fillStyle = specGrad;
+        ctx.fill();
+      }
+
+      // Silhouette figure in center — blurred shadow effect
+      const figX = W / 2;
+      const figY = H * 0.52;
+      const figH = H * 0.28;
+      const figW = figH * 0.28;
+
+      ctx.save();
+      ctx.globalAlpha = 0.35 + Math.sin(t * 0.7) * 0.05;
+      // Body
+      const bodyGrad = ctx.createRadialGradient(figX, figY, 0, figX, figY, figW * 2.5);
+      bodyGrad.addColorStop(0, "rgba(30,30,30,0.9)");
+      bodyGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.beginPath();
+      ctx.ellipse(figX, figY + figH * 0.1, figW, figH * 0.55, 0, 0, Math.PI * 2);
+      ctx.fillStyle = bodyGrad;
+      ctx.fill();
+      // Head
+      ctx.beginPath();
+      ctx.arc(figX, figY - figH * 0.38, figW * 0.55, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(20,20,20,0.7)";
+      ctx.fill();
+      ctx.restore();
+
+      // Floor reflection glow
+      const floorGrad = ctx.createLinearGradient(0, H * 0.82, 0, H);
+      floorGrad.addColorStop(0, "rgba(255,255,255,0.04)");
+      floorGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(0, H * 0.82, W, H * 0.18);
+
+      // Heavy vignette edges
+      const vig = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, W*0.75);
+      vig.addColorStop(0, "rgba(0,0,0,0)");
+      vig.addColorStop(1, "rgba(0,0,0,0.82)");
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, W, H);
+    };
+
+    draw();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 w-full h-full" />;
+};
+
+// ─── Dream stack slow marquee ─────────────────────────────────────────────────
 const SkillsStrip = () => {
   const items = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/30 py-5 overflow-hidden">
-      {/* Label */}
+    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/60 py-5 overflow-hidden">
       <p className="text-center text-[9px] tracking-[0.28em] uppercase font-mono text-white/20 mb-4 select-none">
         Dream Stacks &amp; Engineering Ambitions
       </p>
-      {/* Fade edges */}
       <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10"
-        style={{ background: "linear-gradient(to right, rgba(5,5,5,1), transparent)" }} />
+        style={{ background: "linear-gradient(to right, rgba(0,0,0,1), transparent)" }} />
       <div className="pointer-events-none absolute right-0 top-0 h-full w-24 z-10"
-        style={{ background: "linear-gradient(to left, rgba(5,5,5,1), transparent)" }} />
-      {/* Scrolling row */}
+        style={{ background: "linear-gradient(to left, rgba(0,0,0,1), transparent)" }} />
       <div
         className="flex items-center gap-16 whitespace-nowrap will-change-transform"
         style={{ animation: "marquee-ltr 60s linear infinite", width: "max-content" }}
       >
         {items.map((logo, i) => (
           <span key={i} className="inline-flex flex-col items-center gap-2 shrink-0 opacity-50 hover:opacity-95 transition-opacity duration-300">
-            <img
-              src={`${BASE_ICON}${logo.icon}`}
-              alt={logo.name}
-              className="w-8 h-8 object-contain"
-              style={{ filter: "brightness(1.5) grayscale(0.1)" }}
-            />
-            <span
-              className="text-[10px] tracking-[0.18em] uppercase font-mono font-bold"
-              style={{ color: logo.color }}
-            >
-              {logo.name}
-            </span>
+            <img src={`${BASE_ICON}${logo.icon}`} alt={logo.name} className="w-7 h-7 object-contain" style={{ filter: "brightness(1.5) grayscale(0.1)" }} />
+            <span className="text-[10px] tracking-[0.18em] uppercase font-mono font-bold" style={{ color: logo.color }}>{logo.name}</span>
           </span>
         ))}
       </div>
@@ -139,7 +216,6 @@ export const Hero = () => {
   const [playing, setPlaying] = useState(false);
   const [isTouch] = useState(() => isTouchDevice());
 
-  // Custom cursor — desktop only
   useEffect(() => {
     if (isTouch) return;
     const onMove = (e) => { mousePos.current = { x: e.clientX, y: e.clientY }; };
@@ -173,16 +249,15 @@ export const Hero = () => {
     <>
       <style>{`
         ${!isTouch ? `html,body,#root,a,button,img,svg,[role="button"]{cursor:none!important}` : ""}
-        @keyframes marquee-ltr { from{transform:translateX(0)} to{transform:translateX(-25%)} }
+        @keyframes marquee-ltr { from{transform:translateX(0)} to{transform:translateX(-33.33%)} }
         @keyframes waveBar     { from{transform:scaleY(0.3)}  to{transform:scaleY(1)} }
         @media(prefers-reduced-motion:reduce){[style*="animation"]{animation:none!important}}
-        .soc { display:inline-flex;align-items:center;justify-content:center;padding:7px;min-width:36px;min-height:36px; }
       `}</style>
 
       {/* Custom cursor */}
       {!isTouch && (
         <div ref={cursorRef}
-          className="fixed w-3.5 h-3.5 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
+          className="fixed w-3 h-3 bg-white rounded-full pointer-events-none z-[99999] mix-blend-difference will-change-transform"
           style={{ left: 0, top: 0 }}
         />
       )}
@@ -191,16 +266,16 @@ export const Hero = () => {
         id="home"
         data-testid="hero-section"
         className="relative min-h-screen overflow-hidden flex flex-col"
-        style={{ background: "#050505" }}
+        style={{ background: "#000" }}
       >
-        {/* ── Portrait background ── */}
-        <PortraitBackground />
+        {/* ── 3D Panels background ── */}
+        <PanelsBackground />
 
         {/* ── Music toggle — centered top pill ── */}
         <div className="fixed top-4 left-0 right-0 z-50 flex justify-center pointer-events-none">
           <motion.div
             variants={drop} initial="hidden" animate="visible" custom={0}
-            className="pointer-events-auto flex items-center select-none bg-black/45 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.07] shadow-lg"
+            className="pointer-events-auto flex items-center select-none bg-black/50 backdrop-blur-md px-3 py-2 rounded-full border border-white/[0.07] shadow-lg"
           >
             <button onClick={toggleMusic} aria-label={playing ? "Pause" : "Play"}
               className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${playing ? "text-white" : "text-white/35 hover:text-white"}`}
@@ -213,28 +288,28 @@ export const Hero = () => {
         {/* Spacer for navbar */}
         <div className="pt-20" aria-hidden="true" />
 
-        {/* ── Hero body — LEFT aligned ── */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 md:px-10 lg:px-12 max-w-7xl mx-auto w-full py-4">
+        {/* ── Hero body — CENTERED, smaller text ── */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-3xl mx-auto w-full py-6">
 
           {/* Badge */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={1}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 mb-6 backdrop-blur-sm select-none w-fit"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/25 bg-black/40 backdrop-blur-sm mb-7 select-none"
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
             </span>
-            <span className="text-[10px] uppercase tracking-[0.22em] font-mono text-green-400/90 font-medium">
+            <span className="text-[9px] uppercase tracking-[0.24em] font-mono text-green-400/90 font-medium">
               Open to Work
             </span>
           </motion.div>
 
-          {/* Heading line 1 */}
+          {/* Heading line 1 — smaller */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={2}
-            className="flex items-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-[3.25rem] font-light tracking-[-0.01em] leading-[1.18] text-white mb-1"
+            className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
           >
-            <span className="text-white/45 font-light">Hey, I&rsquo;m</span>
-            <span className="inline-block w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
+            <span className="text-white/40 font-light">Hey, I&rsquo;m</span>
+            <span className="inline-block w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
               <img src={PROFILE.photoUrl} alt="Saranmani M" className="w-full h-full object-cover grayscale" />
             </span>
             <span className="font-bold">Saranmani M</span>
@@ -242,17 +317,17 @@ export const Hero = () => {
 
           {/* Heading line 2 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={3}
-            className="flex items-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-[3.25rem] font-light tracking-[-0.01em] leading-[1.18] text-white mb-1"
+            className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
           >
-            <span className="text-white/45 font-light">Aspiring</span>
+            <span className="text-white/40 font-light">Aspiring</span>
             <span className="font-bold">Cloud &amp; Storage Engineer</span>
           </motion.div>
 
           {/* Heading line 3 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={4}
-            className="flex items-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-[3.25rem] font-light tracking-[-0.01em] leading-[1.18] text-white"
+            className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-5"
           >
-            <span className="text-white/45 font-light">Building</span>
+            <span className="text-white/40 font-light">Building</span>
             <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
               Secure Infrastructure
             </span>
@@ -260,39 +335,39 @@ export const Hero = () => {
 
           {/* Bio */}
           <motion.p variants={drop} initial="hidden" animate="visible" custom={5}
-            className="mt-5 text-[13px] md:text-[15px] text-white/40 max-w-[500px] leading-relaxed"
+            className="text-[12px] md:text-[13px] text-white/35 max-w-[420px] leading-relaxed mb-7"
           >
             I enjoy working with Linux systems, cloud infrastructure, and storage technologies,
             building reliable, secure, and scalable environments while continuously learning.
           </motion.p>
 
-          {/* CTAs — socials + Résumé → + Say hi */}
+          {/* CTAs */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={6}
-            className="mt-7 flex items-center gap-4 flex-wrap"
+            className="flex items-center justify-center gap-3 flex-wrap"
           >
             {SOCIAL_ICONS.map(({ Icon, url, k }) => (
               <a key={k} href={url} target="_blank" rel="noopener noreferrer"
                 data-testid={`hero-social-${k}`}
-                className="text-white/45 hover:text-white transition-colors p-1"
+                className="text-white/40 hover:text-white transition-colors p-1"
               >
-                <Icon size={18} strokeWidth={1.5} />
+                <Icon size={16} strokeWidth={1.5} />
               </a>
             ))}
             <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer"
-              className="text-[11px] tracking-[0.22em] uppercase text-white/50 hover:text-white transition-colors py-2 ml-1"
+              className="text-[10px] tracking-[0.22em] uppercase text-white/45 hover:text-white transition-colors py-2 ml-1"
             >
               Résumé →
             </a>
-            <span className="w-px h-4 bg-white/15" />
+            <span className="w-px h-3.5 bg-white/15" />
             <a href={`mailto:${PROFILE.email}`}
-              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[11px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full hover:opacity-90 active:opacity-80 transition-opacity"
+              className="inline-flex items-center gap-1.5 bg-[#e8ff47] text-black text-[10px] font-bold tracking-[0.15em] uppercase px-4 py-2 rounded-full hover:opacity-90 active:opacity-80 transition-opacity"
             >
               Say hi ↗
             </a>
           </motion.div>
         </div>
 
-        {/* ── Skills strip ── */}
+        {/* ── Dream stack slow marquee ── */}
         <SkillsStrip />
       </section>
     </>
