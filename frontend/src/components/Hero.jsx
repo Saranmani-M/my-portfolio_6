@@ -45,8 +45,8 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ─── 3D Vertical Panels Background (like image 1) ────────────────────────────
-const PanelsBackground = () => {
+// ─── Diamond / Crosshatch Pattern Background (like image 3, black theme) ─────
+const DiamondBackground = () => {
   const canvasRef = useRef(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,110 +62,60 @@ const PanelsBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    const PANELS = 11;
-
     const draw = () => {
       animId = requestAnimationFrame(draw);
-      t += 0.004;
+      t += 0.003;
       const W = canvas.offsetWidth, H = canvas.offsetHeight;
       ctx.clearRect(0, 0, W, H);
 
-      // Pure black background
+      // Pure black base
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, W, H);
 
-      const totalW = W * 0.82;
-      const startX = (W - totalW) / 2;
-      const panelW = totalW / PANELS;
-      const gapW   = panelW * 0.18;
-      const slotW  = panelW - gapW;
-
-      for (let i = 0; i < PANELS; i++) {
-        const x = startX + i * panelW + gapW / 2;
-
-        // Each panel has a slightly different brightness driven by sine wave → 3D depth feel
-        const phase = (i / PANELS) * Math.PI * 2;
-        const wave  = Math.sin(t + phase);
-        // Center panels brightest, edges darker — plus slow pulse
-        const centerFactor = 1 - Math.abs((i - (PANELS - 1) / 2) / ((PANELS - 1) / 2)) * 0.55;
-        const brightness = Math.max(0.08, centerFactor * (0.55 + wave * 0.12));
-
-        // Panel top and bottom with perspective taper
-        const topY    = H * 0.08;
-        const bottomY = H * 0.88;
-        const panelH  = bottomY - topY;
-
-        // Vertical gradient — bright white-grey in middle, fade top/bottom
-        const grad = ctx.createLinearGradient(x, topY, x, bottomY);
-        grad.addColorStop(0,    `rgba(255,255,255,0)`);
-        grad.addColorStop(0.15, `rgba(220,220,220,${brightness * 0.6})`);
-        grad.addColorStop(0.45, `rgba(255,255,255,${brightness})`);
-        grad.addColorStop(0.55, `rgba(240,240,240,${brightness * 0.95})`);
-        grad.addColorStop(0.85, `rgba(200,200,200,${brightness * 0.5})`);
-        grad.addColorStop(1,    `rgba(255,255,255,0)`);
-
-        // Draw panel with slight perspective (narrow at top, wider at bottom)
-        const taperTop    = slotW * 0.82;
-        const taperBottom = slotW;
-        const cx = x + slotW / 2;
-
-        ctx.beginPath();
-        ctx.moveTo(cx - taperTop / 2,    topY);
-        ctx.lineTo(cx + taperTop / 2,    topY);
-        ctx.lineTo(cx + taperBottom / 2, bottomY);
-        ctx.lineTo(cx - taperBottom / 2, bottomY);
-        ctx.closePath();
-        ctx.fillStyle = grad;
-        ctx.fill();
-
-        // Subtle inner glow / specular on left edge
-        const specGrad = ctx.createLinearGradient(cx - taperBottom / 2, 0, cx, 0);
-        specGrad.addColorStop(0, `rgba(255,255,255,${brightness * 0.3})`);
-        specGrad.addColorStop(0.3, `rgba(255,255,255,0)`);
-        ctx.beginPath();
-        ctx.moveTo(cx - taperTop / 2,    topY);
-        ctx.lineTo(cx + taperTop / 2,    topY);
-        ctx.lineTo(cx + taperBottom / 2, bottomY);
-        ctx.lineTo(cx - taperBottom / 2, bottomY);
-        ctx.closePath();
-        ctx.fillStyle = specGrad;
-        ctx.fill();
-      }
-
-      // Silhouette figure in center — blurred shadow effect
-      const figX = W / 2;
-      const figY = H * 0.52;
-      const figH = H * 0.28;
-      const figW = figH * 0.28;
+      // Diamond / crosshatch grid
+      const size = 38; // diamond cell size
+      const cols = Math.ceil(W / size) + 2;
+      const rows = Math.ceil(H / size) + 2;
 
       ctx.save();
-      ctx.globalAlpha = 0.35 + Math.sin(t * 0.7) * 0.05;
-      // Body
-      const bodyGrad = ctx.createRadialGradient(figX, figY, 0, figX, figY, figW * 2.5);
-      bodyGrad.addColorStop(0, "rgba(30,30,30,0.9)");
-      bodyGrad.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.beginPath();
-      ctx.ellipse(figX, figY + figH * 0.1, figW, figH * 0.55, 0, 0, Math.PI * 2);
-      ctx.fillStyle = bodyGrad;
-      ctx.fill();
-      // Head
-      ctx.beginPath();
-      ctx.arc(figX, figY - figH * 0.38, figW * 0.55, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(20,20,20,0.7)";
-      ctx.fill();
+      // Rotate 45° around center to make diamonds
+      ctx.translate(W / 2, H / 2);
+      ctx.rotate(Math.PI / 4);
+      ctx.translate(-W / 2, -H / 2);
+
+      for (let row = -2; row < rows + 2; row++) {
+        for (let col = -2; col < cols + 2; col++) {
+          const x = col * size;
+          const y = row * size;
+
+          // Subtle pulse per cell based on distance from center + time
+          const cx = x - W / 2, cy = y - H / 2;
+          const dist = Math.sqrt(cx * cx + cy * cy);
+          const maxDist = Math.sqrt((W / 2) * (W / 2) + (H / 2) * (H / 2));
+          const wave = Math.sin(t * 1.2 - dist * 0.012) * 0.5 + 0.5;
+          const fade = 1 - (dist / maxDist) * 0.7;
+          const alpha = wave * fade * 0.13 + 0.04;
+
+          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          ctx.lineWidth = 0.6;
+          ctx.strokeRect(x, y, size, size);
+        }
+      }
       ctx.restore();
 
-      // Floor reflection glow
-      const floorGrad = ctx.createLinearGradient(0, H * 0.82, 0, H);
-      floorGrad.addColorStop(0, "rgba(255,255,255,0.04)");
-      floorGrad.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = floorGrad;
-      ctx.fillRect(0, H * 0.82, W, H * 0.18);
+      // Center radial glow — very subtle white, keeps black feel
+      const glow = ctx.createRadialGradient(W / 2, H * 0.46, 0, W / 2, H * 0.46, W * 0.45);
+      glow.addColorStop(0, `rgba(255,255,255,${0.04 + Math.sin(t * 0.8) * 0.015})`);
+      glow.addColorStop(0.5, "rgba(255,255,255,0.01)");
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H);
 
-      // Heavy vignette edges
-      const vig = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, W*0.75);
+      // Heavy vignette to keep edges dark like image 4
+      const vig = ctx.createRadialGradient(W / 2, H / 2, H * 0.18, W / 2, H / 2, W * 0.78);
       vig.addColorStop(0, "rgba(0,0,0,0)");
-      vig.addColorStop(1, "rgba(0,0,0,0.82)");
+      vig.addColorStop(0.6, "rgba(0,0,0,0.4)");
+      vig.addColorStop(1, "rgba(0,0,0,0.88)");
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, W, H);
     };
@@ -177,26 +127,38 @@ const PanelsBackground = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0 w-full h-full" />;
 };
 
-// ─── Dream stack slow marquee ─────────────────────────────────────────────────
+// ─── Smaller refined marquee (like image 2 company logos strip) ───────────────
 const SkillsStrip = () => {
   const items = [...RUNNING_LOGOS, ...RUNNING_LOGOS, ...RUNNING_LOGOS];
   return (
-    <div className="relative z-10 w-full border-t border-white/[0.06] bg-black/60 py-5 overflow-hidden">
-      <p className="text-center text-[9px] tracking-[0.28em] uppercase font-mono text-white/20 mb-4 select-none">
+    <div className="relative z-10 w-full border-t border-white/[0.05] bg-black/70 py-3 overflow-hidden">
+      <p className="text-center text-[8px] tracking-[0.32em] uppercase font-mono text-white/18 mb-3 select-none">
         Dream Stacks &amp; Engineering Ambitions
       </p>
-      <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10"
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-20 z-10"
         style={{ background: "linear-gradient(to right, rgba(0,0,0,1), transparent)" }} />
-      <div className="pointer-events-none absolute right-0 top-0 h-full w-24 z-10"
+      <div className="pointer-events-none absolute right-0 top-0 h-full w-20 z-10"
         style={{ background: "linear-gradient(to left, rgba(0,0,0,1), transparent)" }} />
       <div
-        className="flex items-center gap-16 whitespace-nowrap will-change-transform"
+        className="flex items-center gap-10 whitespace-nowrap will-change-transform"
         style={{ animation: "marquee-ltr 60s linear infinite", width: "max-content" }}
       >
         {items.map((logo, i) => (
-          <span key={i} className="inline-flex flex-col items-center gap-2 shrink-0 opacity-50 hover:opacity-95 transition-opacity duration-300">
-            <img src={`${BASE_ICON}${logo.icon}`} alt={logo.name} className="w-7 h-7 object-contain" style={{ filter: "brightness(1.5) grayscale(0.1)" }} />
-            <span className="text-[10px] tracking-[0.18em] uppercase font-mono font-bold" style={{ color: logo.color }}>{logo.name}</span>
+          <span key={i} className="inline-flex flex-col items-center gap-1 shrink-0 opacity-40 hover:opacity-80 transition-opacity duration-300">
+            {/* Logo image — smaller: w-5 h-5 instead of w-7 h-7 */}
+            <img
+              src={`${BASE_ICON}${logo.icon}`}
+              alt={logo.name}
+              className="w-5 h-5 object-contain"
+              style={{ filter: "brightness(1.4) grayscale(0.15)" }}
+            />
+            {/* Text — smaller: 8px instead of 10px */}
+            <span
+              className="text-[8px] tracking-[0.2em] uppercase font-mono font-semibold"
+              style={{ color: logo.color }}
+            >
+              {logo.name}
+            </span>
           </span>
         ))}
       </div>
@@ -268,8 +230,8 @@ export const Hero = () => {
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#000" }}
       >
-        {/* ── 3D Panels background ── */}
-        <PanelsBackground />
+        {/* ── Diamond pattern background (black theme) ── */}
+        <DiamondBackground />
 
         {/* ── Music toggle — centered top pill ── */}
         <div className="fixed top-4 left-0 right-0 z-50 flex justify-center pointer-events-none">
@@ -288,7 +250,7 @@ export const Hero = () => {
         {/* Spacer for navbar */}
         <div className="pt-20" aria-hidden="true" />
 
-        {/* ── Hero body — CENTERED, smaller text ── */}
+        {/* ── Hero body — CENTERED ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 max-w-3xl mx-auto w-full py-6">
 
           {/* Badge */}
@@ -304,7 +266,7 @@ export const Hero = () => {
             </span>
           </motion.div>
 
-          {/* Heading line 1 — smaller */}
+          {/* Heading line 1 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={2}
             className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
           >
@@ -367,7 +329,7 @@ export const Hero = () => {
           </motion.div>
         </div>
 
-        {/* ── Dream stack slow marquee ── */}
+        {/* ── Dream stack slow marquee — smaller ── */}
         <SkillsStrip />
       </section>
     </>
