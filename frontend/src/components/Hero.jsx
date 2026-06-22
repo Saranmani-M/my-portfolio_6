@@ -45,8 +45,8 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ─── Diamond / Crosshatch Pattern Background (like image 3, black theme) ─────
-const DiamondBackground = () => {
+// ─── Twisted Rope Background (bumpy intertwined strands, pure black) ──────────
+const TwistedRopeBackground = () => {
   const canvasRef = useRef(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,60 +62,121 @@ const DiamondBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
+    // Draw a single bumpy sphere (one "bead" on the rope)
+    const drawBead = (x, y, r, lightAngle) => {
+      // Main sphere body — dark grey, almost black
+      const grad = ctx.createRadialGradient(
+        x - r * 0.3, y - r * 0.3, r * 0.05,
+        x, y, r
+      );
+      grad.addColorStop(0,   "rgba(90,90,90,0.95)");
+      grad.addColorStop(0.3, "rgba(45,45,45,0.98)");
+      grad.addColorStop(0.7, "rgba(18,18,18,1)");
+      grad.addColorStop(1,   "rgba(5,5,5,1)");
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Specular highlight — small bright dot
+      const specR = r * 0.28;
+      const specX = x - r * 0.28;
+      const specY = y - r * 0.28;
+      const specGrad = ctx.createRadialGradient(specX, specY, 0, specX, specY, specR);
+      specGrad.addColorStop(0,   "rgba(200,200,200,0.55)");
+      specGrad.addColorStop(0.5, "rgba(120,120,120,0.15)");
+      specGrad.addColorStop(1,   "rgba(0,0,0,0)");
+      ctx.beginPath();
+      ctx.arc(specX, specY, specR, 0, Math.PI * 2);
+      ctx.fillStyle = specGrad;
+      ctx.fill();
+
+      // Rim shadow — bottom-right darkening
+      const rimGrad = ctx.createRadialGradient(
+        x + r * 0.25, y + r * 0.25, r * 0.4,
+        x, y, r
+      );
+      rimGrad.addColorStop(0,   "rgba(0,0,0,0)");
+      rimGrad.addColorStop(0.7, "rgba(0,0,0,0.3)");
+      rimGrad.addColorStop(1,   "rgba(0,0,0,0.75)");
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = rimGrad;
+      ctx.fill();
+    };
+
     const draw = () => {
       animId = requestAnimationFrame(draw);
-      t += 0.003;
+      t += 0.005;
       const W = canvas.offsetWidth, H = canvas.offsetHeight;
       ctx.clearRect(0, 0, W, H);
 
-      // Pure black base
+      // Pure black background
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, W, H);
 
-      // Diamond / crosshatch grid
-      const size = 38; // diamond cell size
-      const cols = Math.ceil(W / size) + 2;
-      const rows = Math.ceil(H / size) + 2;
+      const cx = W / 2;
+      const cy = H / 2;
 
-      ctx.save();
-      // Rotate 45° around center to make diamonds
-      ctx.translate(W / 2, H / 2);
-      ctx.rotate(Math.PI / 4);
-      ctx.translate(-W / 2, -H / 2);
+      // Two intertwined strands — each is a helix projected to 2D
+      // They form an X shape crossing in the center
+      const strandCount = 2;
+      const beadR = Math.min(W, H) * 0.028;   // bead radius
+      const beadSpacing = beadR * 1.85;
+      const numBeads = Math.ceil((W * 1.6) / beadSpacing);
 
-      for (let row = -2; row < rows + 2; row++) {
-        for (let col = -2; col < cols + 2; col++) {
-          const x = col * size;
-          const y = row * size;
+      // Strand paths: two diagonal lines crossing center (like the X in the image)
+      // Strand A: top-left → bottom-right
+      // Strand B: top-right → bottom-left
+      const spread = Math.min(W, H) * 0.22; // how far apart the strands spread at edges
+      const len = Math.sqrt(W * W + H * H) * 0.6;
 
-          // Subtle pulse per cell based on distance from center + time
-          const cx = x - W / 2, cy = y - H / 2;
-          const dist = Math.sqrt(cx * cx + cy * cy);
-          const maxDist = Math.sqrt((W / 2) * (W / 2) + (H / 2) * (H / 2));
-          const wave = Math.sin(t * 1.2 - dist * 0.012) * 0.5 + 0.5;
-          const fade = 1 - (dist / maxDist) * 0.7;
-          const alpha = wave * fade * 0.13 + 0.04;
+      const strands = [
+        { angle:  Math.PI * 0.28, color: 0 }, // \ direction
+        { angle: -Math.PI * 0.28, color: 1 }, // / direction
+      ];
 
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-          ctx.lineWidth = 0.6;
-          ctx.strokeRect(x, y, size, size);
+      // Collect all beads for depth-sorted rendering
+      const allBeads = [];
+
+      strands.forEach((strand, si) => {
+        const cos = Math.cos(strand.angle);
+        const sin = Math.sin(strand.angle);
+        const perpCos = Math.cos(strand.angle + Math.PI / 2);
+        const perpSin = Math.sin(strand.angle + Math.PI / 2);
+
+        for (let i = -numBeads / 2; i < numBeads / 2; i++) {
+          const along = i * beadSpacing;
+          // Helix twist: offset perpendicular to strand direction
+          const twist = Math.sin(along * 0.045 + t + si * Math.PI) * spread * 0.38;
+          const depthWave = Math.cos(along * 0.045 + t + si * Math.PI); // -1..1 for z-depth
+
+          const bx = cx + cos * along + perpCos * twist;
+          const by = cy + sin * along + perpSin * twist;
+
+          // Scale bead by depth (farther = slightly smaller, more faded)
+          const depthScale = 0.82 + depthWave * 0.18;
+          const depthAlpha = 0.72 + depthWave * 0.28;
+
+          allBeads.push({ x: bx, y: by, r: beadR * depthScale, alpha: depthAlpha, z: depthWave });
         }
-      }
-      ctx.restore();
+      });
 
-      // Center radial glow — very subtle white, keeps black feel
-      const glow = ctx.createRadialGradient(W / 2, H * 0.46, 0, W / 2, H * 0.46, W * 0.45);
-      glow.addColorStop(0, `rgba(255,255,255,${0.04 + Math.sin(t * 0.8) * 0.015})`);
-      glow.addColorStop(0.5, "rgba(255,255,255,0.01)");
-      glow.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, W, H);
+      // Sort by z so closer beads render on top
+      allBeads.sort((a, b) => a.z - b.z);
 
-      // Heavy vignette to keep edges dark like image 4
-      const vig = ctx.createRadialGradient(W / 2, H / 2, H * 0.18, W / 2, H / 2, W * 0.78);
-      vig.addColorStop(0, "rgba(0,0,0,0)");
-      vig.addColorStop(0.6, "rgba(0,0,0,0.4)");
-      vig.addColorStop(1, "rgba(0,0,0,0.88)");
+      allBeads.forEach(bead => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, bead.alpha));
+        drawBead(bead.x, bead.y, bead.r, 0);
+        ctx.restore();
+      });
+
+      // Heavy vignette — keep edges pure black, focus center
+      const vig = ctx.createRadialGradient(cx, cy, H * 0.12, cx, cy, W * 0.72);
+      vig.addColorStop(0,   "rgba(0,0,0,0)");
+      vig.addColorStop(0.5, "rgba(0,0,0,0.25)");
+      vig.addColorStop(1,   "rgba(0,0,0,0.92)");
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, W, H);
     };
@@ -230,8 +291,8 @@ export const Hero = () => {
         className="relative min-h-screen overflow-hidden flex flex-col"
         style={{ background: "#000" }}
       >
-        {/* ── Diamond pattern background (black theme) ── */}
-        <DiamondBackground />
+        {/* ── Twisted rope background ── */}
+        <TwistedRopeBackground />
 
         {/* ── Music toggle — centered top pill ── */}
         <div className="fixed top-4 left-0 right-0 z-50 flex justify-center pointer-events-none">
