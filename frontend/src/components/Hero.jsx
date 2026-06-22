@@ -255,7 +255,7 @@ export const Hero = () => {
   }, [isTouch]);
 
   useEffect(() => {
-    const audio = new Audio("/1.mp3");
+    const audio = new Audio("/Interstellar_-_Stay_slowed_(SkySound.cc).mp3");
     audio.loop = true; audio.volume = 0.5;
     audioRef.current = audio;
     return () => { audio.pause(); audio.src = ""; };
