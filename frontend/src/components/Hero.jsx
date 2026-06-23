@@ -45,7 +45,7 @@ const WaveformIcon = ({ playing, size = 16 }) => {
   );
 };
 
-// ─── Twisted Rope Background (bumpy intertwined strands, pure black) ──────────
+// ─── Twisted Rope + Stars + Shooting Stars Background ────────────────────────
 const TwistedRopeBackground = () => {
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -62,47 +62,53 @@ const TwistedRopeBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    // Draw a single bumpy sphere (one "bead" on the rope)
-    const drawBead = (x, y, r, lightAngle) => {
-      // Main sphere body — dark grey, almost black
-      const grad = ctx.createRadialGradient(
-        x - r * 0.3, y - r * 0.3, r * 0.05,
-        x, y, r
-      );
+    // ── Static glowing stars ──────────────────────────────────────────────────
+    const NUM_STARS = 120;
+    const stars = Array.from({ length: NUM_STARS }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.4 + 0.3,          // radius 0.3–1.7
+      glowR: Math.random() * 6 + 3,           // glow radius 3–9
+      phase: Math.random() * Math.PI * 2,     // twinkle phase offset
+      speed: Math.random() * 0.6 + 0.3,      // twinkle speed
+      bright: Math.random() * 0.5 + 0.5,     // base brightness
+    }));
+
+    // ── Shooting stars ────────────────────────────────────────────────────────
+    const MAX_SHOOTERS = 4;
+    const shooters = [];
+    const spawnShooter = (W, H) => ({
+      x: Math.random() * W * 0.8,
+      y: Math.random() * H * 0.35,
+      vx: (Math.random() * 5 + 5),
+      vy: (Math.random() * 2.5 + 1.5),
+      len: Math.random() * 120 + 80,
+      alpha: 1,
+      life: 0,
+      maxLife: Math.random() * 60 + 50,
+    });
+
+    // ── Bead drawing ──────────────────────────────────────────────────────────
+    const drawBead = (x, y, r) => {
+      const grad = ctx.createRadialGradient(x - r*0.3, y - r*0.3, r*0.05, x, y, r);
       grad.addColorStop(0,   "rgba(90,90,90,0.95)");
       grad.addColorStop(0.3, "rgba(45,45,45,0.98)");
       grad.addColorStop(0.7, "rgba(18,18,18,1)");
       grad.addColorStop(1,   "rgba(5,5,5,1)");
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fillStyle = grad; ctx.fill();
 
-      // Specular highlight — small bright dot
-      const specR = r * 0.28;
-      const specX = x - r * 0.28;
-      const specY = y - r * 0.28;
+      const specR = r*0.28, specX = x - r*0.28, specY = y - r*0.28;
       const specGrad = ctx.createRadialGradient(specX, specY, 0, specX, specY, specR);
       specGrad.addColorStop(0,   "rgba(200,200,200,0.55)");
       specGrad.addColorStop(0.5, "rgba(120,120,120,0.15)");
       specGrad.addColorStop(1,   "rgba(0,0,0,0)");
-      ctx.beginPath();
-      ctx.arc(specX, specY, specR, 0, Math.PI * 2);
-      ctx.fillStyle = specGrad;
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(specX, specY, specR, 0, Math.PI*2); ctx.fillStyle = specGrad; ctx.fill();
 
-      // Rim shadow — bottom-right darkening
-      const rimGrad = ctx.createRadialGradient(
-        x + r * 0.25, y + r * 0.25, r * 0.4,
-        x, y, r
-      );
+      const rimGrad = ctx.createRadialGradient(x + r*0.25, y + r*0.25, r*0.4, x, y, r);
       rimGrad.addColorStop(0,   "rgba(0,0,0,0)");
       rimGrad.addColorStop(0.7, "rgba(0,0,0,0.3)");
       rimGrad.addColorStop(1,   "rgba(0,0,0,0.75)");
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = rimGrad;
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fillStyle = rimGrad; ctx.fill();
     };
 
     const draw = () => {
@@ -111,69 +117,108 @@ const TwistedRopeBackground = () => {
       const W = canvas.offsetWidth, H = canvas.offsetHeight;
       ctx.clearRect(0, 0, W, H);
 
-      // Pure black background
+      // Pure black base
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, W, H);
 
-      const cx = W / 2;
-      const cy = H / 2;
+      // ── Draw glowing stars ──────────────────────────────────────────────────
+      stars.forEach(s => {
+        const twinkle = Math.sin(t * s.speed * 2 + s.phase) * 0.4 + 0.6;
+        const alpha = s.bright * twinkle;
+        const sx = s.x * W, sy = s.y * H;
 
-      // Two intertwined strands — each is a helix projected to 2D
-      // They form an X shape crossing in the center
-      const strandCount = 2;
-      const beadR = Math.min(W, H) * 0.028;   // bead radius
-      const beadSpacing = beadR * 1.85;
-      const numBeads = Math.ceil((W * 1.6) / beadSpacing);
+        // Outer glow
+        const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.glowR);
+        glow.addColorStop(0,   `rgba(255,255,255,${alpha * 0.35})`);
+        glow.addColorStop(0.4, `rgba(200,220,255,${alpha * 0.12})`);
+        glow.addColorStop(1,   "rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.arc(sx, sy, s.glowR, 0, Math.PI*2);
+        ctx.fillStyle = glow; ctx.fill();
 
-      // Strand paths: two diagonal lines crossing center (like the X in the image)
-      // Strand A: top-left → bottom-right
-      // Strand B: top-right → bottom-left
-      const spread = Math.min(W, H) * 0.22; // how far apart the strands spread at edges
-      const len = Math.sqrt(W * W + H * H) * 0.6;
-
-      const strands = [
-        { angle:  Math.PI * 0.28, color: 0 }, // \ direction
-        { angle: -Math.PI * 0.28, color: 1 }, // / direction
-      ];
-
-      // Collect all beads for depth-sorted rendering
-      const allBeads = [];
-
-      strands.forEach((strand, si) => {
-        const cos = Math.cos(strand.angle);
-        const sin = Math.sin(strand.angle);
-        const perpCos = Math.cos(strand.angle + Math.PI / 2);
-        const perpSin = Math.sin(strand.angle + Math.PI / 2);
-
-        for (let i = -numBeads / 2; i < numBeads / 2; i++) {
-          const along = i * beadSpacing;
-          // Helix twist: offset perpendicular to strand direction
-          const twist = Math.sin(along * 0.045 + t + si * Math.PI) * spread * 0.38;
-          const depthWave = Math.cos(along * 0.045 + t + si * Math.PI); // -1..1 for z-depth
-
-          const bx = cx + cos * along + perpCos * twist;
-          const by = cy + sin * along + perpSin * twist;
-
-          // Scale bead by depth (farther = slightly smaller, more faded)
-          const depthScale = 0.82 + depthWave * 0.18;
-          const depthAlpha = 0.72 + depthWave * 0.28;
-
-          allBeads.push({ x: bx, y: by, r: beadR * depthScale, alpha: depthAlpha, z: depthWave });
-        }
+        // Star core
+        ctx.beginPath(); ctx.arc(sx, sy, s.r * twinkle, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,255,255,${Math.min(1, alpha * 1.1)})`;
+        ctx.fill();
       });
 
-      // Sort by z so closer beads render on top
-      allBeads.sort((a, b) => a.z - b.z);
+      // ── Shooting stars ──────────────────────────────────────────────────────
+      // Spawn new shooter randomly
+      if (shooters.length < MAX_SHOOTERS && Math.random() < 0.008) {
+        shooters.push(spawnShooter(W, H));
+      }
 
-      allBeads.forEach(bead => {
+      for (let i = shooters.length - 1; i >= 0; i--) {
+        const s = shooters[i];
+        s.life++;
+        s.x += s.vx;
+        s.y += s.vy;
+        s.alpha = Math.max(0, 1 - s.life / s.maxLife);
+
+        if (s.life >= s.maxLife || s.x > W + 50 || s.y > H + 50) {
+          shooters.splice(i, 1);
+          continue;
+        }
+
+        // Tail — gradient line
+        const tx = s.x - (s.vx / Math.hypot(s.vx, s.vy)) * s.len;
+        const ty = s.y - (s.vy / Math.hypot(s.vx, s.vy)) * s.len;
+        const tailGrad = ctx.createLinearGradient(tx, ty, s.x, s.y);
+        tailGrad.addColorStop(0, "rgba(255,255,255,0)");
+        tailGrad.addColorStop(0.6, `rgba(200,220,255,${s.alpha * 0.4})`);
+        tailGrad.addColorStop(1,   `rgba(255,255,255,${s.alpha * 0.9})`);
+        ctx.beginPath();
+        ctx.moveTo(tx, ty); ctx.lineTo(s.x, s.y);
+        ctx.strokeStyle = tailGrad;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Head glow
+        const headGlow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 6);
+        headGlow.addColorStop(0,   `rgba(255,255,255,${s.alpha * 0.9})`);
+        headGlow.addColorStop(0.5, `rgba(180,210,255,${s.alpha * 0.3})`);
+        headGlow.addColorStop(1,   "rgba(0,0,0,0)");
+        ctx.beginPath(); ctx.arc(s.x, s.y, 6, 0, Math.PI*2);
+        ctx.fillStyle = headGlow; ctx.fill();
+      }
+
+      // ── Twisted rope beads ──────────────────────────────────────────────────
+      const cx = W / 2, cy = H / 2;
+      const beadR = Math.min(W, H) * 0.028;
+      const beadSpacing = beadR * 1.85;
+      const numBeads = Math.ceil((W * 1.6) / beadSpacing);
+      const spread = Math.min(W, H) * 0.22;
+      const strands = [
+        { angle:  Math.PI * 0.28 },
+        { angle: -Math.PI * 0.28 },
+      ];
+      const allBeads = [];
+      strands.forEach((strand, si) => {
+        const cos = Math.cos(strand.angle), sin = Math.sin(strand.angle);
+        const perpCos = Math.cos(strand.angle + Math.PI/2);
+        const perpSin = Math.sin(strand.angle + Math.PI/2);
+        for (let i = -numBeads/2; i < numBeads/2; i++) {
+          const along = i * beadSpacing;
+          const twist = Math.sin(along * 0.045 + t + si * Math.PI) * spread * 0.38;
+          const depthWave = Math.cos(along * 0.045 + t + si * Math.PI);
+          allBeads.push({
+            x: cx + cos * along + perpCos * twist,
+            y: cy + sin * along + perpSin * twist,
+            r: beadR * (0.82 + depthWave * 0.18),
+            alpha: 0.72 + depthWave * 0.28,
+            z: depthWave,
+          });
+        }
+      });
+      allBeads.sort((a, b) => a.z - b.z);
+      allBeads.forEach(b => {
         ctx.save();
-        ctx.globalAlpha = Math.max(0, Math.min(1, bead.alpha));
-        drawBead(bead.x, bead.y, bead.r, 0);
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha));
+        drawBead(b.x, b.y, b.r);
         ctx.restore();
       });
 
-      // Heavy vignette — keep edges pure black, focus center
-      const vig = ctx.createRadialGradient(cx, cy, H * 0.12, cx, cy, W * 0.72);
+      // Vignette
+      const vig = ctx.createRadialGradient(cx, cy, H*0.12, cx, cy, W*0.72);
       vig.addColorStop(0,   "rgba(0,0,0,0)");
       vig.addColorStop(0.5, "rgba(0,0,0,0.25)");
       vig.addColorStop(1,   "rgba(0,0,0,0.92)");
@@ -255,7 +300,7 @@ export const Hero = () => {
   }, [isTouch]);
 
   useEffect(() => {
-    const audio = new Audio("/Interstellar_-_Stay_slowed_(SkySound.cc).mp3");
+    const audio = new Audio("/1.mp3");
     audio.loop = true; audio.volume = 0.5;
     audioRef.current = audio;
     return () => { audio.pause(); audio.src = ""; };
@@ -329,7 +374,7 @@ export const Hero = () => {
 
           {/* Heading line 1 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={2}
-            className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
+            className="flex items-center justify-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-[2.5rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
           >
             <span className="text-white/40 font-light">Hey, I&rsquo;m</span>
             <span className="inline-block w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-white/20 align-middle flex-shrink-0">
@@ -340,7 +385,7 @@ export const Hero = () => {
 
           {/* Heading line 2 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={3}
-            className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
+            className="flex items-center justify-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-[2.5rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-0.5"
           >
             <span className="text-white/40 font-light">Aspiring</span>
             <span className="font-bold">Cloud &amp; Storage Engineer</span>
@@ -348,7 +393,7 @@ export const Hero = () => {
 
           {/* Heading line 3 */}
           <motion.div variants={drop} initial="hidden" animate="visible" custom={4}
-            className="flex items-center justify-center gap-2 flex-wrap text-xl sm:text-2xl md:text-[2.2rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-5"
+            className="flex items-center justify-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-[2.5rem] font-light tracking-[-0.01em] leading-[1.2] text-white mb-5"
           >
             <span className="text-white/40 font-light">Building</span>
             <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">
@@ -358,7 +403,7 @@ export const Hero = () => {
 
           {/* Bio */}
           <motion.p variants={drop} initial="hidden" animate="visible" custom={5}
-            className="text-[12px] md:text-[13px] text-white/35 max-w-[420px] leading-relaxed mb-7"
+            className="text-[13px] md:text-[14px] text-white/35 max-w-[440px] leading-relaxed mb-7"
           >
             I enjoy working with Linux systems, cloud infrastructure, and storage technologies,
             building reliable, secure, and scalable environments while continuously learning.
